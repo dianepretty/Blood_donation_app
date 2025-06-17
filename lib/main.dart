@@ -1,4 +1,7 @@
+import 'package:blood/pages/landing.dart';
+import 'package:blood/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,11 +15,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
+      debugShowCheckedModeBanner: false,
+      theme:AppTheme.lightTheme,
 
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const Placeholder()
+      home: LandingPage()
     );
   }
 }
