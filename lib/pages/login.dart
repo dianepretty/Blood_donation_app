@@ -188,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
                     //     child: const Text(
                     //       'Forgot Password?',
                     //       style: TextStyle(
-                    //         color: Color(0xFFE53E3E),
+                    //         color: AppColors.red,
                     //         fontWeight: FontWeight.w500,
                     //       ),
                     //     ),
@@ -207,7 +207,7 @@ class _LoginPageState extends State<LoginPage> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE53E3E),
+                          backgroundColor: AppColors.red,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(28),
@@ -244,7 +244,7 @@ class _LoginPageState extends State<LoginPage> {
                                 child: const Text(
                                   'Sign up',
                                   style: TextStyle(
-                                    color: Color(0xFFE53E3E),
+                                    color: AppColors.red,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -327,7 +327,7 @@ class _LoginPageState extends State<LoginPage> {
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide.none,
                     ),
-                    fillColor: Color(0xFFF8F9FA),
+                    fillColor: Colors.white,
                     filled: true,
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 12,

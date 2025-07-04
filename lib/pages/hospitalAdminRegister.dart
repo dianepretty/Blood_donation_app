@@ -1,3 +1,4 @@
+import 'package:blood/theme/theme.dart';
 import 'package:flutter/material.dart';
 
 class HospitalAdminRegister extends StatefulWidget {
@@ -315,7 +316,7 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE53E3E),
+                    backgroundColor: AppColors.red,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(28),

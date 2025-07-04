@@ -1,3 +1,4 @@
+import 'package:blood/theme/theme.dart';
 import 'package:flutter/material.dart';
 
 class VolunteerRegister extends StatefulWidget {
@@ -551,7 +552,7 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE53E3E),
+                    backgroundColor: AppColors.red,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(28),
