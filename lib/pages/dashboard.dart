@@ -107,11 +107,6 @@ class DashboardScreen extends StatelessWidget {
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
         ),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFE53E3E), Color(0xFFD53F8C)],
-        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -120,53 +115,60 @@ class DashboardScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: SafeArea(
-        child: Stack(
-          children: [
-            // Background overlay
-            Container(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background image
+          ClipRRect(
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
+            ),
+            child: Image.asset(
+              'assets/images/header_bg.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          // Semi-transparent red overlay
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
+              ),
+              color: Color(0xFFD7263D).withOpacity(0.4),
+            ),
+          ),
+          // Header content
+          Positioned(
+            left: isSmallScreen ? 16 : 24,
+            top: headerHeight * 0.35,
+            child: Text(
+              'Dashboard',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: isSmallScreen ? 24 : 28,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Positioned(
+            right: isSmallScreen ? 16 : 24,
+            top: headerHeight * 0.35,
+            child: Container(
+              padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(24),
-                  bottomRight: Radius.circular(24),
-                ),
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.settings_outlined,
+                color: Colors.white,
+                size: isSmallScreen ? 24 : 28,
               ),
             ),
-
-            // Header content
-            Positioned(
-              left: isSmallScreen ? 16 : 24,
-              top: headerHeight * 0.35,
-              child: Text(
-                'Dashboard',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: isSmallScreen ? 24 : 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-
-            // Settings icon
-            Positioned(
-              right: isSmallScreen ? 16 : 24,
-              top: headerHeight * 0.35,
-              child: Container(
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.settings_outlined,
-                  color: Colors.white,
-                  size: isSmallScreen ? 24 : 28,
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

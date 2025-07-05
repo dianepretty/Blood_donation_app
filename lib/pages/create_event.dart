@@ -13,58 +13,70 @@ class CreateEventScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Stack(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    height: headerHeight,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(32),
-                        bottomRight: Radius.circular(32),
-                      ),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(32),
-                        bottomRight: Radius.circular(32),
-                      ),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Image.asset(
-                            'assets/images/header_bg.png',
-                            fit: BoxFit.cover,
-                          ),
-                          Container(
-                            color: Color(0xB3D7263D), // semi-transparent red overlay
-                          ),
-                        ],
-                      ),
-                    ),
+              Container(
+                width: double.infinity,
+                height: headerHeight,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(24),
+                    bottomRight: Radius.circular(24),
                   ),
-                  Positioned(
-                    left: 16,
-                    top: headerHeight * 0.32,
-                    child: IconButton(
-                      icon: Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => Navigator.of(context).pop(),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: Offset(0, 5),
                     ),
-                  ),
-                  Center(
-                    child: Padding(
-                      padding: EdgeInsets.only(top: headerHeight * 0.32),
-                      child: Text(
-                        'Create Event',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22,
+                  ],
+                ),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Background image
+                    ClipRRect(
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(24),
+                        bottomRight: Radius.circular(24),
+                      ),
+                      child: Image.asset(
+                        'assets/images/header_bg.png',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    // Semi-transparent red overlay
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(24),
+                          bottomRight: Radius.circular(24),
+                        ),
+                        color: Color(0xFFD7263D).withOpacity(0.4),
+                      ),
+                    ),
+                    // Back button and title
+                    Positioned(
+                      left: 16,
+                      top: headerHeight * 0.32,
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ),
+                    Center(
+                      child: Padding(
+                        padding: EdgeInsets.only(top: headerHeight * 0.32),
+                        child: Text(
+                          'Create Event',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.all(16.0),

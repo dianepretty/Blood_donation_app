@@ -97,11 +97,6 @@ class ProfileScreen extends StatelessWidget {
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
         ),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFE53E3E), Color(0xFFD53F8C)],
-        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -110,102 +105,100 @@ class ProfileScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: SafeArea(
-        child: Stack(
-          children: [
-            // Background pattern or image could go here
-            Container(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background image
+          ClipRRect(
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
+            ),
+            child: Image.asset(
+              'assets/images/header_bg.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          // Semi-transparent red overlay
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
+              ),
+              color: Color(0xFFD7263D).withOpacity(0.4),
+            ),
+          ),
+          // Notification icon
+          Positioned(
+            top: 16,
+            right: 16,
+            child: Container(
+              padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(24),
-                  bottomRight: Radius.circular(24),
-                ),
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.notifications_outlined,
+                color: Colors.white,
+                size: 24,
               ),
             ),
-
-            // Notification icon
-            Positioned(
-              top: 16,
-              right: 16,
-              child: Container(
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.notifications_outlined,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-            ),
-
-            // Profile content
-            Positioned.fill(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Profile image
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 4),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 10,
-                          offset: Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: CircleAvatar(
-                      radius: isSmallScreen ? 40 : 48,
-                      backgroundImage: NetworkImage(
-                        'https://randomuser.me/api/portraits/women/44.jpg',
+          ),
+          // Profile content
+          Positioned.fill(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 4),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 10,
+                        offset: Offset(0, 5),
                       ),
+                    ],
+                  ),
+                  child: CircleAvatar(
+                    radius: isSmallScreen ? 40 : 48,
+                    backgroundImage: NetworkImage(
+                      'https://randomuser.me/api/portraits/women/44.jpg',
                     ),
                   ),
-
-                  SizedBox(height: 16),
-
-                  // Name
-                  Text(
-                    'Jone Doe',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: isSmallScreen ? 20 : 24,
-                    ),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Jone Doe',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: isSmallScreen ? 20 : 24,
                   ),
-
-                  SizedBox(height: 4),
-
-                  // Email
-                  Text(
-                    'Johndoe@gmail.com',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
-                      fontSize: isSmallScreen ? 14 : 16,
-                    ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Johndoe@gmail.com',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: isSmallScreen ? 14 : 16,
                   ),
-
-                  SizedBox(height: 8),
-
-                  // Joined date
-                  Text(
-                    'Joined 2023',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: isSmallScreen ? 12 : 14,
-                    ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Joined 2023',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: isSmallScreen ? 12 : 14,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
