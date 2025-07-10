@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dashboard.dart';
 import 'events.dart';
-import 'appointments.dart';
 import 'profile.dart';
 
 class HomePage extends StatefulWidget {
@@ -16,8 +15,16 @@ class _HomePageState extends State<HomePage> {
 
   static final List<Widget> _pages = <Widget>[
     DashboardScreen(),
-    EventsScreen(),
-    AppointmentsScreen(),
+    // Replace with a builder to pass callback
+    // EventsScreen(),
+    Builder(
+      builder: (context) => EventsScreen(
+        onBackToDashboard: () {
+          final state = context.findAncestorStateOfType<_HomePageState>();
+          state?._onItemTapped(0);
+        },
+      ),
+    ),
     ProfileScreen(),
   ];
 
@@ -40,10 +47,6 @@ class _HomePageState extends State<HomePage> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Dashboard'),
           BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Events'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Appointments',
-          ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),

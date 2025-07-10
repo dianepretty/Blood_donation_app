@@ -19,23 +19,41 @@ class DashboardScreen extends StatelessWidget {
   ];
 
   final List<Map<String, String>> appointments = [
+    {'name': 'Dr. Anya Sharma', 'specialty': 'Cardiology', 'time': '10:00 AM'},
+    {'name': 'Dr. Ben Carter', 'specialty': 'Neurology', 'time': '2:30 PM'},
+    {'name': 'Dr. Chloe Davis', 'specialty': 'Pediatrics', 'time': '4:00 PM'},
+  ];
+
+  final List<Map<String, dynamic>> statistics = [
     {
-      'name': 'Dr. Anya Sharma',
-      'specialty': 'Cardiology',
-      'time': '10:00 AM',
-      'avatar': '',
+      'label': 'Events',
+      'value': '12',
+      'color': Colors.blue,
+      'icon': Icons.event,
     },
     {
-      'name': 'Dr. Ben Carter',
-      'specialty': 'Neurology',
-      'time': '2:30 PM',
-      'avatar': '',
+      'label': 'Appointments',
+      'value': '8',
+      'color': Colors.orange,
+      'icon': Icons.calendar_today,
     },
     {
-      'name': 'Dr. Chloe Davis',
-      'specialty': 'Pediatrics',
-      'time': '4:00 PM',
-      'avatar': '',
+      'label': 'Donors',
+      'value': '150',
+      'color': Colors.green,
+      'icon': Icons.people,
+    },
+    {
+      'label': 'Patients',
+      'value': '245',
+      'color': Colors.purple,
+      'icon': Icons.person,
+    },
+    {
+      'label': 'Revenue',
+      'value': '12K',
+      'color': Colors.teal,
+      'icon': Icons.attach_money,
     },
   ];
 
@@ -49,10 +67,7 @@ class DashboardScreen extends StatelessWidget {
       backgroundColor: Colors.grey[50],
       body: Column(
         children: [
-          // Header Section
           _buildHeader(context, headerHeight, isSmallScreen),
-
-          // Content Section
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
@@ -63,27 +78,21 @@ class DashboardScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Upcoming Events Section
+                    _buildSectionTitle('Overview', isSmallScreen),
+                    SizedBox(height: 16),
+                    _buildStatisticsSection(context, isSmallScreen),
+                    SizedBox(height: 32),
                     _buildSectionTitle('Upcoming Events', isSmallScreen),
                     SizedBox(height: 16),
                     _buildEventsSection(isSmallScreen),
-
                     SizedBox(height: 32),
-
-                    // Pending Appointments Section
                     _buildSectionTitle(
                       'Pending Appointment Requests',
                       isSmallScreen,
                     ),
                     SizedBox(height: 16),
                     _buildAppointmentsSection(isSmallScreen),
-
-                    SizedBox(height: 32),
-
-                    // Statistics Section
-                    _buildStatisticsSection(isSmallScreen),
-
-                    SizedBox(height: 100), // Space for bottom navigation
+                    SizedBox(height: 100),
                   ],
                 ),
               ),
@@ -118,7 +127,6 @@ class DashboardScreen extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Background image
           ClipRRect(
             borderRadius: BorderRadius.only(
               bottomLeft: Radius.circular(24),
@@ -129,17 +137,15 @@ class DashboardScreen extends StatelessWidget {
               fit: BoxFit.cover,
             ),
           ),
-          // Semi-transparent red overlay
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(24),
                 bottomRight: Radius.circular(24),
               ),
-              color: Color(0xFFD7263D).withOpacity(0.4),
+              color: Color(0xFFD7263D).withOpacity(0.7),
             ),
           ),
-          // Header content
           Positioned(
             left: isSmallScreen ? 16 : 24,
             top: headerHeight * 0.35,
@@ -184,6 +190,81 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildStatisticsSection(BuildContext context, bool isSmallScreen) {
+    return SizedBox(
+      height: isSmallScreen ? 130 : 140,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: statistics.length,
+        separatorBuilder: (_, __) => SizedBox(width: 16),
+        itemBuilder: (context, index) {
+          final stat = statistics[index];
+          return _buildStatCard(
+            stat['label'],
+            stat['value'],
+            stat['color'],
+            stat['icon'],
+            isSmallScreen,
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildStatCard(
+    String label,
+    String value,
+    Color color,
+    IconData icon,
+    bool isSmallScreen,
+  ) {
+    return Container(
+      width: isSmallScreen ? 120 : 140,
+      padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 16 : 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: isSmallScreen ? 20 : 24),
+          ),
+          SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: isSmallScreen ? 18 : 20,
+              color: Colors.grey[800],
+            ),
+          ),
+          SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: isSmallScreen ? 12 : 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildEventsSection(bool isSmallScreen) {
     return SizedBox(
       height: isSmallScreen ? 140 : 160,
@@ -197,18 +278,13 @@ class DashboardScreen extends StatelessWidget {
             width: isSmallScreen ? 240 : 280,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
                 colors: [
                   Color(0xFFE53E3E).withOpacity(0.1),
                   Color(0xFFD53F8C).withOpacity(0.1),
                 ],
               ),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Color(0xFFE53E3E).withOpacity(0.2),
-                width: 1,
-              ),
+              border: Border.all(color: Color(0xFFE53E3E).withOpacity(0.2)),
             ),
             padding: EdgeInsets.all(20),
             child: Column(
@@ -261,170 +337,83 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildAppointmentsSection(bool isSmallScreen) {
     return Column(
       children:
-          appointments
-              .map(
-                (appointment) => Container(
-                  margin: EdgeInsets.only(bottom: 12),
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 8,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
+          appointments.map((appointment) {
+            return Container(
+              margin: EdgeInsets.only(bottom: 12),
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: Offset(0, 2),
                   ),
-                  child: Row(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [Color(0xFFE53E3E), Color(0xFFD53F8C)],
-                          ),
-                          shape: BoxShape.circle,
-                        ),
-                        child: CircleAvatar(
-                          radius: isSmallScreen ? 24 : 28,
-                          backgroundColor: Colors.transparent,
-                          child: Icon(
-                            Icons.person,
-                            color: Colors.white,
-                            size: isSmallScreen ? 24 : 28,
-                          ),
-                        ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xFFE53E3E), Color(0xFFD53F8C)],
                       ),
-                      SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              appointment['name']!,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: isSmallScreen ? 15 : 16,
-                                color: Colors.grey[800],
-                              ),
-                            ),
-                            SizedBox(height: 2),
-                            Text(
-                              appointment['specialty']!,
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: isSmallScreen ? 13 : 14,
-                              ),
-                            ),
-                          ],
-                        ),
+                      shape: BoxShape.circle,
+                    ),
+                    child: CircleAvatar(
+                      radius: isSmallScreen ? 24 : 28,
+                      backgroundColor: Colors.transparent,
+                      child: Icon(
+                        Icons.person,
+                        color: Colors.white,
+                        size: isSmallScreen ? 24 : 28,
                       ),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Color(0xFFE53E3E).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          appointment['time']!,
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          appointment['name']!,
                           style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: isSmallScreen ? 12 : 13,
-                            color: Color(0xFFE53E3E),
+                            fontWeight: FontWeight.bold,
+                            fontSize: isSmallScreen ? 15 : 16,
+                            color: Colors.grey[800],
                           ),
                         ),
-                      ),
-                    ],
+                        SizedBox(height: 2),
+                        Text(
+                          appointment['specialty']!,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: isSmallScreen ? 13 : 14,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              )
-              .toList(),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Color(0xFFE53E3E).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      appointment['time']!,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: isSmallScreen ? 12 : 13,
+                        color: Color(0xFFE53E3E),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
     );
-  }
-
-  Widget _buildStatisticsSection(bool isSmallScreen) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _buildStatCard('Events', '12', Colors.blue, isSmallScreen),
-        _buildStatCard('Appointments', '8', Colors.orange, isSmallScreen),
-        _buildStatCard('Donors', '150', Colors.green, isSmallScreen),
-      ],
-    );
-  }
-
-  Widget _buildStatCard(
-    String label,
-    String value,
-    Color color,
-    bool isSmallScreen,
-  ) {
-    return Container(
-      width: isSmallScreen ? 90 : 100,
-      padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 16 : 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              _getStatIcon(label),
-              color: color,
-              size: isSmallScreen ? 20 : 24,
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: isSmallScreen ? 18 : 20,
-              color: Colors.grey[800],
-            ),
-          ),
-          SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: isSmallScreen ? 12 : 14,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  IconData _getStatIcon(String label) {
-    switch (label) {
-      case 'Events':
-        return Icons.event;
-      case 'Appointments':
-        return Icons.calendar_today;
-      case 'Donors':
-        return Icons.people;
-      default:
-        return Icons.info;
-    }
   }
 }
