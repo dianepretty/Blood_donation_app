@@ -70,8 +70,6 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
 
   String? hospital;
 
-  final List<String> hospitals = ["General Hospital"];
-
   @override
   void dispose() {
     _emailController.dispose();
@@ -311,10 +309,10 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
                       ),
                     ),
                     items:
-                        hospitals.map((String hospital) {
+                        bloodGroups.map((String bloodGroup) {
                           return DropdownMenuItem<String>(
-                            value: hospital,
-                            child: Text(hospital),
+                            value: bloodGroup,
+                            child: Text(bloodGroup),
                           );
                         }).toList(),
                     onChanged: (String? newValue) {
@@ -324,7 +322,7 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
                     },
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please select a hospital';
+                        return 'Please select a blood group';
                       }
                       return null;
                     },
@@ -379,10 +377,10 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
                       ),
                     ),
                     items:
-                        hospitals.map((String hospital) {
+                        genders.map((String gender) {
                           return DropdownMenuItem<String>(
-                            value: hospital,
-                            child: Text(hospital),
+                            value: gender,
+                            child: Text(gender),
                           );
                         }).toList(),
                     onChanged: (String? newValue) {
@@ -447,10 +445,10 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
                       ),
                     ),
                     items:
-                        hospitals.map((String hospital) {
+                        districts.map((String district) {
                           return DropdownMenuItem<String>(
-                            value: hospital,
-                            child: Text(hospital),
+                            value: district,
+                            child: Text(district),
                           );
                         }).toList(),
                     onChanged: (String? newValue) {

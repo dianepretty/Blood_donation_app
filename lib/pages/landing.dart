@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:blood/pages/hospitalAdminRegister.dart';
 import 'package:blood/pages/login.dart';
 import 'package:blood/pages/volunteerRegister.dart';
