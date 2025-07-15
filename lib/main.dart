@@ -1,3 +1,5 @@
+import 'package:blood_system/screens/home.dart';
+import 'package:blood_system/screens/landing.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'firebase_options.dart';
@@ -19,7 +21,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false
 ,
-      home: Placeholder()
+      home: LandingPage()
     );
   }
 }
