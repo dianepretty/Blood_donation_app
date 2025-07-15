@@ -1,9 +1,14 @@
+<<<<<<< HEAD
 import 'package:blood_system/blocs/hospital/bloc.dart';
 import 'package:blood_system/screens/home.dart';
 import 'package:blood_system/screens/hospitalAdminRegister.dart';
 import 'package:blood_system/screens/landing.dart';
 import 'package:blood_system/screens/welcomepage.dart';
 import 'package:blood_system/service/hospital_service.dart';
+=======
+import 'package:blood_system/screens/volunteerRegister.dart';
+import 'package:blood_system/screens/welcomepage.dart';
+>>>>>>> c28ded0 (add: routes)
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,8 +16,15 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+<<<<<<< HEAD
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
+=======
+  // await Firebase.initializeApp(
+  //   options: DefaultFirebaseOptions.currentPlatform,
+  // );
+  runApp(MyApp());
+>>>>>>> c28ded0 (add: routes)
 }
 
 class MyApp extends StatelessWidget {
@@ -20,6 +32,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -36,6 +49,18 @@ class MyApp extends StatelessWidget {
           '/hospitalAdminRegister': (context) => const HospitalAdminRegister(),
         },
       ),
+=======
+    return MaterialApp(
+      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false
+,
+      // home: Placeholder()
+      initialRoute: '/',
+      routes: {
+        '/': (context) => Welcomepage(),
+         '/registration': (context) => VolunteerRegister(),
+      },
+>>>>>>> c28ded0 (add: routes)
     );
   }
 }
