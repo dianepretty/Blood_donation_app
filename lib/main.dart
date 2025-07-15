@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 import 'package:blood_system/blocs/hospital/bloc.dart';
 import 'package:blood_system/screens/home.dart';
 import 'package:blood_system/screens/hospitalAdminRegister.dart';
@@ -13,6 +14,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'firebase_options.dart';
+=======
+import 'package:blood_system/screens/appointments.dart';
+import 'package:blood_system/screens/volunteerRegister.dart';
+import 'package:blood_system/screens/welcomepage.dart';
+// import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+// import 'firebase_options.dart';
+>>>>>>> 4156bc3 (feat: appointments screen admin)
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,10 +64,11 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false
 ,
       // home: Placeholder()
-      initialRoute: '/',
+      initialRoute: '/appointments',
       routes: {
         '/': (context) => Welcomepage(),
          '/registration': (context) => VolunteerRegister(),
+         '/appointments': (context) => AppointmentsScreen(),
       },
 >>>>>>> c28ded0 (add: routes)
     );
