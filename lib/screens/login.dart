@@ -1,6 +1,6 @@
-import 'package:blood/pages/hospitalAdminRegister.dart';
-import 'package:blood/pages/volunteerRegister.dart';
-import 'package:blood/theme/theme.dart';
+import 'package:blood_system/screens/hospitalAdminRegister.dart';
+import 'package:blood_system/screens/volunteerRegister.dart';
+import 'package:blood_system/theme/theme.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
