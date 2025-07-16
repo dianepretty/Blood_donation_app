@@ -1,6 +1,6 @@
 
 
-import 'package:blood_system/screens/ViewAppointment.dart';
+import 'package:blood_system/screens/appointments/ViewAppointment.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';

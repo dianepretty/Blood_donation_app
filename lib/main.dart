@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import 'package:blood_system/blocs/hospital/bloc.dart';
 import 'package:blood_system/screens/home.dart';
 import 'package:blood_system/screens/hospitalAdminRegister.dart';
@@ -16,6 +17,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'firebase_options.dart';
 =======
 import 'package:blood_system/screens/appointments.dart';
+=======
+import 'package:blood_system/screens/appointments/appointments.dart';
+import 'package:blood_system/screens/appointments_router.dart';
+>>>>>>> 2bf3f36 (feat: volunteer appointments)
 import 'package:blood_system/screens/volunteerRegister.dart';
 import 'package:blood_system/screens/welcomepage.dart';
 // import 'package:firebase_core/firebase_core.dart';
@@ -68,9 +73,13 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => Welcomepage(),
          '/registration': (context) => VolunteerRegister(),
+<<<<<<< HEAD
          '/appointments': (context) => AppointmentsScreen(),
       },
 >>>>>>> c28ded0 (add: routes)
+=======
+        '/appointments': (context) => AppointmentsRouter(),      },
+>>>>>>> 2bf3f36 (feat: volunteer appointments)
     );
   }
 }
