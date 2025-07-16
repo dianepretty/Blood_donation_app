@@ -1,6 +1,7 @@
 import 'package:blood_system/screens/FAQScreen.dart';
 import 'package:blood_system/screens/hospitalAdminRegister.dart';
 import 'package:blood_system/screens/login.dart';
+import 'package:blood_system/screens/securityScreen.dart';
 import 'package:blood_system/screens/volunteerRegister.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false
 ,
-      home: FAQScreen()
+      home: SecurityScreen()
     );
   }
 }

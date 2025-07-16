@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../theme/theme.dart';
+
 class FAQScreen extends StatelessWidget {
   const FAQScreen({super.key});
 
@@ -56,15 +58,28 @@ class FAQScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+        backgroundColor: AppColors.red,
+        elevation: 0,
+        title: const Text(
+          'Help',
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
-        title: const Text('Help'),
+        centerTitle: true,
+        toolbarHeight: 100,
+        leading: Padding(
+          padding: const EdgeInsets.only(top: 8.0, left: 16.0),
+          child: Align(
+            alignment: Alignment.topRight,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+        ),
       ),
       body: Theme(
         data: theme,
