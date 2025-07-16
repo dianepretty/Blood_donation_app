@@ -19,6 +19,7 @@ import 'firebase_options.dart';
 import 'package:blood_system/screens/appointments.dart';
 =======
 import 'package:blood_system/screens/appointments/appointments.dart';
+import 'package:blood_system/screens/appointments/book_appointment.dart';
 import 'package:blood_system/screens/appointments_router.dart';
 >>>>>>> 2bf3f36 (feat: volunteer appointments)
 import 'package:blood_system/screens/volunteerRegister.dart';
@@ -74,12 +75,16 @@ class MyApp extends StatelessWidget {
         '/': (context) => Welcomepage(),
          '/registration': (context) => VolunteerRegister(),
 <<<<<<< HEAD
+<<<<<<< HEAD
          '/appointments': (context) => AppointmentsScreen(),
       },
 >>>>>>> c28ded0 (add: routes)
 =======
         '/appointments': (context) => AppointmentsRouter(),      },
 >>>>>>> 2bf3f36 (feat: volunteer appointments)
+=======
+        '/appointments': (context) => BookAppointmentScreen(),      },
+>>>>>>> 5a00b63 (feat: book appointment)
     );
   }
 }

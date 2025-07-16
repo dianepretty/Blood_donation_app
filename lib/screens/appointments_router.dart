@@ -9,7 +9,7 @@ class AppointmentsRouter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Simple dummy user - change this to test different screens
-    String userRole = 'VOLUNTEER'; // Change to 'ADMIN' to test admin screen
+    String userRole = 'ADMIN'; // Change to 'ADMIN' to test admin screen
     
     // Simple condition to route to correct screen
     return userRole == 'VOLUNTEER' 
