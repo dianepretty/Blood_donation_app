@@ -13,15 +13,7 @@ class RescheduleAppointmentScreen extends StatefulWidget {
 
 class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScreen> {
   DateTime? selectedDate;
-  String? selectedTimeSlot;
   String? selectedLocation;
-
-  final List<String> timeSlots = [
-    '8:00 AM - 12:00 PM',
-    '10:00 AM - 2:00 PM',
-    '2:00 PM - 6:00 PM',
-    '4:00 PM - 8:00 PM',
-  ];
 
   final List<String> locations = [
     'City Hospital',
@@ -35,7 +27,6 @@ class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScree
     super.initState();
     selectedDate = widget.appointment['date'];
     selectedLocation = widget.appointment['location'];
-    selectedTimeSlot = widget.appointment['time'];
   }
 
   @override
@@ -55,8 +46,6 @@ class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScree
                     _buildCurrentAppointmentCard(),
                     const SizedBox(height: 24),
                     _buildDateSelector(),
-                    const SizedBox(height: 24),
-                    _buildTimeSelector(),
                     const SizedBox(height: 24),
                     _buildLocationSelector(),
                     const SizedBox(height: 32),
@@ -135,23 +124,13 @@ class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScree
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.info_outline,
-                color: Color(0xFFD7263D),
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                'Current Appointment',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFFD7263D),
-                ),
-              ),
-            ],
+          const Text(
+            'Appointment details',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
           ),
           const SizedBox(height: 12),
           _buildDetailRow('Date', DateFormat('EEEE, MMMM d, yyyy').format(widget.appointment['date'])),
@@ -168,7 +147,7 @@ class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScree
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Select New Date',
+          'Date',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -187,27 +166,22 @@ class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScree
             ),
             child: Row(
               children: [
-                const Icon(
-                  Icons.calendar_today,
-                  color: Color(0xFFD7263D),
-                  size: 20,
-                ),
-                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     selectedDate != null 
                         ? DateFormat('EEEE, MMMM d, yyyy').format(selectedDate!)
                         : 'Select date',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
+                      color: selectedDate != null ? Colors.black87 : Colors.grey.shade600,
                     ),
                   ),
                 ),
-                const Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.grey,
-                  size: 16,
+                Icon(
+                  Icons.calendar_today,
+                  color: Colors.grey.shade600,
+                  size: 20,
                 ),
               ],
             ),
@@ -217,94 +191,12 @@ class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScree
     );
   }
 
-  Widget _buildTimeSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Select Time Slot',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            children: timeSlots.map((timeSlot) => _buildTimeSlotItem(timeSlot)).toList(),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTimeSlotItem(String timeSlot) {
-    final isSelected = selectedTimeSlot == timeSlot;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedTimeSlot = timeSlot;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFD7263D).withOpacity(0.1) : Colors.transparent,
-          border: Border(
-            bottom: BorderSide(
-              color: Colors.grey.shade200,
-              width: 0.5,
-            ),
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.access_time,
-              color: isSelected ? const Color(0xFFD7263D) : Colors.grey,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                timeSlot,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color: isSelected ? const Color(0xFFD7263D) : Colors.black87,
-                ),
-              ),
-            ),
-            if (isSelected)
-              const Icon(
-                Icons.check_circle,
-                color: Color(0xFFD7263D),
-                size: 20,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildLocationSelector() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Select Location',
+          'Hospital',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -312,72 +204,37 @@ class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScree
           ),
         ),
         const SizedBox(height: 12),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            children: locations.map((location) => _buildLocationItem(location)).toList(),
+        GestureDetector(
+          onTap: () => _showLocationSelector(),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    selectedLocation ?? 'Select hospital',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: selectedLocation != null ? Colors.black87 : Colors.grey.shade600,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.keyboard_arrow_down,
+                  color: Colors.grey.shade600,
+                  size: 20,
+                ),
+              ],
+            ),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildLocationItem(String location) {
-    final isSelected = selectedLocation == location;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedLocation = location;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFD7263D).withOpacity(0.1) : Colors.transparent,
-          border: Border(
-            bottom: BorderSide(
-              color: Colors.grey.shade200,
-              width: 0.5,
-            ),
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.location_on,
-              color: isSelected ? const Color(0xFFD7263D) : Colors.grey,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                location,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color: isSelected ? const Color(0xFFD7263D) : Colors.black87,
-                ),
-              ),
-            ),
-            if (isSelected)
-              const Icon(
-                Icons.check_circle,
-                color: Color(0xFFD7263D),
-                size: 20,
-              ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -413,7 +270,6 @@ class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScree
 
   Widget _buildActionButtons() {
     final bool hasChanges = selectedDate != widget.appointment['date'] ||
-        selectedTimeSlot != widget.appointment['time'] ||
         selectedLocation != widget.appointment['location'];
 
     return Column(
@@ -432,7 +288,7 @@ class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScree
               ),
             ),
             child: const Text(
-              'Confirm Reschedule',
+              'Confirm',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -473,16 +329,68 @@ class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScree
     }
   }
 
+  void _showLocationSelector() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Select Hospital',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ...locations.map((location) => GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedLocation = location;
+                  });
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          location,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      if (selectedLocation == location)
+                        const Icon(
+                          Icons.check,
+                          color: Color(0xFFD7263D),
+                        ),
+                    ],
+                  ),
+                ),
+              )).toList(),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _rescheduleAppointment() {
-    // Here you would typically make an API call to reschedule the appointment
-    // For now, we'll just show a success message and go back
     
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Appointment Rescheduled'),
         content: Text(
-          'Your appointment has been successfully rescheduled to ${DateFormat('EEEE, MMMM d, yyyy').format(selectedDate!)} at $selectedTimeSlot in $selectedLocation.',
+          'Your appointment has been successfully rescheduled to ${DateFormat('EEEE, MMMM d, yyyy').format(selectedDate!)} at $selectedLocation.',
         ),
         actions: [
           TextButton(
