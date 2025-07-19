@@ -1,5 +1,6 @@
 import 'package:blood_system/screens/home.dart';
 import 'package:blood_system/screens/landing.dart';
+import 'package:blood_system/screens/welcomepage.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'firebase_options.dart';
@@ -9,20 +10,23 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
+  runApp(const MyApp());
 }
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false
-,
-      home: LandingPage()
+      title: 'Blood Donation App',
+      debugShowCheckedModeBanner: false,
+      initialRoute: '/home',
+      routes: {
+        '/landing': (context) => const LandingPage(),
+        '/home': (context) => const HomePage(),
+
+      },
     );
   }
 }
-
