@@ -187,15 +187,17 @@ class _EventsScreenState extends State<EventsScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(120),
+        child: RedHeader(
+          title: 'Events',
+          onBack: widget.onBackToDashboard ?? () => Navigator.of(context).pop(),
+          showBack: true,
+          showSettings: false,
+        ),
+      ),
       body: Column(
         children: [
-          RedHeader(
-            title: 'Events',
-            onBack:
-                widget.onBackToDashboard ?? () => Navigator.of(context).pop(),
-            showBack: true,
-            showSettings: false,
-          ),
           Expanded(
             child: Padding(
               padding: EdgeInsets.symmetric(

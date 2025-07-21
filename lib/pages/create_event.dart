@@ -75,6 +75,14 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(120),
+        child: RedHeader(
+          title: "Create Event",
+          onBack: () => Navigator.of(context).pop(),
+          showBack: true,
+        ),
+      ),
       body: SafeArea(
         child: Form(
           key: _formKey,
@@ -82,10 +90,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                RedHeader(
-                  title: "Create Event",
-                  onBack: () => Navigator.of(context).pop(),
-                ),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(

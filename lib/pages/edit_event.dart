@@ -173,13 +173,16 @@ class _EditEventScreenState extends State<EditEventScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(120),
+        child: RedHeader(
+          title: "Edit Event",
+          onBack: () => Navigator.of(context).pop(),
+          showBack: true,
+        ),
+      ),
       body: Column(
         children: [
-          RedHeader(
-            title: 'Edit Event',
-            onBack: () => Navigator.of(context).pop(),
-            showBack: true,
-          ),
           Expanded(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
