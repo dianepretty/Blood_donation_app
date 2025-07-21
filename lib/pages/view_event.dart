@@ -1,6 +1,7 @@
 import 'package:blood_system/pages/events.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 class ViewEventScreen extends StatelessWidget {
@@ -13,6 +14,16 @@ class ViewEventScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.red,
+        child: const Icon(Icons.delete),
+        onPressed: () async {
+          final docId = event['id'];
+          await FirebaseFirestore.instance.collection('events').doc(docId).delete();
+          if (context.mounted) Navigator.of(context).pop();
+        },
+        tooltip: 'Delete Event',
+      ),
       body: Column(
         children: [
           RedHeader(

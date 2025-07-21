@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 class Event {
   final String id;
   final DateTime date;
@@ -51,11 +49,11 @@ class Event {
   @override
   int get hashCode {
     return id.hashCode ^
-    date.hashCode ^
-    timeFrom.hashCode ^
-    timeTo.hashCode ^
-    location.hashCode ^
-    description.hashCode;
+        date.hashCode ^
+        timeFrom.hashCode ^
+        timeTo.hashCode ^
+        location.hashCode ^
+        description.hashCode;
   }
 
   @override

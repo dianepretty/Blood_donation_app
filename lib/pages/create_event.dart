@@ -1,41 +1,6 @@
 import 'package:blood_system/pages/events.dart';
 import 'package:flutter/material.dart';
-
-// Event model class
-class Event {
-  final String id;
-  final String name;
-  final String type;
-  final String location;
-  final DateTime date;
-  final TimeOfDay fromTime;
-  final TimeOfDay toTime;
-  final String description;
-
-  Event({
-    required this.id,
-    required this.name,
-    required this.type,
-    required this.location,
-    required this.date,
-    required this.fromTime,
-    required this.toTime,
-    required this.description,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'type': type,
-      'location': location,
-      'date': date.toIso8601String(),
-      'fromTime': '${fromTime.hour}:${fromTime.minute}',
-      'toTime': '${toTime.hour}:${toTime.minute}',
-      'description': description,
-    };
-  }
-}
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CreateEventScreen extends StatefulWidget {
   const CreateEventScreen({super.key});
@@ -596,22 +561,16 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   }
 
   Future<void> _createEvent() async {
-    final event = Event(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      name: _eventNameController.text.trim(),
-      type: _selectedEventType,
-      location: _locationController.text.trim(),
-      date: _selectedDate!,
-      fromTime: _fromTime!,
-      toTime: _toTime!,
-      description: _descriptionController.text.trim(),
-    );
-
-    // Here you would typically save to a database or send to an API
-    print('Event created: ${event.toJson()}');
-
-    // You can also save to local storage, send to a server, etc.
-    // Example: await EventService.createEvent(event);
+    final eventData = {
+      'name': _eventNameController.text.trim(),
+      'type': _selectedEventType,
+      'location': _locationController.text.trim(),
+      'date': _selectedDate,
+      'timeFrom': _fromTime != null ? _fromTime!.format(context) : '',
+      'timeTo': _toTime != null ? _toTime!.format(context) : '',
+      'description': _descriptionController.text.trim(),
+    };
+    await FirebaseFirestore.instance.collection('events').add(eventData);
   }
 
   void _showErrorSnackBar(String message) {

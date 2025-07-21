@@ -2,7 +2,6 @@ import 'package:blood_system/blocs/hospital/bloc.dart';
 import 'package:blood_system/screens/home.dart';
 import 'package:blood_system/screens/hospitalAdminRegister.dart';
 import 'package:blood_system/screens/landing.dart';
-import 'package:blood_system/screens/welcomepage.dart';
 import 'package:blood_system/service/hospital_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';

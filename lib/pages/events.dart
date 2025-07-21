@@ -4,6 +4,8 @@ import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
 import 'view_event.dart';
 import 'edit_event.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/event_model.dart';
 
 class RedHeader extends StatelessWidget {
   final String title;
@@ -143,40 +145,12 @@ class _EventsScreenState extends State<EventsScreen> {
     });
   }
 
-  final List<Map<String, dynamic>> events = [
-    {
-      'title': 'Blood Drive',
-      'location': 'City Hospital',
-      'date': DateTime.now(),
-      'type': 'medical',
-      'attendees': 45,
-      'status': 'upcoming',
-    },
-    {
-      'title': 'Community Health Fair',
-      'location': 'Community Center',
-      'date': DateTime.now().add(Duration(days: 2)),
-      'type': 'community',
-      'attendees': 120,
-      'status': 'active',
-    },
-    {
-      'title': 'Staff Appreciation',
-      'location': 'Main Hall',
-      'date': DateTime.now().add(Duration(days: 4)),
-      'type': 'social',
-      'attendees': 80,
-      'status': 'upcoming',
-    },
-  ];
-
-  List<Map<String, dynamic>> get filteredEvents {
+  List<Event> _filterEvents(List<Event> events) {
     if (selectedDateRange == null) return events;
     final start = selectedDateRange!.startDate;
     final end = selectedDateRange!.endDate ?? selectedDateRange!.startDate;
     return events.where((event) {
-      final eventDate = event['date'] as DateTime;
-      return !eventDate.isBefore(start!) && !eventDate.isAfter(end!);
+      return !event.date.isBefore(start!) && !event.date.isAfter(end!);
     }).toList();
   }
 
@@ -196,24 +170,53 @@ class _EventsScreenState extends State<EventsScreen> {
           showSettings: false,
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: isSmallScreen ? 16.0 : 24.0,
-                vertical: 16.0,
+      body: StreamBuilder<QuerySnapshot>(
+        stream:
+            FirebaseFirestore.instance
+                .collection('events')
+                .orderBy('date')
+                .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          final docs = snapshot.data?.docs ?? [];
+          final events =
+              docs.map((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                return Event(
+                  id: doc.id,
+                  date: (data['date'] as Timestamp).toDate(),
+                  timeFrom: data['timeFrom'] ?? '',
+                  timeTo: data['timeTo'] ?? '',
+                  location: data['location'] ?? '',
+                  description: data['description'] ?? '',
+                );
+              }).toList();
+          final filteredList = _filterEvents(events);
+          return Column(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isSmallScreen ? 16.0 : 24.0,
+                    vertical: 16.0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildDateRangeSelector(isSmallScreen),
+                      _buildEventsList(filteredList, isSmallScreen),
+                    ],
+                  ),
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildDateRangeSelector(isSmallScreen),
-                  _buildEventsList(isSmallScreen),
-                ],
-              ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -321,23 +324,26 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
-  Widget _buildEventsList(bool isSmallScreen) {
-    final filteredList = filteredEvents;
+  Widget _buildEventsList(List<Event> events, bool isSmallScreen) {
     return Expanded(
-      child: ListView.separated(
-        itemCount: filteredList.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 16),
-        itemBuilder: (context, index) {
-          final event = filteredList[index];
-          return _buildEventCard(event, isSmallScreen);
-        },
-      ),
+      child:
+          events.isEmpty
+              ? const Center(child: Text('No events found.'))
+              : ListView.separated(
+                itemCount: events.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  final event = events[index];
+                  return _buildEventCard(event, isSmallScreen);
+                },
+              ),
     );
   }
 
-  Widget _buildEventCard(Map<String, dynamic> event, bool isSmallScreen) {
-    final eventTypeColor = _getEventTypeColor(event['type']);
-    final statusColor = _getStatusColor(event['status']);
+  Widget _buildEventCard(Event event, bool isSmallScreen) {
+    // You may need to adapt this to your new Event model fields
+    final eventTypeColor = const Color(0xFFD7263D);
+    final statusColor = Colors.orange; // Placeholder, adapt as needed
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -364,11 +370,7 @@ class _EventsScreenState extends State<EventsScreen> {
                   color: eventTypeColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  _getEventTypeIcon(event['type']),
-                  color: eventTypeColor,
-                  size: 20,
-                ),
+                child: Icon(Icons.event, color: eventTypeColor, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -376,7 +378,7 @@ class _EventsScreenState extends State<EventsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      event['title'],
+                      event.description,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: isSmallScreen ? 16 : 18,
@@ -385,7 +387,7 @@ class _EventsScreenState extends State<EventsScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      event['location'],
+                      event.location,
                       style: TextStyle(
                         color: Colors.blueGrey[400],
                         fontSize: isSmallScreen ? 13 : 14,
@@ -401,7 +403,7 @@ class _EventsScreenState extends State<EventsScreen> {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  event['status'].toString().toUpperCase(),
+                  'UPCOMING',
                   style: TextStyle(
                     color: statusColor,
                     fontSize: 10,
@@ -417,7 +419,7 @@ class _EventsScreenState extends State<EventsScreen> {
               Icon(Icons.access_time, size: 16, color: Colors.grey.shade600),
               const SizedBox(width: 6),
               Text(
-                DateFormat('MMM d, yyyy').format(event['date']),
+                DateFormat('MMM d, yyyy').format(event.date),
                 style: TextStyle(
                   color: Colors.grey.shade600,
                   fontSize: isSmallScreen ? 12 : 14,
@@ -427,7 +429,7 @@ class _EventsScreenState extends State<EventsScreen> {
               Icon(Icons.people, size: 16, color: Colors.grey.shade600),
               const SizedBox(width: 6),
               Text(
-                '${event['attendees']} attendees',
+                'N/A', // You can add attendees if you have this field
                 style: TextStyle(
                   color: Colors.grey.shade600,
                   fontSize: isSmallScreen ? 12 : 14,
@@ -444,7 +446,18 @@ class _EventsScreenState extends State<EventsScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ViewEventScreen(event: event),
+                        builder:
+                            (context) => ViewEventScreen(
+                              event: {
+                                'title': event.description,
+                                'location': event.location,
+                                'date': event.date,
+                                'type': 'medical',
+                                'attendees': 'N/A',
+                                'status': 'upcoming',
+                                'description': event.description,
+                              },
+                            ),
                       ),
                     );
                   },
@@ -467,7 +480,18 @@ class _EventsScreenState extends State<EventsScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => EditEventScreen(event: event),
+                        builder:
+                            (context) => EditEventScreen(
+                              event: {
+                                'title': event.description,
+                                'location': event.location,
+                                'date': event.date,
+                                'type': 'medical',
+                                'attendees': 'N/A',
+                                'status': 'upcoming',
+                                'description': event.description,
+                              },
+                            ),
                       ),
                     );
                   },
@@ -488,44 +512,5 @@ class _EventsScreenState extends State<EventsScreen> {
         ],
       ),
     );
-  }
-
-  Color _getEventTypeColor(String type) {
-    switch (type) {
-      case 'medical':
-        return const Color(0xFFD7263D);
-      case 'community':
-        return Colors.blue;
-      case 'social':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'active':
-        return Colors.green;
-      case 'upcoming':
-        return Colors.orange;
-      case 'completed':
-        return Colors.grey;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  IconData _getEventTypeIcon(String type) {
-    switch (type) {
-      case 'medical':
-        return Icons.local_hospital;
-      case 'community':
-        return Icons.group;
-      case 'social':
-        return Icons.celebration;
-      default:
-        return Icons.event;
-    }
   }
 }

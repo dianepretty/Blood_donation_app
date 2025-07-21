@@ -1,6 +1,7 @@
 import 'package:blood_system/pages/events.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
 
@@ -566,63 +567,72 @@ class _EditEventScreenState extends State<EditEventScreen>
         attendeesController.text.isNotEmpty &&
         selectedStatus != null;
 
-    return Container(
-      width: double.infinity,
-      height: 56,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
-        boxShadow:
-            isFormValid
-                ? [
-                  BoxShadow(
-                    color: const Color(0xFFD7263D).withOpacity(0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                ]
-                : [],
-      ),
-      child: ElevatedButton(
-        onPressed:
-            isFormValid
-                ? () {
-                  HapticFeedback.mediumImpact();
-                  // Handle save
-                }
-                : null,
-        style: ElevatedButton.styleFrom(
-          backgroundColor:
-              isFormValid ? const Color(0xFFD7263D) : Colors.grey[300],
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(28),
-          ),
-          elevation: 0,
-          disabledBackgroundColor: Colors.grey[300],
-          disabledForegroundColor: Colors.grey[500],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.save_rounded,
-              size: 20,
-              color: isFormValid ? Colors.white : Colors.grey[500],
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Save Changes',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: isFormValid ? Colors.white : Colors.grey[500],
-                letterSpacing: 0.5,
+    return Row(
+      children: [
+        Expanded(
+          child: ElevatedButton(
+            onPressed: isFormValid ? _handleSave : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isFormValid ? const Color(0xFFD7263D) : Colors.grey[300],
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(28),
               ),
+              elevation: 0,
+              disabledBackgroundColor: Colors.grey[300],
+              disabledForegroundColor: Colors.grey[500],
             ),
-          ],
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.save_rounded,
+                  size: 20,
+                  color: isFormValid ? Colors.white : Colors.grey[500],
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Save Changes',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: isFormValid ? Colors.white : Colors.grey[500],
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-      ),
+        const SizedBox(width: 12),
+        IconButton(
+          icon: const Icon(Icons.delete, color: Colors.red, size: 28),
+          tooltip: 'Delete Event',
+          onPressed: _handleDelete,
+        ),
+      ],
     );
+  }
+
+  Future<void> _handleSave() async {
+    final docId = widget.event['id'];
+    final eventData = {
+      'name': titleController.text.trim(),
+      'type': selectedType,
+      'location': locationController.text.trim(),
+      'date': selectedDate,
+      'timeFrom': '', // Add time fields if needed
+      'timeTo': '',
+      'description': attendeesController.text.trim(), // Use correct field if needed
+    };
+    await FirebaseFirestore.instance.collection('events').doc(docId).update(eventData);
+    if (mounted) Navigator.of(context).pop();
+  }
+
+  Future<void> _handleDelete() async {
+    final docId = widget.event['id'];
+    await FirebaseFirestore.instance.collection('events').doc(docId).delete();
+    if (mounted) Navigator.of(context).pop();
   }
 
   Color _getItemColor(String item) {
