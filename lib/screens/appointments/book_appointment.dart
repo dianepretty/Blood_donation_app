@@ -346,7 +346,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                     ],
                   ),
                 ),
-              )).toList(),
+              )),
             ],
           ),
         );

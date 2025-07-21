@@ -375,7 +375,7 @@ class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScree
                     ],
                   ),
                 ),
-              )).toList(),
+              )),
             ],
           ),
         );

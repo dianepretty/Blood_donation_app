@@ -1,6 +1,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import 'package:blood_system/blocs/hospital/bloc.dart';
 import 'package:blood_system/screens/home.dart';
 import 'package:blood_system/screens/hospitalAdminRegister.dart';
@@ -22,6 +23,9 @@ import 'package:blood_system/screens/appointments/appointments.dart';
 import 'package:blood_system/screens/appointments/book_appointment.dart';
 import 'package:blood_system/screens/appointments_router.dart';
 >>>>>>> 2bf3f36 (feat: volunteer appointments)
+=======
+import 'package:blood_system/screens/appointments/book_appointment.dart';
+>>>>>>> 85e9384 (fix/: gradle)
 import 'package:blood_system/screens/volunteerRegister.dart';
 import 'package:blood_system/screens/welcomepage.dart';
 // import 'package:firebase_core/firebase_core.dart';
