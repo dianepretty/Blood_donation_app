@@ -68,7 +68,11 @@ class RedHeader extends StatelessWidget {
               left: 16,
               top: 32,
               child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
+                  size: 28,
+                ),
                 onPressed: onBack,
               ),
             ),
@@ -187,7 +191,8 @@ class _EventsScreenState extends State<EventsScreen> {
         children: [
           RedHeader(
             title: 'Events',
-            onBack: widget.onBackToDashboard ?? () => Navigator.of(context).pop(),
+            onBack:
+                widget.onBackToDashboard ?? () => Navigator.of(context).pop(),
             showBack: true,
             showSettings: false,
           ),
@@ -200,9 +205,7 @@ class _EventsScreenState extends State<EventsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 16),
                   _buildDateRangeSelector(isSmallScreen),
-                  const SizedBox(height: 24),
                   _buildEventsList(isSmallScreen),
                 ],
               ),
@@ -236,33 +239,6 @@ class _EventsScreenState extends State<EventsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Text(
-              'Date Range',
-              style: TextStyle(
-                fontSize: isSmallScreen ? 18 : 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
-            ),
-            Spacer(),
-            Switch(
-              value: doubleMonth,
-              onChanged: (value) {
-                setState(() {
-                  doubleMonth = value;
-                });
-              },
-              activeColor: const Color(0xFFD7263D),
-            ),
-            Text(
-              'Double Month',
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
         GestureDetector(
           onTap: () async {
             await showDialog(
