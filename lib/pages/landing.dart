@@ -92,8 +92,8 @@ class _LandingPageState extends State<LandingPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                child: Image.asset("assets/images/Blood_illustration.png"),
                 padding: EdgeInsets.all(20),
+                child: Image.asset("assets/images/Blood_illustration.png"),
               ),
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,

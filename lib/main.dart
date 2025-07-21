@@ -1,4 +1,5 @@
 import 'package:blood_system/blocs/hospital/bloc.dart';
+import 'package:blood_system/screens/appointments/book_appointment.dart';
 import 'package:blood_system/screens/home.dart';
 import 'package:blood_system/screens/hospitalAdminRegister.dart';
 import 'package:blood_system/screens/landing.dart';
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
           '/landing': (context) => const LandingPage(),
           '/home': (context) => const HomePage(),
           '/hospitalAdminRegister': (context) => const HospitalAdminRegister(),
+          '/appointments': (context) => const BookAppointmentScreen(),
         },
       ),
     );
