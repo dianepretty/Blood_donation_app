@@ -4,7 +4,7 @@ class Appointment {
   final String id;
   final DateTime date;
   final String timeFrom; // Changed from 'time'
-  final String timeTo;   // Added 'timeTo'
+  final String timeTo; // Added 'timeTo'
   final String hospital;
   final String type;
   final String status; // e.g., 'Upcoming', 'Completed', 'Cancelled'
@@ -87,11 +87,11 @@ class Appointment {
   @override
   int get hashCode {
     return id.hashCode ^
-    date.hashCode ^
-    timeFrom.hashCode ^
-    timeTo.hashCode ^
-    hospital.hashCode ^
-    type.hashCode ^
-    status.hashCode;
+        date.hashCode ^
+        timeFrom.hashCode ^
+        timeTo.hashCode ^
+        hospital.hashCode ^
+        type.hashCode ^
+        status.hashCode;
   }
 }
