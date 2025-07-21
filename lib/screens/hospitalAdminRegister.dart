@@ -1,5 +1,10 @@
+import 'package:blood_system/blocs/hospital/bloc.dart';
+import 'package:blood_system/blocs/hospital/event.dart';
+import 'package:blood_system/blocs/hospital/state.dart';
+import 'package:blood_system/models/hospital_model.dart';
 import 'package:blood_system/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HospitalAdminRegister extends StatefulWidget {
   const HospitalAdminRegister({super.key});
@@ -17,14 +22,12 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
   String? selectedHospital;
   bool _isPasswordVisible = false;
 
-  final List<String> hospitals = [
-    'General Hospital',
-    'City Medical Center',
-    'Regional Health Center',
-    'University Hospital',
-    'Community Hospital',
-    'Central Medical Hospital',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // Load all hospitals when the screen starts
+    context.read<HospitalBloc>().add(const LoadAllHospitals());
+  }
 
   @override
   void dispose() {
@@ -85,47 +88,73 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: selectedHospital,
-                    hint: const Text('Select hospital'),
-                    isExpanded: true,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Colors.blue),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
-                    ),
-                    items:
-                        hospitals.map((String hospital) {
-                          return DropdownMenuItem<String>(
-                            value: hospital,
-                            child: Text(hospital),
-                          );
-                        }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedHospital = newValue;
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select a hospital';
+                  BlocBuilder<HospitalBloc, HospitalState>(
+                    builder: (context, state) {
+                      if (state is HospitalLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (state is HospitalsLoaded) {
+                        print('WE ARE HERE now ${state.hospitals}');
+                        return DropdownButtonFormField<String>(
+                          value: selectedHospital,
+                          hint: const Text('Select hospital'),
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: Colors.blue),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                          ),
+                          items:
+                              state.hospitals.map<DropdownMenuItem<String>>((
+                                Hospital hospital,
+                              ) {
+                                return DropdownMenuItem<String>(
+                                  value: hospital.name,
+                                  child: Text(hospital.name),
+                                );
+                              }).toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedHospital = newValue;
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please select a hospital';
+                            }
+                            return null;
+                          },
+                        );
                       }
-                      return null;
+                      // Default: empty dropdown (or you can show a placeholder)
+                      return DropdownButtonFormField<String>(
+                        value: null,
+                        hint: const Text('Select hospital'),
+                        items: const [],
+                        onChanged: null,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                        ),
+                      );
                     },
                   ),
                 ],
