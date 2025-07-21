@@ -1,7 +1,7 @@
+import 'package:blood_system/pages/events.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:blood/pages/events.dart';
 
 class ViewEventScreen extends StatelessWidget {
   final Map<String, dynamic> event;
