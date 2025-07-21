@@ -16,11 +16,11 @@ class LandingPage extends StatefulWidget {
 
 class _LandingPageState extends State<LandingPage> {
   // Usage in your app (call this once to seed the data):
-  @override
-  void initState() {
-    super.initState();
-    HospitalDataSeeder.addInitialHospitals();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   HospitalDataSeeder.addInitialHospitals();
+  // }
 
   @override
   Widget build(BuildContext context) {
