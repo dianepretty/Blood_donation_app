@@ -2,6 +2,7 @@ import 'package:blood_system/blocs/auth/bloc.dart';
 import 'package:blood_system/blocs/auth/event.dart';
 import 'package:blood_system/blocs/hospital/bloc.dart';
 import 'package:blood_system/screens/userDetails.dart';
+import 'package:blood_system/screens/appointments/book_appointment.dart';
 import 'package:blood_system/screens/home.dart';
 import 'package:blood_system/screens/hospitalAdminRegister.dart';
 import 'package:blood_system/screens/landing.dart';
@@ -44,6 +45,7 @@ class MyApp extends StatelessWidget {
           '/home': (context) => const HomePage(),
           '/hospitalAdminRegister': (context) => const HospitalAdminRegister(),
           '/userDetails': (context) => const UserDetailsPage(),
+          '/appointments': (context) => const BookAppointmentScreen(),
         },
       ),
     );
