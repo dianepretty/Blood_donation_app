@@ -41,12 +41,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       try {
         // Get user data from Firestore
         final userData = await _authService.getUserData(event.user!.uid);
-        emit(
-          AuthAuthenticated(
-            firebaseUser: event.user!,
-            userData: UserModel.fromJson(userData),
-          ),
-        );
+        emit(AuthAuthenticated(firebaseUser: event.user!, userData: userData));
       } catch (e) {
         emit(AuthError('Failed to load user data: ${e.toString()}'));
       }
@@ -149,7 +144,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(
           AuthAuthenticated(
             firebaseUser: currentState.firebaseUser,
-            userData: UserModel.fromJson(updatedUserData),
+            userData: updatedUserData,
           ),
         );
       } catch (e) {

@@ -1,7 +1,6 @@
-import 'dart:ffi';
-
 import 'package:blood_system/screens/hospitalAdminRegister.dart';
-import 'package:blood_system/seeder/hospital.dart';
+import 'package:blood_system/screens/login.dart';
+import 'package:blood_system/screens/volunteerRegister.dart';
 import 'package:blood_system/theme/theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,14 +13,64 @@ class LandingPage extends StatefulWidget {
   State<LandingPage> createState() => _LandingPageState();
 }
 
-class _LandingPageState extends State<LandingPage> {
-  // Usage in your app (call this once to seed the data):
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   HospitalDataSeeder.addInitialHospitals();
-  // }
+String? selectedRole;
 
+Widget buildDialog(BuildContext context) {
+  return AlertDialog(
+    title: const Text('Select Your Role'),
+    backgroundColor: Colors.white,
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Please choose your role:'),
+        const SizedBox(height: 16),
+        DropdownButtonFormField<String>(
+          hint: const Text('Select a role'),
+          isExpanded: true,
+          decoration: const InputDecoration(
+            // remove the border
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
+            focusedBorder: OutlineInputBorder(borderSide: BorderSide.none),
+            fillColor: Color(0xFFF8F9FA),
+            filled: true,
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          ),
+          items:
+              ["Hospital admin", "Volunteer"].map((String role) {
+                return DropdownMenuItem<String>(value: role, child: Text(role));
+              }).toList(),
+          onChanged: (String? newValue) {
+            selectedRole = newValue;
+          },
+        ),
+      ],
+    ),
+    actions: [
+      Center(
+        child: ElevatedButton(
+          onPressed:
+              selectedRole == "Hospital admin"
+                  ? () {
+                    Navigator.pushNamed(context, '/hospitalAdminRegister');
+                  }
+                  : selectedRole == "Volunteer"
+                  ? () {
+                    Navigator.pushNamed(context, '/volunteerRegister');
+                  }
+                  : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.red,
+            foregroundColor: Colors.white,
+          ),
+          child: const Text('Continue'),
+        ),
+      ),
+    ],
+  );
+}
+
+class _LandingPageState extends State<LandingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,7 +115,10 @@ class _LandingPageState extends State<LandingPage> {
 
                   ElevatedButton(
                     onPressed: () {
-                      print("Register button pressed!");
+                      showDialog(
+                        context: context,
+                        builder: (context) => buildDialog(context),
+                      );
                       // Navigator.push(context, MaterialPageRoute(builder: (context) => RegistrationScreen()));
                     },
                     style: ElevatedButton.styleFrom(
@@ -87,11 +139,10 @@ class _LandingPageState extends State<LandingPage> {
 
                   ElevatedButton(
                     onPressed: () {
+                      // print("Register button pressed!");
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => HospitalAdminRegister(),
-                        ),
+                        MaterialPageRoute(builder: (context) => LoginPage()),
                       );
                     },
                     style: ElevatedButton.styleFrom(

@@ -15,25 +15,30 @@ class HospitalService {
   }
 
   // Get hospitals by district
-  Future<List<Hospital>> getHospitalsByDistrict(String district) async {
-    final snapshot =
-        await _firestore
-            .collection(_collectionName)
-            .where('district', isEqualTo: district)
-            .orderBy('name')
-            .get();
-    return snapshot.docs
-        .map((doc) => Hospital.fromJson({...doc.data()}))
-        .toList();
+  Stream<List<Hospital>> getHospitalsByDistrict(String district) {
+    return _firestore
+        .collection(_collectionName)
+        .where('district', isEqualTo: district)
+        .orderBy('name')
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs
+                  .map((doc) => Hospital.fromJson({...doc.data()}))
+                  .toList(),
+        );
   }
 
   // Get single hospital by ID
-  Future<Hospital?> getHospitalById(String id) async {
-    final doc = await _firestore.collection(_collectionName).doc(id).get();
-    if (doc.exists) {
-      return Hospital.fromJson({...doc.data()!});
-    }
-    return null;
+  Stream<Hospital?> getHospitalById(String id) {
+    return _firestore.collection(_collectionName).doc(id).snapshots().map((
+      doc,
+    ) {
+      if (doc.exists) {
+        return Hospital.fromJson({...doc.data()!});
+      }
+      return null;
+    });
   }
 
   // Get single hospital by ID (Future version)

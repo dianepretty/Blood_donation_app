@@ -1,5 +1,8 @@
+import 'package:blood_system/blocs/auth/bloc.dart';
+import 'package:blood_system/blocs/auth/event.dart';
 import 'package:blood_system/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class VolunteerRegister extends StatefulWidget {
   const VolunteerRegister({super.key});
@@ -589,5 +592,20 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
     print('Email: ${_emailController.text}');
     print('Phone: ${_phoneController.text}');
     print('Password: ${_passwordController.text}');
+
+    if (_formKey.currentState!.validate()) {
+      context.read<AuthBloc>().add(
+        AuthSignUpRequested(
+          fullName: _emailController.text.trim(),
+          email: _emailController.text.trim(),
+          districtName: district ?? '',
+          password: _passwordController.text,
+          phoneNumber: _phoneController.text.trim(),
+          role: 'VOLUNTEER',
+          gender: gender ?? '',
+          bloodType: bloodGroup ?? '',
+        ),
+      );
+    }
   }
 }
