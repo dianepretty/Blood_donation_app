@@ -1,6 +1,7 @@
 import 'package:blood_system/blocs/auth/bloc.dart';
 import 'package:blood_system/blocs/auth/event.dart';
 import 'package:blood_system/blocs/auth/state.dart';
+import 'package:blood_system/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -10,47 +11,13 @@ class UserDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Blood System Home'),
-        backgroundColor: Colors.red,
-        foregroundColor: Colors.white,
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              switch (value) {
-                case 'profile':
-                  Navigator.pushNamed(context, '/profile');
-                  break;
-                case 'logout':
-                  _showLogoutDialog(context);
-                  break;
-              }
-            },
-            itemBuilder:
-                (BuildContext context) => [
-                  const PopupMenuItem(
-                    value: 'profile',
-                    child: Row(
-                      children: [
-                        Icon(Icons.person),
-                        SizedBox(width: 8),
-                        Text('Profile'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'logout',
-                    child: Row(
-                      children: [
-                        Icon(Icons.logout),
-                        SizedBox(width: 8),
-                        Text('Logout'),
-                      ],
-                    ),
-                  ),
-                ],
-          ),
-        ],
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: CustomAppBar(
+          pageName: 'User Details',
+          onMenuPressed: () => Navigator.of(context).pop(),
+          onNotificationPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
@@ -327,14 +294,8 @@ class UserDetailsPage extends StatelessWidget {
       _buildActionButton(
         context,
         icon: Icons.edit,
-        label: 'Edit Profile',
-        onTap: () => Navigator.pushNamed(context, '/edit-profile'),
-      ),
-      _buildActionButton(
-        context,
-        icon: Icons.history,
-        label: 'History',
-        onTap: () => Navigator.pushNamed(context, '/history'),
+        label: 'Logout',
+        onTap: () => _showLogoutDialog(context),
       ),
     ];
 

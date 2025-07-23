@@ -397,21 +397,14 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed:
                       selectedRole == "Hospital admin"
                           ? () {
-                            Navigator.push(
+                            Navigator.pushNamed(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => HospitalAdminRegister(),
-                              ),
+                              '/hospitalAdminRegister',
                             );
                           }
                           : selectedRole == "Volunteer"
                           ? () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => VolunteerRegister(),
-                              ),
-                            );
+                            Navigator.pushNamed(context, '/volunteerRegister');
                           }
                           : null,
                   style: ElevatedButton.styleFrom(
