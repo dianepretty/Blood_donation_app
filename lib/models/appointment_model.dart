@@ -1,74 +1,78 @@
-import 'package:flutter/foundation.dart';
+// models/appointment_model.dart
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Appointment {
-  final String id;
-  final DateTime date;
-  final String timeFrom; // Changed from 'time'
-  final String timeTo; // Added 'timeTo'
-  final String hospital;
-  final String type;
-  final String status; // e.g., 'Upcoming', 'Completed', 'Cancelled'
+  final String? id;
+  final String userId;
+  final String hospitalName;
+  final DateTime appointmentDate;
+  final String appointmentTime;
+
 
   const Appointment({
-    required this.id,
-    required this.date,
-    required this.timeFrom,
-    required this.timeTo,
-    required this.hospital,
-    required this.type,
-    this.status = 'Upcoming', // Added status
+    this.id,
+    required this.userId,
+    required this.hospitalName,
+    required this.appointmentDate,
+    required this.appointmentTime,
+   
   });
 
-  // Create a copy with modified fields
-  Appointment copyWith({
-    String? id,
-    DateTime? date,
-    String? timeFrom,
-    String? timeTo,
-    String? hospital,
-    String? type,
-    String? status,
-  }) {
+  // Create from JSON
+  factory Appointment.fromJson(Map<String, dynamic> json) {
     return Appointment(
-      id: id ?? this.id,
-      date: date ?? this.date,
-      timeFrom: timeFrom ?? this.timeFrom,
-      timeTo: timeTo ?? this.timeTo,
-      hospital: hospital ?? this.hospital,
-      type: type ?? this.type,
-      status: status ?? this.status,
+      id: json['id'],
+      userId: json['userId'] ?? '',
+      hospitalName: json['hospitalName'] ?? '',
+      appointmentDate: _parseDateTime(json['appointmentDate']),
+      appointmentTime: json['appointmentTime'] ?? '',
+    
     );
   }
 
   // Convert to JSON
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'date': date.toIso8601String(),
-      'timeFrom': timeFrom,
-      'timeTo': timeTo,
-      'hospital': hospital,
-      'type': type,
-      'status': status,
+      'userId': userId,
+      'hospitalName': hospitalName,
+      'appointmentDate': Timestamp.fromDate(appointmentDate),
+      'appointmentTime': appointmentTime,
+    
     };
   }
 
-  // Create from JSON
-  factory Appointment.fromJson(Map<String, dynamic> json) {
+  // Helper method to parse DateTime from various formats
+  static DateTime _parseDateTime(dynamic dateTime) {
+    if (dateTime == null) return DateTime.now();
+    if (dateTime is Timestamp) return dateTime.toDate();
+    if (dateTime is DateTime) return dateTime;
+    if (dateTime is String) return DateTime.tryParse(dateTime) ?? DateTime.now();
+    return DateTime.now();
+  }
+
+  // Copy with method for updates
+  Appointment copyWith({
+    String? id,
+    String? userId,
+    String? hospitalId,
+    String? hospitalName,
+    DateTime? appointmentDate,
+    String? appointmentTime,
+  
+  }) {
     return Appointment(
-      id: json['id'],
-      date: DateTime.parse(json['date']),
-      timeFrom: json['timeFrom'],
-      timeTo: json['timeTo'],
-      hospital: json['hospital'],
-      type: json['type'],
-      status: json['status'] ?? 'Upcoming', // Handle status for old data
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      hospitalName: hospitalName ?? this.hospitalName,
+      appointmentDate: appointmentDate ?? this.appointmentDate,
+      appointmentTime: appointmentTime ?? this.appointmentTime,
+     
     );
   }
 
   @override
   String toString() {
-    return 'Appointment{id: $id, date: $date, timeFrom: $timeFrom, timeTo: $timeTo, hospital: $hospital, type: $type, status: $status}';
+    return 'Appointment(id: $id, hospitalName: $hospitalName, date: $appointmentDate, time: $appointmentTime)';
   }
 
   @override
@@ -76,22 +80,18 @@ class Appointment {
     if (identical(this, other)) return true;
     return other is Appointment &&
         other.id == id &&
-        other.date == date &&
-        other.timeFrom == timeFrom &&
-        other.timeTo == timeTo &&
-        other.hospital == hospital &&
-        other.type == type &&
-        other.status == status;
+        other.userId == userId &&
+        other.appointmentDate == appointmentDate &&
+        other.appointmentTime == appointmentTime;
   }
 
   @override
   int get hashCode {
-    return id.hashCode ^
-        date.hashCode ^
-        timeFrom.hashCode ^
-        timeTo.hashCode ^
-        hospital.hashCode ^
-        type.hashCode ^
-        status.hashCode;
+    return Object.hash(
+      id,
+      userId,
+      appointmentDate,
+      appointmentTime,
+    );
   }
 }

@@ -1,9 +1,8 @@
+import 'package:blood_system/blocs/appointment/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import '../blocs/appointment_bloc.dart';
-import '../blocs/appointment_event.dart';
-import '../blocs/appointment_state.dart';
+
 import '../models/appointment_model.dart';
 import '../blocs/event_bloc.dart'; // Import EventBloc
 import '../blocs/event_event.dart'; // Import EventEvent
@@ -19,9 +18,9 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (context) => AppointmentBloc()..add(LoadAppointments()),
-        ),
+        // BlocProvider(
+        //   create: (context) => AppointmentBloc()..add(LoadAppointments()),
+        // ),
         BlocProvider(
           create: (context) => EventBloc()..add(LoadEvents()), // Provide EventBloc
         ),
@@ -57,7 +56,7 @@ class HomePageContent extends StatelessWidget {
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async {
-                context.read<AppointmentBloc>().add(RefreshAppointments());
+               // context.read<AppointmentBloc>().add(RefreshAppointments());
                 context.read<EventBloc>().add(RefreshEvents()); // Refresh events
               },
               child: SingleChildScrollView(
@@ -102,75 +101,75 @@ class HomePageContent extends StatelessWidget {
                     const SizedBox(height: 16),
 
                     // Appointment cards
-                    BlocBuilder<AppointmentBloc, AppointmentState>(
-                      builder: (context, state) {
-                        if (state is AppointmentLoading) {
-                          return const Center(
-                            child: CircularProgressIndicator(
-                              color: Color(0xFFB83A3A),
-                            ),
-                          );
-                        }
+                    // BlocBuilder<AppointmentBloc, AppointmentState>(
+                    //   builder: (context, state) {
+                    //     if (state is AppointmentLoading) {
+                    //       return const Center(
+                    //         child: CircularProgressIndicator(
+                    //           color: Color(0xFFB83A3A),
+                    //         ),
+                    //       );
+                    //     }
 
-                        if (state is AppointmentError) {
-                          return Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.error_outline,
-                                  size: 64,
-                                  color: Colors.red[300],
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'Error: ${state.message}',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.red,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 16),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    context.read<AppointmentBloc>().add(LoadAppointments());
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFB83A3A),
-                                    foregroundColor: Colors.white,
-                                  ),
-                                  child: const Text('Retry'),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
+                    //     if (state is AppointmentError) {
+                    //       return Center(
+                    //         child: Column(
+                    //           mainAxisAlignment: MainAxisAlignment.center,
+                    //           children: [
+                    //             Icon(
+                    //               Icons.error_outline,
+                    //               size: 64,
+                    //               color: Colors.red[300],
+                    //             ),
+                    //             const SizedBox(height: 16),
+                    //             Text(
+                    //               'Error: ${state.message}',
+                    //               style: const TextStyle(
+                    //                 fontSize: 16,
+                    //                 color: Colors.red,
+                    //               ),
+                    //               textAlign: TextAlign.center,
+                    //             ),
+                    //             const SizedBox(height: 16),
+                    //             ElevatedButton(
+                    //               onPressed: () {
+                    //                 context.read<AppointmentBloc>().add(LoadAppointments());
+                    //               },
+                    //               style: ElevatedButton.styleFrom(
+                    //                 backgroundColor: const Color(0xFFB83A3A),
+                    //                 foregroundColor: Colors.white,
+                    //               ),
+                    //               child: const Text('Retry'),
+                    //             ),
+                    //           ],
+                    //         ),
+                    //       );
+                    //     }
 
-                        if (state is AppointmentLoaded || state is AppointmentOperationSuccess) {
-                          // Access upcomingAppointments from both states
-                          final appointments = state is AppointmentLoaded
-                              ? state.upcomingAppointments
-                              : (state as AppointmentOperationSuccess).upcomingAppointments;
+                    //     if (state is AppointmentLoaded || state is AppointmentOperationSuccess) {
+                    //       // Access upcomingAppointments from both states
+                    //       final appointments = state is AppointmentLoaded
+                    //           ? state.upcomingAppointments
+                    //           : (state as AppointmentOperationSuccess).upcomingAppointments;
 
-                          if (appointments.isEmpty) {
-                            return _buildEmptyState('No upcoming appointments');
-                          } else {
-                            return Column(
-                              children: appointments.take(2).map((appointment) =>
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 12),
-                                    child: _buildAppointmentCard(appointment),
-                                  ),
-                              ).toList(),
-                            );
-                          }
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
+                    //       if (appointments.isEmpty) {
+                    //         return _buildEmptyState('No upcoming appointments');
+                    //       } else {
+                    //         return Column(
+                    //           children: appointments.take(2).map((appointment) =>
+                    //               Padding(
+                    //                 padding: const EdgeInsets.only(bottom: 12),
+                    //                 child: _buildAppointmentCard(appointment),
+                    //               ),
+                    //           ).toList(),
+                    //         );
+                    //       }
+                    //     }
+                    //     return const SizedBox.shrink();
+                    //   },
+                    // ),
 
-                    const SizedBox(height: 32),
+                    // const SizedBox(height: 32),
 
                     // Events section
                     Row(
@@ -305,7 +304,7 @@ class HomePageContent extends StatelessWidget {
 
   Widget _buildAppointmentCard(Appointment appointment) {
     final dateFormatter = DateFormat('M/d/yyyy');
-    final formattedDate = dateFormatter.format(appointment.date);
+    final formattedDate = dateFormatter.format(appointment.appointmentDate);
 
     return Container(
       decoration: BoxDecoration(
@@ -327,17 +326,17 @@ class HomePageContent extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    appointment.type,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF333333),
-                    ),
-                  ),
+                  // Text(
+                  //   appointment.type,
+                  //   style: const TextStyle(
+                  //     fontSize: 16,
+                  //     fontWeight: FontWeight.w600,
+                  //     color: Color(0xFF333333),
+                  //   ),
+                  // ),
                   const SizedBox(height: 4),
                   Text(
-                    appointment.hospital,
+                    appointment.hospitalName,
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -346,7 +345,7 @@ class HomePageContent extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '$formattedDate from ${appointment.timeFrom} to ${appointment.timeTo}', // Updated to use timeFrom and timeTo
+                    '$formattedDate  ${appointment.appointmentTime} ', // Updated to use timeFrom and timeTo
                     style: const TextStyle(
                       fontSize: 14,
                       color: Color(0xFF888888),
