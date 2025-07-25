@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Blood Donation App',
         debugShowCheckedModeBanner: false,
-        initialRoute: '/appointments',
+        initialRoute: '/landing',
         routes: {
           '/landing': (context) => const LandingPage(),
           '/home': (context) => const HomePage(),
