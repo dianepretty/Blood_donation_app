@@ -1,7 +1,11 @@
+import 'package:blood_system/blocs/auth/bloc.dart';
+import 'package:blood_system/blocs/auth/event.dart';
+import 'package:blood_system/blocs/auth/state.dart';
 import 'package:blood_system/screens/hospitalAdminRegister.dart';
 import 'package:blood_system/screens/volunteerRegister.dart';
 import 'package:blood_system/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,6 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _rememberMe = false;
 
   bool _isPasswordVisible = false;
 
@@ -52,11 +57,42 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          // Form Content
-          Expanded(
-            child: SingleChildScrollView(
+      body: BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state is AuthAuthenticated) {
+            // Navigate to home screen on successful authentication
+            Navigator.pushReplacementNamed(context, '/userDetails');
+          } else if (state is AuthError) {
+            // Show error message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+                margin: const EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            );
+          } else if (state is AuthPasswordResetSent) {
+            // Show password reset confirmation
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Password reset email sent to ${state.email}'),
+                backgroundColor: Colors.green,
+                behavior: SnackBarBehavior.floating,
+                margin: const EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            );
+          }
+        },
+        child: BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, state) {
+            return SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Form(
                 key: _formKey,
@@ -258,26 +294,34 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
               ),
-            ),
-          ),
-        ],
+            );
+          },
+        ),
       ),
     );
   }
 
   void _handleLogin() {
     // Show loading or success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Logging in...'),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   const SnackBar(
+    //     content: Text('Logging in...'),
+    //     backgroundColor: Colors.green,
+    //     duration: Duration(seconds: 2),
+    //   ),
+    // );
 
     // Add your login logic here
     print('Email: ${_emailController.text}');
     print('Password: ${_passwordController.text}');
+    if (_formKey.currentState!.validate()) {
+      context.read<AuthBloc>().add(
+        AuthSignInRequested(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        ),
+      );
+    }
   }
 
   // void _handleForgotPassword() {
@@ -353,21 +397,14 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed:
                       selectedRole == "Hospital admin"
                           ? () {
-                            Navigator.push(
+                            Navigator.pushNamed(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => HospitalAdminRegister(),
-                              ),
+                              '/hospitalAdminRegister',
                             );
                           }
                           : selectedRole == "Volunteer"
                           ? () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => VolunteerRegister(),
-                              ),
-                            );
+                            Navigator.pushNamed(context, '/volunteerRegister');
                           }
                           : null,
                   style: ElevatedButton.styleFrom(
