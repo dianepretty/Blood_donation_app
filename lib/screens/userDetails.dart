@@ -403,7 +403,7 @@ class UserDetailsPage extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop();
                 context.read<AuthBloc>().add(AuthSignOutRequested());
-                Navigator.pushReplacementNamed(context, '/login');
+                // AuthWrapper will handle navigation after logout
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
               child: const Text(
