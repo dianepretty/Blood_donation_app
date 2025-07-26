@@ -43,46 +43,21 @@ class MyApp extends StatelessWidget {
         title: 'Blood Donation App',
         debugShowCheckedModeBanner: false,
         home: const AuthWrapper(),
-        onGenerateRoute: (settings) {
-          // Check authentication state before allowing navigation to certain routes
-          return MaterialPageRoute(
-            builder:
-                (context) => BlocBuilder<AuthBloc, AuthState>(
-                  builder: (context, state) {
-                    switch (settings.name) {
-                      case '/landing':
-                        return const LandingPage();
-                      case '/login':
-                        // If already authenticated, redirect to appropriate page
-                        if (state is AuthAuthenticated) {
-                          return const AuthWrapper();
-                        }
-                        return const LoginPage();
-                      case '/home':
-                        return const HomePage();
-                      case '/hospitalAdminRegister':
-                        return const HospitalAdminRegister();
-                      case '/volunteerRegister':
-                        return const VolunteerRegister();
-                      case '/userDetails':
-                        return const UserDetailsPage();
-                      case '/appointments':
-                        return const BookAppointmentScreen();
-                      case '/events':
-                        return const Welcomepage();
-                      default:
-                        return const AuthWrapper();
-                    }
-                  },
-                ),
-          );
+        routes: {
+          '/landing': (context) => const LandingPage(),
+          '/home': (context) => const HomePage(),
+          '/hospitalAdminRegister': (context) => const HospitalAdminRegister(),
+          '/volunteerRegister': (context) => const VolunteerRegister(),
+          '/userDetails': (context) => const UserDetailsPage(),
+          '/appointments': (context) => const BookAppointmentScreen(),
+          '/login': (context) => const LoginPage(),
+          '/events': (context) => const Welcomepage(),
         },
       ),
     );
   }
 }
 
-// Updated AuthWrapper to handle route-based navigation
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
 
@@ -108,7 +83,7 @@ class AuthWrapper extends StatelessWidget {
               originalRole == 'Hospital admin' ||
               originalRole == 'HOSPITAL_ADMIN') {
             print('AuthWrapper - Navigating to UserDetailsPage');
-            return const UserDetailsPage();
+            return const UserDetailsPage(); // User details page for hospital admin
           } else {
             // Unknown role, go to landing page
             print(
