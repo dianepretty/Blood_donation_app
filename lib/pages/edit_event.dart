@@ -621,7 +621,7 @@ class _EditEventScreenState extends State<EditEventScreen>
       'name': titleController.text.trim(),
       'type': selectedType,
       'location': locationController.text.trim(),
-      'date': selectedDate,
+      'date': Timestamp.fromDate(selectedDate!), // Convert DateTime to Timestamp
       'timeFrom': '', // Add time fields if needed
       'timeTo': '',
       'description': attendeesController.text.trim(), // Use correct field if needed
