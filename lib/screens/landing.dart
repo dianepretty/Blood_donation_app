@@ -1,8 +1,6 @@
-import 'dart:ffi';
-
-import 'package:blood_system/screens/hospitalAdminRegister.dart';
-import 'package:blood_system/seeder/hospital.dart';
+import 'package:blood_system/screens/login.dart';
 import 'package:blood_system/theme/theme.dart';
+import 'package:blood_system/widgets/select-role.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui; // Prefix dart:ui with 'ui'
@@ -14,14 +12,16 @@ class LandingPage extends StatefulWidget {
   State<LandingPage> createState() => _LandingPageState();
 }
 
-class _LandingPageState extends State<LandingPage> {
-  // Usage in your app (call this once to seed the data):
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   HospitalDataSeeder.addInitialHospitals();
-  // }
+String? selectedRole;
 
+void showRoleSelectionDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (context) => const RoleSelectionDialog(),
+  );
+}
+
+class _LandingPageState extends State<LandingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,7 +66,7 @@ class _LandingPageState extends State<LandingPage> {
 
                   ElevatedButton(
                     onPressed: () {
-                      print("Register button pressed!");
+                      showRoleSelectionDialog(context);
                       // Navigator.push(context, MaterialPageRoute(builder: (context) => RegistrationScreen()));
                     },
                     style: ElevatedButton.styleFrom(
@@ -87,11 +87,10 @@ class _LandingPageState extends State<LandingPage> {
 
                   ElevatedButton(
                     onPressed: () {
+                      // print("Register button pressed!");
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => HospitalAdminRegister(),
-                        ),
+                        MaterialPageRoute(builder: (context) => LoginPage()),
                       );
                     },
                     style: ElevatedButton.styleFrom(

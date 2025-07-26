@@ -6,115 +6,9 @@ import 'view_event.dart';
 import 'edit_event.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/event_model.dart';
+import '../widgets/red_header.dart';
 
-class RedHeader extends StatelessWidget {
-  final String title;
-  final double? height;
-  final VoidCallback? onBack;
-  final bool showBack;
-  final bool showSettings;
-  const RedHeader({
-    super.key,
-    required this.title,
-    this.height,
-    this.onBack,
-    this.showBack = false,
-    this.showSettings = false,
-  });
 
-  @override
-  Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final headerHeight = height ?? screenHeight * 0.18;
-    final isSmallScreen = MediaQuery.of(context).size.width < 400;
-    return Container(
-      width: double.infinity,
-      height: headerHeight,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(24),
-              bottomRight: Radius.circular(24),
-            ),
-            child: Image.asset(
-              'assets/images/header_bg.png',
-              fit: BoxFit.cover,
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(24),
-                bottomRight: Radius.circular(24),
-              ),
-              color: Color(0xFFD7263D).withOpacity(0.7),
-            ),
-          ),
-          if (showBack && onBack != null)
-            Positioned(
-              left: 16,
-              top: 32,
-              child: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back,
-                  color: Colors.white,
-                  size: 28,
-                ),
-                onPressed: onBack,
-              ),
-            ),
-          Positioned(
-            left: isSmallScreen ? 56 : 64,
-            right: isSmallScreen ? 56 : 64,
-            top: headerHeight * 0.35,
-            child: Center(
-              child: Text(
-                title,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: isSmallScreen ? 24 : 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          if (showSettings)
-            Positioned(
-              right: isSmallScreen ? 16 : 24,
-              top: headerHeight * 0.35,
-              child: Container(
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.settings_outlined,
-                  color: Colors.white,
-                  size: isSmallScreen ? 24 : 28,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
 
 class EventsScreen extends StatefulWidget {
   final VoidCallback? onBackToDashboard;
@@ -189,11 +83,15 @@ class _EventsScreenState extends State<EventsScreen> {
                 final data = doc.data() as Map<String, dynamic>;
                 return Event(
                   id: doc.id,
+                  name: data['name'] ?? '',
+                  type: data['type'] ?? 'other',
                   date: (data['date'] as Timestamp).toDate(),
                   timeFrom: data['timeFrom'] ?? '',
                   timeTo: data['timeTo'] ?? '',
                   location: data['location'] ?? '',
                   description: data['description'] ?? '',
+                  attendees: data['attendees'] ?? 0,
+                  status: data['status'] ?? 'upcoming',
                 );
               }).toList();
           final filteredList = _filterEvents(events);
@@ -378,7 +276,7 @@ class _EventsScreenState extends State<EventsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      event.description,
+                      event.name,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: isSmallScreen ? 16 : 18,
@@ -429,7 +327,7 @@ class _EventsScreenState extends State<EventsScreen> {
               Icon(Icons.people, size: 16, color: Colors.grey.shade600),
               const SizedBox(width: 6),
               Text(
-                'N/A', // You can add attendees if you have this field
+                '${event.attendees} attendees',
                 style: TextStyle(
                   color: Colors.grey.shade600,
                   fontSize: isSmallScreen ? 12 : 14,
@@ -449,12 +347,13 @@ class _EventsScreenState extends State<EventsScreen> {
                         builder:
                             (context) => ViewEventScreen(
                               event: {
-                                'title': event.description,
+                                'id': event.id,
+                                'title': event.name,
                                 'location': event.location,
                                 'date': event.date,
-                                'type': 'medical',
-                                'attendees': 'N/A',
-                                'status': 'upcoming',
+                                'type': event.type,
+                                'attendees': event.attendees,
+                                'status': event.status,
                                 'description': event.description,
                               },
                             ),
@@ -483,12 +382,13 @@ class _EventsScreenState extends State<EventsScreen> {
                         builder:
                             (context) => EditEventScreen(
                               event: {
-                                'title': event.description,
+                                'id': event.id,
+                                'title': event.name,
                                 'location': event.location,
                                 'date': event.date,
-                                'type': 'medical',
-                                'attendees': 'N/A',
-                                'status': 'upcoming',
+                                'type': event.type,
+                                'attendees': event.attendees,
+                                'status': event.status,
                                 'description': event.description,
                               },
                             ),
@@ -512,5 +412,44 @@ class _EventsScreenState extends State<EventsScreen> {
         ],
       ),
     );
+  }
+
+  Color _getEventTypeColor(String type) {
+    switch (type) {
+      case 'medical':
+        return const Color(0xFFD7263D);
+      case 'community':
+        return Colors.blue;
+      case 'social':
+        return Colors.purple;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'active':
+        return Colors.green;
+      case 'upcoming':
+        return Colors.orange;
+      case 'completed':
+        return Colors.grey;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  IconData _getEventTypeIcon(String type) {
+    switch (type) {
+      case 'medical':
+        return Icons.local_hospital;
+      case 'community':
+        return Icons.group;
+      case 'social':
+        return Icons.celebration;
+      default:
+        return Icons.event;
+    }
   }
 }

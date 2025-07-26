@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
+import '../widgets/red_header.dart';
 
 class EditEventScreen extends StatefulWidget {
   final Map<String, dynamic> event;
@@ -624,6 +625,8 @@ class _EditEventScreenState extends State<EditEventScreen>
       'timeFrom': '', // Add time fields if needed
       'timeTo': '',
       'description': attendeesController.text.trim(), // Use correct field if needed
+      'attendees': int.tryParse(attendeesController.text.trim()) ?? 0,
+      'status': selectedStatus,
     };
     await FirebaseFirestore.instance.collection('events').doc(docId).update(eventData);
     if (mounted) Navigator.of(context).pop();

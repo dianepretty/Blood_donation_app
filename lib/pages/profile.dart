@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/red_header.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -14,7 +15,11 @@ class ProfileScreen extends StatelessWidget {
       body: Column(
         children: [
           // Header Section
-          _buildHeader(context, headerHeight, isSmallScreen),
+          RedHeader(
+            title: 'Profile',
+            height: headerHeight,
+            showSettings: true,
+          ),
 
           // Content Section
           Expanded(
@@ -84,6 +89,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  // TODO: Remove this method as we're now using RedHeader widget
   Widget _buildHeader(
     BuildContext context,
     double headerHeight,

@@ -1,3 +1,5 @@
+import 'package:blood_system/blocs/auth/bloc.dart';
+import 'package:blood_system/blocs/auth/event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -23,7 +25,8 @@ class HomePage extends StatelessWidget {
           create: (context) => AppointmentBloc()..add(LoadAppointments()),
         ),
         BlocProvider(
-          create: (context) => EventBloc()..add(LoadEvents()), // Provide EventBloc
+          create:
+              (context) => EventBloc()..add(LoadEvents()), // Provide EventBloc
         ),
       ],
       child: const HomePageContent(),
@@ -49,7 +52,11 @@ class HomePageContent extends StatelessWidget {
             },
             onNotificationPressed: () {
               // Handle notification press
-              print('Notification pressed');
+              // print('Notification pressed');
+
+              //navigate to login page
+              Navigator.of(context).pushNamed('/login');
+              context.read<AuthBloc>().add(AuthSignOutRequested());
             },
           ),
 
@@ -58,7 +65,9 @@ class HomePageContent extends StatelessWidget {
             child: RefreshIndicator(
               onRefresh: () async {
                 context.read<AppointmentBloc>().add(RefreshAppointments());
-                context.read<EventBloc>().add(RefreshEvents()); // Refresh events
+                context.read<EventBloc>().add(
+                  RefreshEvents(),
+                ); // Refresh events
               },
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -134,7 +143,9 @@ class HomePageContent extends StatelessWidget {
                                 const SizedBox(height: 16),
                                 ElevatedButton(
                                   onPressed: () {
-                                    context.read<AppointmentBloc>().add(LoadAppointments());
+                                    context.read<AppointmentBloc>().add(
+                                      LoadAppointments(),
+                                    );
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFFB83A3A),
@@ -147,22 +158,33 @@ class HomePageContent extends StatelessWidget {
                           );
                         }
 
-                        if (state is AppointmentLoaded || state is AppointmentOperationSuccess) {
+                        if (state is AppointmentLoaded ||
+                            state is AppointmentOperationSuccess) {
                           // Access upcomingAppointments from both states
-                          final appointments = state is AppointmentLoaded
-                              ? state.upcomingAppointments
-                              : (state as AppointmentOperationSuccess).upcomingAppointments;
+                          final appointments =
+                              state is AppointmentLoaded
+                                  ? state.upcomingAppointments
+                                  : (state as AppointmentOperationSuccess)
+                                      .upcomingAppointments;
 
                           if (appointments.isEmpty) {
                             return _buildEmptyState('No upcoming appointments');
                           } else {
                             return Column(
-                              children: appointments.take(2).map((appointment) =>
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 12),
-                                    child: _buildAppointmentCard(appointment),
-                                  ),
-                              ).toList(),
+                              children:
+                                  appointments
+                                      .take(2)
+                                      .map(
+                                        (appointment) => Padding(
+                                          padding: const EdgeInsets.only(
+                                            bottom: 12,
+                                          ),
+                                          child: _buildAppointmentCard(
+                                            appointment,
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
                             );
                           }
                         }
@@ -253,21 +275,29 @@ class HomePageContent extends StatelessWidget {
                           );
                         }
 
-                        if (state is EventLoaded || state is EventOperationSuccess) {
-                          final events = state is EventLoaded
-                              ? state.events
-                              : (state as EventOperationSuccess).events;
+                        if (state is EventLoaded ||
+                            state is EventOperationSuccess) {
+                          final events =
+                              state is EventLoaded
+                                  ? state.events
+                                  : (state as EventOperationSuccess).events;
 
                           if (events.isEmpty) {
                             return _buildEmptyState('No upcoming events');
                           } else {
                             return Column(
-                              children: events.take(3).map((event) =>
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 12),
-                                    child: _buildEventCard(event),
-                                  ),
-                              ).toList(),
+                              children:
+                                  events
+                                      .take(3)
+                                      .map(
+                                        (event) => Padding(
+                                          padding: const EdgeInsets.only(
+                                            bottom: 12,
+                                          ),
+                                          child: _buildEventCard(event),
+                                        ),
+                                      )
+                                      .toList(),
                             );
                           }
                         }
@@ -479,7 +509,8 @@ class HomePageContent extends StatelessWidget {
   //   );
   // }
 
-  Widget _buildEventCard(Event event) { // Updated to accept an Event object
+  Widget _buildEventCard(Event event) {
+    // Updated to accept an Event object
     final dateFormatter = DateFormat('M/d/yyyy');
     final formattedDate = dateFormatter.format(event.date);
 

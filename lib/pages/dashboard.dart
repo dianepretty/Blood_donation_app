@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/red_header.dart';
 
 class DashboardScreen extends StatelessWidget {
   DashboardScreen({super.key});
@@ -67,7 +68,11 @@ class DashboardScreen extends StatelessWidget {
       backgroundColor: Colors.grey[50],
       body: Column(
         children: [
-          _buildHeader(context, headerHeight, isSmallScreen),
+          RedHeader(
+            title: 'Dashboard',
+            height: headerHeight,
+            showSettings: true,
+          ),
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
@@ -103,81 +108,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(
-    BuildContext context,
-    double headerHeight,
-    bool isSmallScreen,
-  ) {
-    return Container(
-      width: double.infinity,
-      height: headerHeight,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(24),
-              bottomRight: Radius.circular(24),
-            ),
-            child: Image.asset(
-              'assets/images/header_bg.png',
-              fit: BoxFit.cover,
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(24),
-                bottomRight: Radius.circular(24),
-              ),
-              color: Color(0xFFD7263D).withOpacity(0.7),
-            ),
-          ),
-          Positioned(
-            left: isSmallScreen ? 16 : 24,
-            top: headerHeight * 0.35,
-            child: Text(
-              'Dashboard',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: isSmallScreen ? 24 : 28,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          Positioned(
-            right: isSmallScreen ? 16 : 24,
-            top: headerHeight * 0.35,
-            child: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.settings_outlined,
-                color: Colors.white,
-                size: isSmallScreen ? 24 : 28,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  
 
   Widget _buildSectionTitle(String title, bool isSmallScreen) {
     return Text(

@@ -1,6 +1,7 @@
 import 'package:blood_system/pages/events.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../widgets/red_header.dart';
 
 class CreateEventScreen extends StatefulWidget {
   const CreateEventScreen({super.key});
@@ -569,6 +570,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       'timeFrom': _fromTime != null ? _fromTime!.format(context) : '',
       'timeTo': _toTime != null ? _toTime!.format(context) : '',
       'description': _descriptionController.text.trim(),
+      'attendees': 0, // Default attendees count
+      'status': 'upcoming', // Default status
     };
     await FirebaseFirestore.instance.collection('events').add(eventData);
   }
