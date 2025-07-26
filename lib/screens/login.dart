@@ -71,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
                 // Navigate back to home - AuthWrapper will handle the routing
                 Navigator.of(
                   context,
-                ).pushNamedAndRemoveUntil('/', (route) => false);
+                ).pushNamedAndRemoveUntil('/appointments', (route) => false);
               }
             });
           } else if (state is AuthError) {

@@ -15,7 +15,7 @@ class AppointmentBloc extends Bloc<AppointmentEvent, AppointmentState> {
 
   AppointmentBloc({
     required AppointmentService appointmentService,
-    required HospitalService hospitalService,
+     required HospitalService hospitalService,
   })  : _appointmentService = appointmentService,
         _hospitalService = hospitalService,
         super(const AppointmentState()) {

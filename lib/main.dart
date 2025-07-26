@@ -1,3 +1,4 @@
+import 'package:blood_system/blocs/appointment/bloc.dart';
 import 'package:blood_system/blocs/auth/bloc.dart';
 import 'package:blood_system/blocs/auth/event.dart';
 import 'package:blood_system/blocs/auth/state.dart';
@@ -9,6 +10,7 @@ import 'package:blood_system/screens/hospitalAdminRegister.dart';
 import 'package:blood_system/screens/landing.dart';
 import 'package:blood_system/screens/volunteerRegister.dart';
 import 'package:blood_system/screens/welcomepage.dart';
+import 'package:blood_system/service/appointment_service.dart';
 import 'package:blood_system/service/hospital_service.dart';
 import 'package:blood_system/service/user_service.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -37,6 +39,12 @@ class MyApp extends StatelessWidget {
           create:
               (context) =>
                   AuthBloc(authService: AuthService())..add(AuthStarted()),
+        ),
+        BlocProvider(
+          create: (context) => AppointmentBloc(
+              appointmentService: AppointmentService(),
+              hospitalService: HospitalService()
+            ),
         ),
       ],
       child: MaterialApp(
@@ -83,7 +91,7 @@ class AuthWrapper extends StatelessWidget {
               originalRole == 'Hospital admin' ||
               originalRole == 'HOSPITAL_ADMIN') {
             print('AuthWrapper - Navigating to UserDetailsPage');
-            return const UserDetailsPage(); // User details page for hospital admin
+            return const AppointmentsRouter(); // User details page for hospital admin
           } else {
             // Unknown role, go to landing page
             print(

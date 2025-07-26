@@ -81,7 +81,7 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
                     children: [
                       _buildUpcomingAppointments(),
                       const SizedBox(height: 24),
-                      _buildAppointmentHistory(),
+                      // _buildAppointmentHistory(),
                     ],
                   ),
                 ),
