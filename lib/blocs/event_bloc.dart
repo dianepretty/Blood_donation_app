@@ -24,6 +24,10 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     _events.add(
       Event(
         id: _uuid.v4(),
+        name: 'Tech Conference',
+        type: 'Conference',
+        attendees: 200,
+        status: 'Upcoming',
         date: DateTime.now().add(const Duration(days: 7)),
         timeFrom: '10:00 AM',
         timeTo: '12:00 PM',
@@ -34,6 +38,10 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     _events.add(
       Event(
         id: _uuid.v4(),
+        name: 'Blood Donation Drive',
+        type: 'Donation',
+        attendees: 500,
+        status: 'Upcoming',
         date: DateTime.now().add(const Duration(days: 14)),
         timeFrom: '09:00 AM',
         timeTo: '05:00 PM',
@@ -44,6 +52,10 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     _events.add(
       Event(
         id: _uuid.v4(),
+        name: 'Innovation Workshop',
+        type: 'Workshop',
+        attendees: 100,
+        status: 'Upcoming',
         date: DateTime.now().add(const Duration(days: 21)),
         timeFrom: '02:00 PM',
         timeTo: '04:00 PM',
@@ -73,22 +85,39 @@ class EventBloc extends Bloc<EventEvent, EventState> {
       _events.add(newEvent);
       // Sort events after adding
       _events.sort((a, b) => a.date.compareTo(b.date));
-      emit(EventOperationSuccess('Event added successfully!', events: List.from(_events)));
-      emit(EventLoaded(events: List.from(_events))); // Re-emit loaded state to update UI
+      emit(
+        EventOperationSuccess(
+          'Event added successfully!',
+          events: List.from(_events),
+        ),
+      );
+      emit(
+        EventLoaded(events: List.from(_events)),
+      ); // Re-emit loaded state to update UI
     } catch (e) {
       emit(EventError('Failed to add event: ${e.toString()}'));
     }
   }
 
-  Future<void> _onUpdateEvent(UpdateEvent event, Emitter<EventState> emit) async {
+  Future<void> _onUpdateEvent(
+    UpdateEvent event,
+    Emitter<EventState> emit,
+  ) async {
     try {
       final index = _events.indexWhere((e) => e.id == event.event.id);
       if (index != -1) {
         _events[index] = event.event;
         // Sort events after updating
         _events.sort((a, b) => a.date.compareTo(b.date));
-        emit(EventOperationSuccess('Event updated successfully!', events: List.from(_events)));
-        emit(EventLoaded(events: List.from(_events))); // Re-emit loaded state to update UI
+        emit(
+          EventOperationSuccess(
+            'Event updated successfully!',
+            events: List.from(_events),
+          ),
+        );
+        emit(
+          EventLoaded(events: List.from(_events)),
+        ); // Re-emit loaded state to update UI
       } else {
         emit(EventError('Event not found for update.'));
       }
@@ -97,19 +126,32 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     }
   }
 
-  Future<void> _onDeleteEvent(DeleteEvent event, Emitter<EventState> emit) async {
+  Future<void> _onDeleteEvent(
+    DeleteEvent event,
+    Emitter<EventState> emit,
+  ) async {
     try {
       _events.removeWhere((e) => e.id == event.id);
       // Sort events after deleting
       _events.sort((a, b) => a.date.compareTo(b.date));
-      emit(EventOperationSuccess('Event deleted successfully!', events: List.from(_events)));
-      emit(EventLoaded(events: List.from(_events))); // Re-emit loaded state to update UI
+      emit(
+        EventOperationSuccess(
+          'Event deleted successfully!',
+          events: List.from(_events),
+        ),
+      );
+      emit(
+        EventLoaded(events: List.from(_events)),
+      ); // Re-emit loaded state to update UI
     } catch (e) {
       emit(EventError('Failed to delete event: ${e.toString()}'));
     }
   }
 
-  Future<void> _onRefreshEvents(RefreshEvents event, Emitter<EventState> emit) async {
+  Future<void> _onRefreshEvents(
+    RefreshEvents event,
+    Emitter<EventState> emit,
+  ) async {
     // This is similar to LoadEvents, but might be triggered by a pull-to-refresh
     emit(EventLoading());
     try {
