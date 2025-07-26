@@ -22,7 +22,7 @@ class AppointmentBloc extends Bloc<AppointmentEvent, AppointmentState> {
     
     // Register event handlers
     on<LoadUserAppointments>(_onLoadUserAppointments);
-    on<LoadHospitals>(_onLoadHospitals);
+    on<LoadAdminAppointmentsWithDateFilter>(_onLoadAdminAppointmentsWithDateFilter);    on<LoadHospitals>(_onLoadHospitals);
     on<SelectAppointmentDate>(_onSelectAppointmentDate);
     on<SelectHospital>(_onSelectHospital);
     on<LoadAvailableTimeSlots>(_onLoadAvailableTimeSlots);
@@ -50,7 +50,43 @@ class AppointmentBloc extends Bloc<AppointmentEvent, AppointmentState> {
 
       // Listen to appointments stream
       _appointmentsSubscription = _appointmentService
-          .getUserAppointments(event.userId)
+          .getAppointmentByUser(event.userId)
+          .listen(
+            (appointments) {
+              if (!isClosed) {
+                add(_AppointmentsUpdated(appointments));
+              }
+            },
+            onError: (error) {
+              if (!isClosed) {
+                add(_AppointmentsError(error.toString()));
+              }
+            },
+          );
+    } catch (e) {
+      emit(state.copyWith(
+        status: AppointmentStatus.error,
+        errorMessage: 'Failed to load appointments: ${e.toString()}',
+      ));
+    }
+  }
+Future<void> _onLoadAdminAppointmentsWithDateFilter(
+    LoadAdminAppointmentsWithDateFilter event,
+    Emitter<AppointmentState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: AppointmentStatus.loading));
+
+      // Cancel existing subscription
+      await _appointmentsSubscription?.cancel();
+
+      // Listen to appointments stream for the hospital with date filter
+      _appointmentsSubscription = _appointmentService
+          .getAppointmentsByHospitalName(
+            event.hospitalName,
+            fromDate: event.fromDate,
+            toDate: event.toDate,
+          )
           .listen(
             (appointments) {
               if (!isClosed) {
@@ -71,8 +107,9 @@ class AppointmentBloc extends Bloc<AppointmentEvent, AppointmentState> {
     }
   }
 
-  // Load hospitals
-  Future<void> _onLoadHospitals(
+
+// Load hospitals
+Future<void> _onLoadHospitals(
     LoadHospitals event,
     Emitter<AppointmentState> emit,
   ) async {

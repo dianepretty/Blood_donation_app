@@ -19,6 +19,8 @@ class CustomBottomNavigation extends StatelessWidget {
         return 1;
       case 'profile':
         return 2;
+      case 'appointments':
+        return 3;
       default:
         return 0;
     }
@@ -57,6 +59,10 @@ class CustomBottomNavigation extends StatelessWidget {
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            label: 'Appointments',
           ),
         ],
       ),

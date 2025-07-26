@@ -22,7 +22,7 @@ class AppointmentService {
   }
 
   // Get appointments by user ID
-  Stream<List<Appointment>> getUserAppointments(String userId) {
+  Stream<List<Appointment>> getAppointmentByUser(String userId) {
     return _firestore
         .collection(_collectionName)
         .where('userId', isEqualTo: userId)
@@ -31,12 +31,50 @@ class AppointmentService {
         .map(
           (snapshot) => snapshot.docs
               .map((doc) => Appointment.fromJson({
-                    ...doc.data(),
+                    ...(doc.data() != null && doc.data() is Map<String, dynamic> ? doc.data() as Map<String, dynamic> : {}),
                     'id': doc.id,
                   }))
               .toList(),
         );
   }
+  // Get all appointments by hospital name with optional date filtering
+  Stream<List<Appointment>> getAppointmentsByHospitalName(
+    String hospitalName, {
+    DateTime? fromDate,
+    DateTime? toDate,
+  }) {
+    Query query = _firestore
+        .collection(_collectionName)
+        .where('hospitalName', isEqualTo: hospitalName);
+
+    // Add date filtering if provided
+    if (fromDate != null) {
+      // Set time to start of day
+      final startOfDay = DateTime(fromDate.year, fromDate.month, fromDate.day);
+      query = query.where('appointmentDate', 
+          isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay));
+    }
+
+    if (toDate != null) {
+      // Set time to end of day
+      final endOfDay = DateTime(toDate.year, toDate.month, toDate.day, 23, 59, 59);
+      query = query.where('appointmentDate', 
+          isLessThanOrEqualTo: Timestamp.fromDate(endOfDay));
+    }
+
+    return query
+        .orderBy('appointmentDate', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => Appointment.fromJson({
+                    ...(doc.data() != null && doc.data() is Map<String, dynamic> ? doc.data() as Map<String, dynamic> : {}),
+                    'id': doc.id,
+                  }))
+              .toList(),
+        );
+  }
+
 
   // Get upcoming appointments for a user
   Stream<List<Appointment>> getUpcomingAppointments(String userId) {
@@ -56,6 +94,9 @@ class AppointmentService {
               .toList(),
         );
   }
+
+
+
 
   // Get appointment by ID
   Future<Appointment?> getAppointmentById(String appointmentId) async {

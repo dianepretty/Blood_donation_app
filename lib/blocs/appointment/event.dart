@@ -17,7 +17,25 @@ class LoadUserAppointments extends AppointmentEvent {
   @override
   List<Object?> get props => [userId];
 }
+class LoadAdminAppointmentsWithDateFilter extends AppointmentEvent {
+  final String hospitalName;
+  final DateTime? fromDate;
+  final DateTime? toDate;
 
+  const LoadAdminAppointmentsWithDateFilter({
+    required this.hospitalName,
+    this.fromDate,
+    this.toDate,
+  });
+
+  @override
+  List<Object?> get props => [hospitalName, fromDate, toDate];
+}
+//load admin appointments
+class LoadAdminAppointments extends AppointmentEvent {
+  final String hospitalName;
+  const LoadAdminAppointments(this.hospitalName);
+}
 // Load hospitals
 class LoadHospitals extends AppointmentEvent {
   const LoadHospitals();

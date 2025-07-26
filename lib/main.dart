@@ -12,7 +12,6 @@ import 'package:blood_system/screens/home.dart';
 import 'package:blood_system/screens/hospitalAdminRegister.dart';
 import 'package:blood_system/screens/landing.dart';
 import 'package:blood_system/screens/volunteerRegister.dart';
-import 'package:blood_system/screens/welcomepage.dart';
 import 'package:blood_system/service/appointment_service.dart';
 import 'package:blood_system/service/hospital_service.dart';
 import 'package:blood_system/service/user_service.dart';

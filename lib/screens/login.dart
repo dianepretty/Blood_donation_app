@@ -61,7 +61,7 @@ class _LoginPageState extends State<LoginPage> {
         listener: (context, state) {
           if (state is AuthAuthenticated) {
             // Navigate to home screen on successful authentication
-            Navigator.pushReplacementNamed(context, '/userDetails');
+            Navigator.pushReplacementNamed(context, '/appointments');
           } else if (state is AuthError) {
             // Show error message
             ScaffoldMessenger.of(context).showSnackBar(

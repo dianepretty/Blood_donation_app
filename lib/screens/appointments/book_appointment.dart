@@ -2,6 +2,10 @@
 import 'package:blood_system/blocs/appointment/bloc.dart';
 import 'package:blood_system/blocs/appointment/event.dart';
 import 'package:blood_system/blocs/appointment/state.dart';
+import 'package:blood_system/blocs/auth/bloc.dart';
+import 'package:blood_system/blocs/auth/state.dart';
+import 'package:blood_system/service/appointment_service.dart';
+import 'package:blood_system/service/hospital_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -19,7 +23,6 @@ class BookAppointmentScreen extends StatefulWidget {
 }
 
 class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
-  final TextEditingController _notesController = TextEditingController();
 
   @override
   void initState() {
@@ -27,75 +30,155 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     context.read<AppointmentBloc>().add(const LoadHospitals());
   }
 
-  @override
-  void dispose() {
-    _notesController.dispose();
-    super.dispose();
-  }
+ 
+
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AppointmentBloc, AppointmentState>(
-      listener: (context, state) {
-        if (state.successMessage != null) {
-          print('Appointment booked successfully: ${state.successMessage}');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.successMessage!),
-              backgroundColor: Colors.green,
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, authState) {
+        // Check if user is authenticated
+        if (authState is! AuthAuthenticated) {
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Please login to book an appointment',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      '/login',
+                      (route) => false,
+                    ),
+                    child: const Text('Login'),
+                  ),
+                ],
+              ),
             ),
           );
-          if (state.successMessage!.contains('booked successfully')) {
-            Future.delayed(const Duration(seconds: 1), () {
-              if (mounted) {
-                      Navigator.pushNamed(context, '/appointments'); // This tries to navigate
-              };
-            });
-          }
-          
         }
 
-        if (state.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.errorMessage!),
-              backgroundColor: Colors.red,
+        final String userId = authState.firebaseUser.email ?? '';
+        
+        if (userId.isEmpty) {
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Unable to get user information',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         }
-      },
-      builder: (context, state) {
-        return Scaffold(
-          backgroundColor: const Color(0xFFF8F9FA),
-          body: Column(
-            children: [
-              _buildHeader(),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 24),
-                      _buildHospitalSelector(state),
-                      const SizedBox(height: 24),
-                      _buildDateSelector(state),
-                      const SizedBox(height: 24),
-                      _buildTimeSlotSelector(state),
-                      const SizedBox(height: 32),
-                      _buildActionButtons(state),
-                    ],
+
+        return BlocProvider(
+          create: (context) => AppointmentBloc(
+            appointmentService: AppointmentService(),
+            hospitalService: HospitalService(),
+          )..add(const LoadHospitals()),
+          child: BlocConsumer<AppointmentBloc, AppointmentState>(
+            listener: (context, state) {
+              // Handle success messages
+              if (state.successMessage != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.successMessage!),
+                    backgroundColor: Colors.green,
                   ),
-                ),
-              ),
-              _buildBottomNavigation(),
-            ],
+                );
+                // Navigate back after successful booking
+                if (state.successMessage!.contains('booked successfully')) {
+                  Future.delayed(const Duration(seconds: 1), () {
+                    if (mounted) {
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/appointments',
+                        (route) => route.settings.name == '/home',
+                      );
+                    }
+                  });
+                }
+              }
+
+              // Handle error messages
+              if (state.errorMessage != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.errorMessage!),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            builder: (context, state) {
+              return _buildBookingScreen(context, state, userId);
+            },
           ),
         );
       },
     );
   }
 
+  Widget _buildBookingScreen(BuildContext context, AppointmentState state, String userId) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
+      body: Column(
+        children: [
+          _buildHeader(),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 24),
+                    _buildHospitalSelector(state),
+                    const SizedBox(height: 24),
+                    _buildDateSelector(state),
+                    const SizedBox(height: 24),
+                    _buildTimeSlotSelector(state),
+                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
+                    _buildActionButtons(state, userId),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          _buildBottomNavigation(),
+        ],
+      ),
+    );
+  }
   Widget _buildHeader() {
     return Container(
       height: 120,
@@ -340,12 +423,12 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     );
   }
 
-  Widget _buildActionButtons(AppointmentState state) {
+ Widget _buildActionButtons(AppointmentState state, String userId) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         onPressed: state.canBookAppointment && !state.isBooking
-            ? () => _bookAppointment(state)
+            ? () => _bookAppointment(state, userId)
             : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFFD7263D),
@@ -375,7 +458,6 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       ),
     );
   }
-
   Widget _buildBottomNavigation() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -493,14 +575,14 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     );
   }
 
-  void _bookAppointment(AppointmentState state) {
-   
+  void _bookAppointment(AppointmentState state, String userId) {
     context.read<AppointmentBloc>().add(BookAppointment(
-          userId: widget.userId,
+          userId: userId,
           hospitalName: state.selectedHospitalName!,
           appointmentDate: state.selectedDate!,
           appointmentTime: state.selectedTimeSlot!,
+         
         ));
-        Navigator.pushNamed(context, '/appointments'); // Close the booking screen after booking
   }
 }
+

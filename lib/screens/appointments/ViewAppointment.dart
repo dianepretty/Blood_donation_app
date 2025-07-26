@@ -1,7 +1,6 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 class AppointmentDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> appointment;
   
@@ -30,8 +29,6 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                   _buildAppointmentDetails(),
                   const SizedBox(height: 20),
                   _buildPatientInformation(),
-                  const Spacer(),
-                  _buildActionButtons(),
                 ],
               ),
             ),
@@ -73,7 +70,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
               ),
               const SizedBox(width: 12),
               const Text(
-                'Appointment Request',
+                'Appointment Details',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -108,14 +105,14 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              widget.appointment['name'],
+              'Patient',
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
             ),
             Text(
-              'Patient',
+              'Blood Donor',
               style: TextStyle(
                 color: Colors.grey.shade600,
                 fontSize: 12,
@@ -152,12 +149,11 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          _buildDetailRow('Date', DateFormat('MMM d, yyyy').format(widget.appointment['date'])),
-          _buildDetailRow('Time', widget.appointment['time']),
-          _buildDetailRow('Department', widget.appointment['department']),
-          _buildDetailRow('Doctor', widget.appointment['doctor']),
-          _buildDetailRow('Reason', widget.appointment['reason']),
-          _buildDetailRow('Medical History', widget.appointment['medicalHistory']),
+          _buildDetailRow('Appointment ID', widget.appointment['id'] ?? 'N/A'),
+          _buildDetailRow('Date', _formatDate(widget.appointment['appointmentDate'])),
+          _buildDetailRow('Time', widget.appointment['appointmentTime'] ?? 'N/A'),
+          _buildDetailRow('Hospital', widget.appointment['hospitalName'] ?? 'N/A'),
+          _buildDetailRow('Type', 'Blood Donation'),
         ],
       ),
     );
@@ -188,8 +184,8 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          _buildDetailRow('Gender', widget.appointment['gender']),
-          _buildDetailRow('Age', widget.appointment['age'].toString()),
+          _buildDetailRow('User ID', widget.appointment['userId'] ?? 'N/A'),
+          _buildDetailRow('Email', widget.appointment['userId'] ?? 'N/A'), // Using userId as email identifier
         ],
       ),
     );
@@ -225,52 +221,19 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     );
   }
 
-  Widget _buildActionButtons() {
-    return Column(
-      children: [
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              // Approve action
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFD7263D),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text(
-              'Approve',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: TextButton(
-            onPressed: () {
-              // Cancel action
-              Navigator.pop(context);
-            },
-            child: const Text(
-              'Cancel',
-              style: TextStyle(
-                color: Colors.black87,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
+  String _formatDate(dynamic date) {
+    if (date == null) return 'N/A';
+    
+    try {
+      if (date is DateTime) {
+        return DateFormat('MMM d, yyyy').format(date);
+      } else if (date is String) {
+        final parsedDate = DateTime.tryParse(date);
+        return parsedDate != null ? DateFormat('MMM d, yyyy').format(parsedDate) : date;
+      }
+      return date.toString();
+    } catch (e) {
+      return 'Invalid Date';
+    }
   }
 }
