@@ -1,590 +1,392 @@
 import 'package:blood_system/blocs/auth/bloc.dart';
 import 'package:blood_system/blocs/auth/event.dart';
+import 'package:blood_system/blocs/auth/state.dart';
+import 'package:blood_system/screens/hospitalAdminRegister.dart';
+import 'package:blood_system/screens/volunteerRegister.dart';
+import 'package:blood_system/theme/theme.dart';
+import 'package:blood_system/widgets/select-role.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
-import '../models/appointment_model.dart';
-import '../blocs/event_bloc.dart'; // Import EventBloc
-import '../blocs/event_event.dart'; // Import EventEvent
-import '../blocs/event_state.dart'; // Import EventState
-import '../models/event_model.dart'; // Import EventModel
-import '../widgets/app_bar.dart';
-import '../widgets/bottom_navigation.dart';
-
-class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => AppointmentBloc()..add(LoadAppointments()),
-        ),
-        BlocProvider(
-          create:
-              (context) => EventBloc()..add(LoadEvents()), // Provide EventBloc
-        ),
-      ],
-      child: const HomePageContent(),
-    );
-  }
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class HomePageContent extends StatelessWidget {
-  const HomePageContent({Key? key}) : super(key: key);
+class _LoginPageState extends State<LoginPage> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _rememberMe = false;
+
+  bool _isPasswordVisible = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      body: Column(
-        children: [
-          // Header Section
-          CustomAppBar(
-            pageName: 'Home',
-            onMenuPressed: () {
-              // Handle menu press
-              print('Menu pressed');
-            },
-            onNotificationPressed: () {
-              // Handle notification press
-              // print('Notification pressed');
-
-              //navigate to login page
-              Navigator.of(context).pushNamed('/login');
-              context.read<AuthBloc>().add(AuthSignOutRequested());
-            },
+      backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        backgroundColor: AppColors.red,
+        elevation: 0,
+        title: const Text(
+          'Welcome Back!',
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
+        ),
+        centerTitle: true,
+        toolbarHeight: 200,
+        leading: Padding(
+          padding: const EdgeInsets.only(top: 8.0, left: 16.0),
+          child: Align(
+            alignment: Alignment.topRight,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+        ),
+      ),
+      body: BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) {
+          print('LoginPage - AuthState changed: ${state.runtimeType}');
 
-          // Content Section
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async {
-               // context.read<AppointmentBloc>().add(RefreshAppointments());
-                context.read<EventBloc>().add(
-                  RefreshEvents(),
-                ); // Refresh events
-              },
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(20),
+          if (state is AuthAuthenticated) {
+            print('LoginPage - Authentication successful');
+            print('LoginPage - User role: ${state.userData?.role}');
+            // Add a small delay to ensure Firebase auth is fully processed
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (mounted) {
+                // Navigate back to home - AuthWrapper will handle the routing
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/', (route) => false);
+              }
+            });
+          } else if (state is AuthError) {
+            // Show error message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+                margin: const EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            );
+          } else if (state is AuthPasswordResetSent) {
+            // Show password reset confirmation
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Password reset email sent to ${state.email}'),
+                backgroundColor: Colors.green,
+                behavior: SnackBarBehavior.floating,
+                margin: const EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            );
+          }
+        },
+        child: BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, state) {
+            final isLoading = state is AuthLoading;
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: Form(
+                key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Upcoming appointments section
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    const SizedBox(height: 40),
+
+                    // Email Field
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Upcoming appointments',
+                          'Email',
                           style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF333333),
+                            fontSize: 16,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        Row(
-                          children: [
-                            Text(
-                              'view more',
-                              style: TextStyle(
-                                color: Color(0xFFB83A3A),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
                             ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.arrow_forward,
-                              color: Color(0xFFB83A3A),
-                              size: 16,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
                             ),
-                          ],
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: Colors.blue),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your email';
+                            }
+                            if (!RegExp(
+                              r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                            ).hasMatch(value)) {
+                              return 'Please enter a valid email';
+                            }
+                            return null;
+                          },
                         ),
                       ],
                     ),
+                    const SizedBox(height: 24),
 
-                    const SizedBox(height: 16),
-
-                    // Appointment cards
-                    // BlocBuilder<AppointmentBloc, AppointmentState>(
-                    //   builder: (context, state) {
-                    //     if (state is AppointmentLoading) {
-                    //       return const Center(
-                    //         child: CircularProgressIndicator(
-                    //           color: Color(0xFFB83A3A),
-                    //         ),
-                    //       );
-                    //     }
-
-                        if (state is AppointmentError) {
-                          return Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.error_outline,
-                                  size: 64,
-                                  color: Colors.red[300],
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'Error: ${state.message}',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.red,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 16),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    context.read<AppointmentBloc>().add(
-                                      LoadAppointments(),
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFB83A3A),
-                                    foregroundColor: Colors.white,
-                                  ),
-                                  child: const Text('Retry'),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-
-                        if (state is AppointmentLoaded ||
-                            state is AppointmentOperationSuccess) {
-                          // Access upcomingAppointments from both states
-                          final appointments =
-                              state is AppointmentLoaded
-                                  ? state.upcomingAppointments
-                                  : (state as AppointmentOperationSuccess)
-                                      .upcomingAppointments;
-
-                          if (appointments.isEmpty) {
-                            return _buildEmptyState('No upcoming appointments');
-                          } else {
-                            return Column(
-                              children:
-                                  appointments
-                                      .take(2)
-                                      .map(
-                                        (appointment) => Padding(
-                                          padding: const EdgeInsets.only(
-                                            bottom: 12,
-                                          ),
-                                          child: _buildAppointmentCard(
-                                            appointment,
-                                          ),
-                                        ),
-                                      )
-                                      .toList(),
-                            );
-                          }
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
-
-                    // const SizedBox(height: 32),
-
-                    // Events section
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // Password Field
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Events',
+                          'Password',
                           style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF333333),
+                            fontSize: 16,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        Row(
-                          children: [
-                            Text(
-                              'view more',
-                              style: TextStyle(
-                                color: Color(0xFFB83A3A),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _passwordController,
+                          obscureText: !_isPasswordVisible,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: Colors.blue),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isPasswordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Colors.grey,
                               ),
+                              onPressed: () {
+                                setState(() {
+                                  _isPasswordVisible = !_isPasswordVisible;
+                                });
+                              },
                             ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.arrow_forward,
-                              color: Color(0xFFB83A3A),
-                              size: 16,
-                            ),
-                          ],
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your password';
+                            }
+                            return null;
+                          },
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 16),
 
-                    // Event cards (using BlocBuilder for events)
-                    BlocBuilder<EventBloc, EventState>(
-                      builder: (context, state) {
-                        if (state is EventLoading) {
-                          return const Center(
-                            child: CircularProgressIndicator(
-                              color: Color(0xFFB83A3A),
-                            ),
-                          );
-                        }
+                    // Forgot Password Link
+                    // Align(
+                    //   alignment: Alignment.centerRight,
+                    //   child: TextButton(
+                    //     onPressed: () {
+                    //       // Handle forgot password
+                    //       _handleForgotPassword();
+                    //     },
+                    //     child: const Text(
+                    //       'Forgot Password?',
+                    //       style: TextStyle(
+                    //         color: AppColors.red,
+                    //         fontWeight: FontWeight.w500,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
+                    // const SizedBox(height: 24),
 
-                        if (state is EventError) {
-                          return Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.error_outline,
-                                  size: 64,
-                                  color: Colors.red[300],
+                    // Login Button with Loading State
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed:
+                            isLoading
+                                ? null
+                                : () {
+                                  if (_formKey.currentState!.validate()) {
+                                    _handleLogin();
+                                  }
+                                },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              isLoading ? Colors.grey[400] : AppColors.red,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(28),
+                          ),
+                          elevation: 0,
+                        ),
+                        child:
+                            isLoading
+                                ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    const Text(
+                                      'Signing in...',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                                : const Text(
+                                  'Login',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'Error: ${state.message}',
-                                  style: const TextStyle(
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Sign Up Link
+                    Center(
+                      child: RichText(
+                        text: TextSpan(
+                          text: "Don't have an account yet? ",
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 16,
+                          ),
+                          children: [
+                            WidgetSpan(
+                              child: GestureDetector(
+                                onTap: () {
+                                  // Handle sign up navigation
+                                  showRoleSelectionDialog(context);
+                                },
+                                child: const Text(
+                                  'Sign up',
+                                  style: TextStyle(
+                                    color: AppColors.red,
                                     fontSize: 16,
-                                    color: Colors.red,
+                                    fontWeight: FontWeight.w600,
                                   ),
-                                  textAlign: TextAlign.center,
                                 ),
-                                const SizedBox(height: 16),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    context.read<EventBloc>().add(LoadEvents());
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFB83A3A),
-                                    foregroundColor: Colors.white,
-                                  ),
-                                  child: const Text('Retry'),
-                                ),
-                              ],
+                              ),
                             ),
-                          );
-                        }
-
-                        if (state is EventLoaded ||
-                            state is EventOperationSuccess) {
-                          final events =
-                              state is EventLoaded
-                                  ? state.events
-                                  : (state as EventOperationSuccess).events;
-
-                          if (events.isEmpty) {
-                            return _buildEmptyState('No upcoming events');
-                          } else {
-                            return Column(
-                              children:
-                                  events
-                                      .take(3)
-                                      .map(
-                                        (event) => Padding(
-                                          padding: const EdgeInsets.only(
-                                            bottom: 12,
-                                          ),
-                                          child: _buildEventCard(event),
-                                        ),
-                                      )
-                                      .toList(),
-                            );
-                          }
-                        }
-                        return const SizedBox.shrink();
-                      },
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
-
-      // Bottom Navigation Bar
-      bottomNavigationBar: CustomBottomNavigation(
-        currentPage: 'home',
-        onTap: (index) {
-          // Handle navigation based on index
-          switch (index) {
-            case 0:
-              print('Navigate to Home');
-              break;
-            case 1:
-              print('Navigate to History');
-              break;
-            case 2:
-              print('Navigate to Profile');
-              break;
-          }
-        },
-      ),
-    );
-  }
-
-  Widget _buildAppointmentCard(Appointment appointment) {
-    final dateFormatter = DateFormat('M/d/yyyy');
-    final formattedDate = dateFormatter.format(appointment.appointmentDate);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Text(
-                  //   appointment.type,
-                  //   style: const TextStyle(
-                  //     fontSize: 16,
-                  //     fontWeight: FontWeight.w600,
-                  //     color: Color(0xFF333333),
-                  //   ),
-                  // ),
-                  const SizedBox(height: 4),
-                  Text(
-                    appointment.hospitalName,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF666666),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '$formattedDate  ${appointment.appointmentTime} ', // Updated to use timeFrom and timeTo
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF888888),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              width: 80,
-              height: 60,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE8F4FD),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.local_hospital,
-                color: Color(0xFF4A90E2),
-                size: 32,
-              ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildEmptyState(String message) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Icon(
-            Icons.calendar_today_outlined,
-            size: 48,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            message,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
+  void _handleLogin() {
+    print('LoginPage - _handleLogin called');
+    print('LoginPage - Email: ${_emailController.text}');
+    print('LoginPage - Password: ${_passwordController.text}');
+
+    if (_formKey.currentState!.validate()) {
+      print('LoginPage - Form validated, dispatching AuthSignInRequested');
+      context.read<AuthBloc>().add(
+        AuthSignInRequested(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        ),
+      );
+    } else {
+      print('LoginPage - Form validation failed');
+    }
   }
 
-  // Removed _buildAppointmentCardOld as it's no longer used
-  // Widget _buildAppointmentCardOld(String title, String hospital, String date) {
-  //   return Container(
-  //     decoration: BoxDecoration(
-  //       color: Colors.white,
-  //       borderRadius: BorderRadius.circular(12),
-  //       boxShadow: [
-  //         BoxShadow(
-  //           color: Colors.black.withOpacity(0.05),
-  //           blurRadius: 8,
-  //           offset: const Offset(0, 2),
+  // void _handleForgotPassword() {
+  //   // Navigate to forgot password page or show dialog
+  //   showDialog(
+  //     context: context,
+  //     builder:
+  //         (context) => AlertDialog(
+  //           title: const Text('Forgot Password'),
+  //           content: const Text(
+  //             'Password reset functionality would be implemented here.',
+  //           ),
+  //           actions: [
+  //             TextButton(
+  //               onPressed: () => Navigator.of(context).pop(),
+  //               child: const Text('OK'),
+  //             ),
+  //           ],
   //         ),
-  //       ],
-  //     ),
-  //     child: Padding(
-  //       padding: const EdgeInsets.all(16),
-  //       child: Row(
-  //         children: [
-  //           Expanded(
-  //             child: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                 Text(
-  //                   title,
-  //                   style: const TextStyle(
-  //                     fontSize: 16,
-  //                     fontWeight: FontWeight.w600,
-  //                     color: Color(0xFF333333),
-  //                   ),
-  //                 ),
-  //                 const SizedBox(height: 4),
-  //                 Text(
-  //                   hospital,
-  //                   style: const TextStyle(
-  //                     fontSize: 14,
-  //                     fontWeight: FontWeight.w600,
-  //                     color: Color(0xFF666666),
-  //                   ),
-  //                 ),
-  //                 const SizedBox(height: 4),
-  //                 Text(
-  //                   date,
-  //                   style: const TextStyle(
-  //                     fontSize: 14,
-  //                     color: Color(0xFF888888),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //           Container(
-  //             width: 80,
-  //             height: 60,
-  //             decoration: BoxDecoration(
-  //               color: const Color(0xFFE8F4FD),
-  //               borderRadius: BorderRadius.circular(8),
-  //             ),
-  //             child: const Icon(
-  //               Icons.local_hospital,
-  //               color: Color(0xFF4A90E2),
-  //               size: 32,
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
   //   );
   // }
 
-  Widget _buildEventCard(Event event) {
-    // Updated to accept an Event object
-    final dateFormatter = DateFormat('M/d/yyyy');
-    final formattedDate = dateFormatter.format(event.date);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    event.description, // Using description as the main title
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF333333),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    event.location,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF4A90E2),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  'view details',
-                  style: TextStyle(
-                    color: Color(0xFF666666),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  formattedDate,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF888888),
-                  ),
-                ),
-                Text(
-                  '${event.timeFrom} - ${event.timeTo}', // Displaying timeFrom and timeTo
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF888888),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+  void showRoleSelectionDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => const RoleSelectionDialog(),
     );
   }
 }
