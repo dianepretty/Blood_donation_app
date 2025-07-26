@@ -36,16 +36,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthUserChanged event,
     Emitter<AuthState> emit,
   ) async {
+    print('AuthBloc - _onAuthUserChanged called');
+    print('AuthBloc - User: ${event.user?.uid}');
+
     if (event.user != null) {
+      print('AuthBloc - User is not null, emitting AuthLoading');
       emit(AuthLoading());
       try {
         // Get user data from Firestore
+        print('AuthBloc - Getting user data from Firestore');
         final userData = await _authService.getUserData(event.user!.uid);
+        print('AuthBloc - User data retrieved: ${userData?.toJson()}');
         emit(AuthAuthenticated(firebaseUser: event.user!, userData: userData));
+        print('AuthBloc - Emitted AuthAuthenticated');
       } catch (e) {
+        print('AuthBloc - Error getting user data: ${e.toString()}');
         emit(AuthError('Failed to load user data: ${e.toString()}'));
       }
     } else {
+      print('AuthBloc - User is null, emitting AuthUnauthenticated');
       emit(AuthUnauthenticated());
     }
   }
@@ -81,16 +90,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthSignInRequested event,
     Emitter<AuthState> emit,
   ) async {
+    print('AuthBloc - _onAuthSignInRequested called');
+    print('AuthBloc - Email: ${event.email}');
     emit(AuthLoading());
     try {
+      print('AuthBloc - Calling signInWithEmailAndPassword');
       await _authService.signInWithEmailAndPassword(
         email: event.email,
         password: event.password,
       );
+      print('AuthBloc - Sign in successful, AuthUserChanged will be triggered');
       // AuthUserChanged will be triggered automatically by auth state stream
     } on FirebaseAuthException catch (e) {
+      print('AuthBloc - FirebaseAuthException: ${e.code}');
       emit(AuthError(_getErrorMessage(e.code)));
     } catch (e) {
+      print('AuthBloc - Unexpected error: ${e.toString()}');
       emit(AuthError('An unexpected error occurred: ${e.toString()}'));
     }
   }

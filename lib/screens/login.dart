@@ -4,6 +4,7 @@ import 'package:blood_system/blocs/auth/state.dart';
 import 'package:blood_system/screens/hospitalAdminRegister.dart';
 import 'package:blood_system/screens/volunteerRegister.dart';
 import 'package:blood_system/theme/theme.dart';
+import 'package:blood_system/widgets/select-role.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -59,9 +60,20 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
+          print('LoginPage - AuthState changed: ${state.runtimeType}');
+
           if (state is AuthAuthenticated) {
-            // Navigate to home screen on successful authentication
-            Navigator.pushReplacementNamed(context, '/userDetails');
+            print('LoginPage - Authentication successful');
+            print('LoginPage - User role: ${state.userData?.role}');
+            // Add a small delay to ensure Firebase auth is fully processed
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (mounted) {
+                // Navigate back to home - AuthWrapper will handle the routing
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/', (route) => false);
+              }
+            });
           } else if (state is AuthError) {
             // Show error message
             ScaffoldMessenger.of(context).showSnackBar(
@@ -92,6 +104,8 @@ class _LoginPageState extends State<LoginPage> {
         },
         child: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
+            final isLoading = state is AuthLoading;
+
             return SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Form(
@@ -232,31 +246,61 @@ class _LoginPageState extends State<LoginPage> {
                     // ),
                     // const SizedBox(height: 24),
 
-                    // Login Button
+                    // Login Button with Loading State
                     SizedBox(
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            _handleLogin();
-                          }
-                        },
+                        onPressed:
+                            isLoading
+                                ? null
+                                : () {
+                                  if (_formKey.currentState!.validate()) {
+                                    _handleLogin();
+                                  }
+                                },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.red,
+                          backgroundColor:
+                              isLoading ? Colors.grey[400] : AppColors.red,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(28),
                           ),
                           elevation: 0,
                         ),
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        child:
+                            isLoading
+                                ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    const Text(
+                                      'Signing in...',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                                : const Text(
+                                  'Login',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                       ),
                     ),
                     const SizedBox(height: 32),
@@ -275,7 +319,7 @@ class _LoginPageState extends State<LoginPage> {
                               child: GestureDetector(
                                 onTap: () {
                                   // Handle sign up navigation
-                                  _handleSignUp();
+                                  showRoleSelectionDialog(context);
                                 },
                                 child: const Text(
                                   'Sign up',
@@ -302,25 +346,20 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _handleLogin() {
-    // Show loading or success message
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   const SnackBar(
-    //     content: Text('Logging in...'),
-    //     backgroundColor: Colors.green,
-    //     duration: Duration(seconds: 2),
-    //   ),
-    // );
+    print('LoginPage - _handleLogin called');
+    print('LoginPage - Email: ${_emailController.text}');
+    print('LoginPage - Password: ${_passwordController.text}');
 
-    // Add your login logic here
-    print('Email: ${_emailController.text}');
-    print('Password: ${_passwordController.text}');
     if (_formKey.currentState!.validate()) {
+      print('LoginPage - Form validated, dispatching AuthSignInRequested');
       context.read<AuthBloc>().add(
         AuthSignInRequested(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         ),
       );
+    } else {
+      print('LoginPage - Form validation failed');
     }
   }
 
@@ -344,78 +383,10 @@ class _LoginPageState extends State<LoginPage> {
   //   );
   // }
 
-  void _handleSignUp() {
-    String? selectedRole;
-
-    // Navigate to sign up page
+  void showRoleSelectionDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Select Your Role'),
-            backgroundColor: Colors.white,
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Please choose your role:'),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  hint: const Text('Select a role'),
-                  isExpanded: true,
-                  decoration: const InputDecoration(
-                    // remove the border
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                    ),
-                    fillColor: Colors.white,
-                    filled: true,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                  ),
-                  items:
-                      ["Hospital admin", "Volunteer"].map((String role) {
-                        return DropdownMenuItem<String>(
-                          value: role,
-                          child: Text(role),
-                        );
-                      }).toList(),
-                  onChanged: (String? newValue) {
-                    selectedRole = newValue;
-                  },
-                ),
-              ],
-            ),
-            actions: [
-              Center(
-                child: ElevatedButton(
-                  onPressed:
-                      selectedRole == "Hospital admin"
-                          ? () {
-                            Navigator.pushNamed(
-                              context,
-                              '/hospitalAdminRegister',
-                            );
-                          }
-                          : selectedRole == "Volunteer"
-                          ? () {
-                            Navigator.pushNamed(context, '/volunteerRegister');
-                          }
-                          : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.red,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Continue'),
-                ),
-              ),
-            ],
-          ),
+      builder: (context) => const RoleSelectionDialog(),
     );
   }
 }

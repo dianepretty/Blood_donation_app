@@ -1,5 +1,6 @@
 import 'package:blood_system/blocs/auth/bloc.dart';
 import 'package:blood_system/blocs/auth/event.dart';
+import 'package:blood_system/blocs/auth/state.dart';
 import 'package:blood_system/blocs/hospital/bloc.dart';
 import 'package:blood_system/screens/login.dart';
 import 'package:blood_system/screens/userDetails.dart';
@@ -41,7 +42,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Blood Donation App',
         debugShowCheckedModeBanner: false,
-        initialRoute: '/landing',
+        home: const AuthWrapper(),
         routes: {
           '/landing': (context) => const LandingPage(),
           '/home': (context) => const HomePage(),
@@ -50,8 +51,66 @@ class MyApp extends StatelessWidget {
           '/userDetails': (context) => const UserDetailsPage(),
           '/appointments': (context) => const BookAppointmentScreen(),
           '/login': (context) => const LoginPage(),
+          '/events': (context) => const Welcomepage(),
         },
       ),
+    );
+  }
+}
+
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        // Debug: Print the current state
+        print('AuthWrapper - Current state: ${state.runtimeType}');
+
+        if (state is AuthAuthenticated) {
+          // User is logged in, check role and navigate accordingly
+          final userRole = state.userData?.role?.toUpperCase();
+          final originalRole = state.userData?.role;
+          print('AuthWrapper - Original role: "$originalRole"');
+          print('AuthWrapper - Uppercase role: "$userRole"');
+          print('AuthWrapper - User data: ${state.userData?.toJson()}');
+
+          if (userRole == 'VOLUNTEER' || originalRole == 'Volunteer') {
+            print('AuthWrapper - Navigating to HomePage');
+            return const HomePage();
+          } else if (userRole == 'HOSPITAL_ADMIN' ||
+              originalRole == 'Hospital admin' ||
+              originalRole == 'HOSPITAL_ADMIN') {
+            print('AuthWrapper - Navigating to UserDetailsPage');
+            return const UserDetailsPage(); // User details page for hospital admin
+          } else {
+            // Unknown role, go to landing page
+            print(
+              'AuthWrapper - Unknown role: "$originalRole", navigating to LandingPage',
+            );
+            return const LandingPage();
+          }
+        } else if (state is AuthUnauthenticated) {
+          // User is not logged in, show landing page
+          print(
+            'AuthWrapper - User not authenticated, navigating to LandingPage',
+          );
+          return const LandingPage();
+        } else if (state is AuthLoading) {
+          // Loading state, show loading indicator
+          print('AuthWrapper - Loading state');
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        } else {
+          // Other states, show loading indicator
+          print('AuthWrapper - Other state: ${state.runtimeType}');
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+      },
     );
   }
 }

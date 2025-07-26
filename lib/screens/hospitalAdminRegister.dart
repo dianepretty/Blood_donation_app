@@ -55,8 +55,16 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthAuthenticated) {
-            // Navigate to home screen on successful authentication
-            Navigator.pushReplacementNamed(context, '/userDetails');
+            // Authentication successful - AuthWrapper will handle navigation based on role
+            // No need to navigate here as the app will automatically redirect
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (mounted) {
+                // Navigate back to home - AuthWrapper will handle the routing
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/', (route) => false);
+              }
+            });
           } else if (state is AuthError) {
             // Show error message
             ScaffoldMessenger.of(context).showSnackBar(
@@ -69,6 +77,7 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
         },
         child: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
+            final isLoading = state is AuthLoading;
             return SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Form(
@@ -368,27 +377,58 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            // Handle registration logic here
-                            _handleRegister();
-                          }
-                        },
+                        onPressed:
+                            isLoading
+                                ? null
+                                : () {
+                                  if (_formKey.currentState!.validate()) {
+                                    // Handle registration logic here
+                                    _handleRegister();
+                                  }
+                                },
+
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.red,
+                          backgroundColor:
+                              isLoading ? Colors.grey[400] : AppColors.red,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(28),
                           ),
                           elevation: 0,
                         ),
-                        child: const Text(
-                          'Register',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        child:
+                            isLoading
+                                ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    const Text(
+                                      'Registering...',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                                : const Text(
+                                  'Register',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                       ),
                     ),
                   ],
