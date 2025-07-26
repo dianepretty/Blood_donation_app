@@ -8,8 +8,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/event_model.dart';
 import '../widgets/red_header.dart';
 
-
-
 class EventsScreen extends StatefulWidget {
   final VoidCallback? onBackToDashboard;
   const EventsScreen({super.key, this.onBackToDashboard});
@@ -20,17 +18,15 @@ class EventsScreen extends StatefulWidget {
 
 class _EventsScreenState extends State<EventsScreen> {
   PickerDateRange? selectedDateRange;
-  bool doubleMonth = false;
 
   @override
   void initState() {
     super.initState();
-    // Set initial date range to current week
+    // Set initial date range to one year
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final weekStart = today.subtract(Duration(days: today.weekday - 1));
-    final weekEnd = weekStart.add(Duration(days: 6));
-    selectedDateRange = PickerDateRange(weekStart, weekEnd);
+    final yearStart = DateTime(now.year, 1, 1); // January 1st of current year
+    final yearEnd = DateTime(now.year, 12, 31); // December 31st of current year
+    selectedDateRange = PickerDateRange(yearStart, yearEnd);
   }
 
   void onDateRangeChanged(PickerDateRange? newDateRange) {
@@ -40,12 +36,22 @@ class _EventsScreenState extends State<EventsScreen> {
   }
 
   List<Event> _filterEvents(List<Event> events) {
-    if (selectedDateRange == null) return events;
+    if (selectedDateRange == null) {
+      print(
+        'DEBUG: No date range selected, showing all ${events.length} events',
+      );
+      return events;
+    }
     final start = selectedDateRange!.startDate;
     final end = selectedDateRange!.endDate ?? selectedDateRange!.startDate;
-    return events.where((event) {
-      return !event.date.isBefore(start!) && !event.date.isAfter(end!);
-    }).toList();
+    final filtered =
+        events.where((event) {
+          return !event.date.isBefore(start!) && !event.date.isAfter(end!);
+        }).toList();
+    print(
+      'DEBUG: Filtered ${events.length} events to ${filtered.length} events (range: ${start} to ${end})',
+    );
+    return filtered;
   }
 
   @override
@@ -78,14 +84,26 @@ class _EventsScreenState extends State<EventsScreen> {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
           final docs = snapshot.data?.docs ?? [];
+          print('DEBUG: Found ${docs.length} events in Firestore');
           final events =
               docs.map((doc) {
                 final data = doc.data() as Map<String, dynamic>;
+                // Handle both Timestamp and DateTime formats for backward compatibility
+                DateTime eventDate;
+                if (data['date'] is Timestamp) {
+                  eventDate = (data['date'] as Timestamp).toDate();
+                } else if (data['date'] is DateTime) {
+                  eventDate = data['date'] as DateTime;
+                } else {
+                  // Fallback to current date if date is missing or invalid
+                  eventDate = DateTime.now();
+                }
+
                 return Event(
                   id: doc.id,
                   name: data['name'] ?? '',
                   type: data['type'] ?? 'other',
-                  date: (data['date'] as Timestamp).toDate(),
+                  date: eventDate,
                   timeFrom: data['timeFrom'] ?? '',
                   timeTo: data['timeTo'] ?? '',
                   location: data['location'] ?? '',
@@ -106,7 +124,26 @@ class _EventsScreenState extends State<EventsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildDateRangeSelector(isSmallScreen),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildDateRangeSelector(isSmallScreen),
+                          ),
+                          if (selectedDateRange != null)
+                            IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  selectedDateRange = null;
+                                });
+                              },
+                              icon: const Icon(Icons.clear),
+                              tooltip: 'Clear filter',
+                            ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 24,
+                      ), // Add padding between date range and events
                       _buildEventsList(filteredList, isSmallScreen),
                     ],
                   ),
@@ -137,11 +174,30 @@ class _EventsScreenState extends State<EventsScreen> {
       final start = selectedDateRange!.startDate!;
       final end = selectedDateRange!.endDate ?? selectedDateRange!.startDate!;
       final formatter = DateFormat('MMM d, yyyy');
-      rangeText = '${formatter.format(start)} - ${formatter.format(end)}';
+
+      // Check if it's a full year range
+      if (start.year == end.year &&
+          start.month == 1 &&
+          start.day == 1 &&
+          end.month == 12 &&
+          end.day == 31) {
+        rangeText = '${start.year} (Full Year)';
+      } else {
+        rangeText = '${formatter.format(start)} - ${formatter.format(end)}';
+      }
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          'Date Range',
+          style: TextStyle(
+            fontSize: isSmallScreen ? 16 : 18,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[800],
+          ),
+        ),
+        const SizedBox(height: 8),
         GestureDetector(
           onTap: () async {
             await showDialog(
@@ -154,12 +210,10 @@ class _EventsScreenState extends State<EventsScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: SfDateRangePicker(
-                        view:
-                            doubleMonth
-                                ? DateRangePickerView.month
-                                : DateRangePickerView.month,
+                        view: DateRangePickerView.month,
                         selectionMode: DateRangePickerSelectionMode.range,
                         initialSelectedRange: selectedDateRange,
+                        // Allow selection up to one year range
                         onSelectionChanged: (
                           DateRangePickerSelectionChangedArgs args,
                         ) {
