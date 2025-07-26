@@ -97,8 +97,8 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthAuthenticated) {
-            // Navigate to home screen on successful authentication
-            Navigator.pushReplacementNamed(context, '/userDetails');
+            // Authentication successful - AuthWrapper will handle navigation based on role
+            // No need to navigate here as the app will automatically redirect
           } else if (state is AuthError) {
             // Show error message
             ScaffoldMessenger.of(context).showSnackBar(
