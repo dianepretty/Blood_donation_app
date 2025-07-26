@@ -566,14 +566,16 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       'name': _eventNameController.text.trim(),
       'type': _selectedEventType,
       'location': _locationController.text.trim(),
-      'date': _selectedDate,
+      'date': Timestamp.fromDate(_selectedDate!), // Convert DateTime to Timestamp
       'timeFrom': _fromTime != null ? _fromTime!.format(context) : '',
       'timeTo': _toTime != null ? _toTime!.format(context) : '',
       'description': _descriptionController.text.trim(),
       'attendees': 0, // Default attendees count
       'status': 'upcoming', // Default status
     };
-    await FirebaseFirestore.instance.collection('events').add(eventData);
+    print('DEBUG: Creating event with data: $eventData');
+    final docRef = await FirebaseFirestore.instance.collection('events').add(eventData);
+    print('DEBUG: Event created with ID: ${docRef.id}');
   }
 
   void _showErrorSnackBar(String message) {
