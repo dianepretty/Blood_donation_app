@@ -4,6 +4,7 @@ import 'package:blood_system/blocs/auth/event.dart';
 import 'package:blood_system/blocs/auth/state.dart';
 import 'package:blood_system/blocs/hospital/bloc.dart';
 import 'package:blood_system/screens/appointments_router.dart';
+import 'package:blood_system/screens/events/events.dart';
 import 'package:blood_system/screens/userDetails.dart';
 import 'package:blood_system/screens/appointments/book_appointment.dart';
 import 'package:blood_system/screens/hospitalAdminRegister.dart';
@@ -11,7 +12,6 @@ import 'package:blood_system/screens/landing.dart';
 import 'package:blood_system/screens/volunteerRegister.dart';
 import 'package:blood_system/screens/welcomepage.dart';
 // import 'package:blood_system/screens/profile.dart';
-import 'package:blood_system/screens/events_page.dart';
 import 'package:blood_system/service/appointment_service.dart';
 // import 'package:blood_system/screens/history.dart';
 import 'package:blood_system/service/hospital_service.dart';
@@ -64,7 +64,7 @@ class MyApp extends StatelessWidget {
           '/userDetails': (context) => const UserDetailsPage(),
           '/appointments': (context) => const AppointmentsRouter(),
           '/login': (context) => const LoginPage(),
-          '/events': (context) => const EventsPage(),
+          '/events': (context) => const EventsScreen(),
           // '/profile': (context) => const ProfilePage(),
           // '/history': (context) => const HistoryPage(),
         },
@@ -98,7 +98,7 @@ class AuthWrapper extends StatelessWidget {
               originalRole == 'Hospital admin' ||
               originalRole == 'HOSPITAL_ADMIN') {
             print('AuthWrapper - Navigating to EventsPage');
-            return const EventsPage(); // Events page for hospital admin
+            return const EventsScreen(); // Events page for hospital admin
           } else {
             // Unknown role, go to landing page
             print(
