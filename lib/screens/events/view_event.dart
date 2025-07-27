@@ -1,9 +1,8 @@
-import 'package:blood_system/pages/events.dart';
+import 'package:blood_system/widgets/red_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import '../widgets/red_header.dart';
 
 class ViewEventScreen extends StatelessWidget {
   final Map<String, dynamic> event;
@@ -20,7 +19,10 @@ class ViewEventScreen extends StatelessWidget {
         child: const Icon(Icons.delete),
         onPressed: () async {
           final docId = event['id'];
-          await FirebaseFirestore.instance.collection('events').doc(docId).delete();
+          await FirebaseFirestore.instance
+              .collection('events')
+              .doc(docId)
+              .delete();
           if (context.mounted) Navigator.of(context).pop();
         },
         tooltip: 'Delete Event',

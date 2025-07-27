@@ -1,6 +1,6 @@
+import 'package:blood_system/screens/events/events.dart';
 import 'package:flutter/material.dart';
 import 'dashboard.dart';
-import 'events.dart';
 import 'profile.dart';
 
 class HomePage extends StatefulWidget {
@@ -18,12 +18,13 @@ class _HomePageState extends State<HomePage> {
     // Replace with a builder to pass callback
     // EventsScreen(),
     Builder(
-      builder: (context) => EventsScreen(
-        onBackToDashboard: () {
-          final state = context.findAncestorStateOfType<_HomePageState>();
-          state?._onItemTapped(0);
-        },
-      ),
+      builder:
+          (context) => EventsScreen(
+            onBackToDashboard: () {
+              final state = context.findAncestorStateOfType<_HomePageState>();
+              state?._onItemTapped(0);
+            },
+          ),
     ),
     ProfileScreen(),
   ];
