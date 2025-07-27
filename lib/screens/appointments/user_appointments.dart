@@ -3,8 +3,10 @@ import 'package:blood_system/blocs/appointment/event.dart';
 import 'package:blood_system/blocs/appointment/state.dart';
 import 'package:blood_system/blocs/auth/bloc.dart';
 import 'package:blood_system/blocs/auth/state.dart';
+import 'package:blood_system/screens/appointments/book_appointment.dart';
 import 'package:blood_system/screens/appointments/rescheduleAppointment.dart';
 import 'package:blood_system/screens/appointments/user_appointmentDetails.dart';
+// import 'package:blood_system/screens/appointments/booking_appointment.dart'; // Add your booking page import here
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -27,7 +29,7 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       // Use the Firebase user ID to load appointments
-      context.read<AppointmentBloc>().add(LoadUserAppointments(authState.firebaseUser.uid));
+      context.read<AppointmentBloc>().add(LoadUserAppointments(authState.firebaseUser.email!));
     }
   }
 
@@ -82,6 +84,7 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
                       _buildUpcomingAppointments(),
                       const SizedBox(height: 24),
                       // _buildAppointmentHistory(),
+                      const SizedBox(height: 80), // Add space for floating button
                     ],
                   ),
                 ),
@@ -90,8 +93,66 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
           ),
         ],
       ),
+      floatingActionButton: _buildBookAppointmentButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
+
+
+  Widget _buildBookAppointmentButton() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      width: double.infinity,
+      child: FloatingActionButton.extended(
+        onPressed: () {
+          final authState = context.read<AuthBloc>().state;
+          if (authState is AuthAuthenticated) {
+            // Navigate to booking appointment page
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => BookAppointmentScreen(
+                  userId: authState.firebaseUser.email!,
+                ),
+              ),
+            );
+          } else {
+            // Handle case where user is not authenticated
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Please log in to book an appointment'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        backgroundColor: const Color(0xFFD7263D),
+        foregroundColor: Colors.white,
+        elevation: 8,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        icon: Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Icon(
+            Icons.add,
+            size: 20,
+          ),
+        ),
+        label: const Text(
+          'Book New Appointment',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
 
   Widget _buildHeader() {
     return Container(
@@ -545,4 +606,5 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
         ],
       ),
     );
-  } }
+  }
+}
