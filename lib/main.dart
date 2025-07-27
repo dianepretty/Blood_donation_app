@@ -2,6 +2,7 @@ import 'package:blood_system/blocs/auth/bloc.dart';
 import 'package:blood_system/blocs/auth/event.dart';
 import 'package:blood_system/blocs/auth/state.dart';
 import 'package:blood_system/blocs/hospital/bloc.dart';
+import 'package:blood_system/pages/events.dart';
 import 'package:blood_system/screens/login.dart';
 import 'package:blood_system/screens/userDetails.dart';
 import 'package:blood_system/screens/appointments/book_appointment.dart';
@@ -42,9 +43,9 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Blood Donation App',
         debugShowCheckedModeBanner: false,
-        home: const AuthWrapper(),
+        home: const EventsScreen(),
         routes: {
-          '/landing': (context) => const LandingPage(),
+          '/landing': (context) => const EventsScreen(),
           '/home': (context) => const HomePage(),
           '/hospitalAdminRegister': (context) => const HospitalAdminRegister(),
           '/volunteerRegister': (context) => const VolunteerRegister(),
