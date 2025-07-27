@@ -1,12 +1,12 @@
-import 'package:blood_system/pages/create_event.dart';
+import 'package:blood_system/models/event_model.dart';
+import 'package:blood_system/screens/events/create_event.dart';
+import 'package:blood_system/widgets/red_header.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
 import 'view_event.dart';
 import 'edit_event.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/event_model.dart';
-import '../widgets/red_header.dart';
 
 class EventsScreen extends StatefulWidget {
   final VoidCallback? onBackToDashboard;
@@ -466,44 +466,5 @@ class _EventsScreenState extends State<EventsScreen> {
         ],
       ),
     );
-  }
-
-  Color _getEventTypeColor(String type) {
-    switch (type) {
-      case 'medical':
-        return const Color(0xFFD7263D);
-      case 'community':
-        return Colors.blue;
-      case 'social':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'active':
-        return Colors.green;
-      case 'upcoming':
-        return Colors.orange;
-      case 'completed':
-        return Colors.grey;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  IconData _getEventTypeIcon(String type) {
-    switch (type) {
-      case 'medical':
-        return Icons.local_hospital;
-      case 'community':
-        return Icons.group;
-      case 'social':
-        return Icons.celebration;
-      default:
-        return Icons.event;
-    }
   }
 }

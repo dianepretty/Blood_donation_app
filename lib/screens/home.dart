@@ -1,11 +1,16 @@
+import 'package:blood_system/blocs/appointment/bloc.dart';
+import 'package:blood_system/blocs/appointment/event.dart'; // <-- Add this import
+import 'package:blood_system/blocs/appointment/state.dart';
 import 'package:blood_system/blocs/auth/bloc.dart';
 import 'package:blood_system/blocs/auth/event.dart';
+import 'package:blood_system/service/appointment_service.dart';
+import 'package:blood_system/service/hospital_service.dart';
+import 'package:blood_system/widgets/app_bar.dart';
+import 'package:blood_system/widgets/bottom_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import '../blocs/appointment_bloc.dart';
-import '../blocs/appointment_event.dart';
-import '../blocs/appointment_state.dart';
+
 import '../models/appointment_model.dart';
 import '../blocs/event_bloc.dart'; // Import EventBloc
 import '../blocs/event_event.dart'; // Import EventEvent
@@ -21,7 +26,11 @@ class HomePage extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => AppointmentBloc()..add(LoadAppointments()),
+          create:
+              (context) => AppointmentBloc(
+                appointmentService: AppointmentService(),
+                hospitalService: HospitalService(),
+              )..add(LoadAdminAppointments('put hospital name of logegd user')),
         ),
         BlocProvider(
           create:
@@ -38,13 +47,297 @@ class HomePageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MainNavigationWrapper(
-      currentPage: 'home',
-      pageTitle: 'Home',
-      child: RefreshIndicator(
-        onRefresh: () async {
-          context.read<AppointmentBloc>().add(RefreshAppointments());
-          context.read<EventBloc>().add(RefreshEvents()); // Refresh events
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5),
+      body: Column(
+        children: [
+          // Header Section
+          CustomAppBar(
+            pageName: 'Home',
+            onMenuPressed: () {
+              // Handle menu press
+              print('Menu pressed');
+            },
+            onNotificationPressed: () {
+              // Handle notification press
+              // print('Notification pressed');
+
+              //navigate to login page
+              Navigator.of(context).pushNamed('/login');
+              context.read<AuthBloc>().add(AuthSignOutRequested());
+            },
+          ),
+
+          // Content Section
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () async {
+                // context.read<AppointmentBloc>().add(RefreshAppointments());
+                context.read<EventBloc>().add(
+                  RefreshEvents(),
+                ); // Refresh events
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Upcoming appointments section
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Upcoming appointments',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF333333),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              'view more',
+                              style: TextStyle(
+                                color: Color(0xFFB83A3A),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.arrow_forward,
+                              color: Color(0xFFB83A3A),
+                              size: 16,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Appointment cards
+                    // BlocBuilder<AppointmentBloc, AppointmentState>(
+                    //   builder: (context, state) {
+                    //     if (state is AppointmentLoading) {
+                    //       return const Center(
+                    //         child: CircularProgressIndicator(
+                    //           color: Color(0xFFB83A3A),
+                    //         ),
+                    //       );
+                    //     }
+
+                    //     if (state is AppointmentError) {
+                    //       return Center(
+                    //         child: Column(
+                    //           mainAxisAlignment: MainAxisAlignment.center,
+                    //           children: [
+                    //             Icon(
+                    //               Icons.error_outline,
+                    //               size: 64,
+                    //               color: Colors.red[300],
+                    //             ),
+                    //             const SizedBox(height: 16),
+                    //             Text(
+                    //               'Error: ${state.message}',
+                    //               style: const TextStyle(
+                    //                 fontSize: 16,
+                    //                 color: Colors.red,
+                    //               ),
+                    //               textAlign: TextAlign.center,
+                    //             ),
+                    //             const SizedBox(height: 16),
+                    //             ElevatedButton(
+                    //               onPressed: () {
+                    //                 context.read<AppointmentBloc>().add(
+                    //                   LoadAppointments(),
+                    //                 );
+                    //               },
+                    //               style: ElevatedButton.styleFrom(
+                    //                 backgroundColor: const Color(0xFFB83A3A),
+                    //                 foregroundColor: Colors.white,
+                    //               ),
+                    //               child: const Text('Retry'),
+                    //             ),
+                    //           ],
+                    //         ),
+                    //       );
+                    //     }
+
+                    //     if (state is AppointmentLoaded ||
+                    //         state is AppointmentOperationSuccess) {
+                    //       // Access upcomingAppointments from both states
+                    //       final appointments =
+                    //           state is AppointmentLoaded
+                    //               ? state.upcomingAppointments
+                    //               : (state as AppointmentOperationSuccess)
+                    //                   .upcomingAppointments;
+
+                    //       if (appointments.isEmpty) {
+                    //         return _buildEmptyState('No upcoming appointments');
+                    //       } else {
+                    //         return Column(
+                    //           children:
+                    //               appointments
+                    //                   .take(2)
+                    //                   .map(
+                    //                     (appointment) => Padding(
+                    //                       padding: const EdgeInsets.only(
+                    //                         bottom: 12,
+                    //                       ),
+                    //                       child: _buildAppointmentCard(
+                    //                         appointment,
+                    //                       ),
+                    //                     ),
+                    //                   )
+                    //                   .toList(),
+                    //         );
+                    //       }
+                    //     }
+                    //     return const SizedBox.shrink();
+                    //   },
+                    // ),
+                    const SizedBox(height: 32),
+
+                    // Events section
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Events',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF333333),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              'view more',
+                              style: TextStyle(
+                                color: Color(0xFFB83A3A),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.arrow_forward,
+                              color: Color(0xFFB83A3A),
+                              size: 16,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Event cards (using BlocBuilder for events)
+                    BlocBuilder<EventBloc, EventState>(
+                      builder: (context, state) {
+                        if (state is EventLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(
+                              color: Color(0xFFB83A3A),
+                            ),
+                          );
+                        }
+
+                        if (state is EventError) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.error_outline,
+                                  size: 64,
+                                  color: Colors.red[300],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Error: ${state.message}',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.red,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 16),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    context.read<EventBloc>().add(LoadEvents());
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFB83A3A),
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: const Text('Retry'),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        if (state is EventLoaded ||
+                            state is EventOperationSuccess) {
+                          final events =
+                              state is EventLoaded
+                                  ? state.events
+                                  : (state as EventOperationSuccess).events;
+
+                          if (events.isEmpty) {
+                            return _buildEmptyState('No upcoming events');
+                          } else {
+                            return Column(
+                              children:
+                                  events
+                                      .take(3)
+                                      .map(
+                                        (event) => Padding(
+                                          padding: const EdgeInsets.only(
+                                            bottom: 12,
+                                          ),
+                                          child: _buildEventCard(event),
+                                        ),
+                                      )
+                                      .toList(),
+                            );
+                          }
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+
+      // Bottom Navigation Bar
+      bottomNavigationBar: CustomBottomNavigation(
+        currentPage: 'home',
+        userRole: 'user', // <-- Add the required userRole argument here
+        onTap: (index) {
+          // Handle navigation based on index
+          switch (index) {
+            case 0:
+              print('Navigate to Home');
+              break;
+            case 1:
+              print('Navigate to History');
+              break;
+            case 2:
+              print('Navigate to Profile');
+              break;
+            case 3:
+              Navigator.of(context).pushNamed('/appointments');
+          }
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -90,77 +383,77 @@ class HomePageContent extends StatelessWidget {
               // Appointment cards
               BlocBuilder<AppointmentBloc, AppointmentState>(
                 builder: (context, state) {
-                  if (state is AppointmentLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        color: Color(0xFFB83A3A),
-                      ),
-                    );
-                  }
+                  // if (state is isLoadingHospitals) {
+                  //   return const Center(
+                  //     child: CircularProgressIndicator(
+                  //       color: Color(0xFFB83A3A),
+                  //     ),
+                  //   );
+                  // }
 
-                  if (state is AppointmentError) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            size: 64,
-                            color: Colors.red[300],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Error: ${state.message}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.red,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () {
-                              context.read<AppointmentBloc>().add(
-                                LoadAppointments(),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFB83A3A),
-                              foregroundColor: Colors.white,
-                            ),
-                            child: const Text('Retry'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
+                  // if (state is AppointmentError) {
+                  //   return Center(
+                  //     child: Column(
+                  //       mainAxisAlignment: MainAxisAlignment.center,
+                  //       children: [
+                  //         Icon(
+                  //           Icons.error_outline,
+                  //           size: 64,
+                  //           color: Colors.red[300],
+                  //         ),
+                  //         const SizedBox(height: 16),
+                  //         Text(
+                  //           'Error: ${state.message}',
+                  //           style: const TextStyle(
+                  //             fontSize: 16,
+                  //             color: Colors.red,
+                  //           ),
+                  //           textAlign: TextAlign.center,
+                  //         ),
+                  //         const SizedBox(height: 16),
+                  //         ElevatedButton(
+                  //           onPressed: () {
+                  //             context.read<AppointmentBloc>().add(
+                  //               LoadAppointments(),
+                  //             );
+                  //           },
+                  //           style: ElevatedButton.styleFrom(
+                  //             backgroundColor: const Color(0xFFB83A3A),
+                  //             foregroundColor: Colors.white,
+                  //           ),
+                  //           child: const Text('Retry'),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   );
+                  // }
 
-                  if (state is AppointmentLoaded ||
-                      state is AppointmentOperationSuccess) {
-                    // Access upcomingAppointments from both states
-                    final appointments =
-                        state is AppointmentLoaded
-                            ? state.upcomingAppointments
-                            : (state as AppointmentOperationSuccess)
-                                .upcomingAppointments;
+                  // if (state is AppointmentLoaded ||
+                  //     state is AppointmentOperationSuccess) {
+                  //   // Access upcomingAppointments from both states
+                  //   final appointments =
+                  //       state is AppointmentLoaded
+                  //           ? state.upcomingAppointments
+                  //           : (state as AppointmentOperationSuccess)
+                  //               .upcomingAppointments;
 
-                    if (appointments.isEmpty) {
-                      return _buildEmptyState('No upcoming appointments');
-                    } else {
-                      return Column(
-                        children:
-                            appointments
-                                .take(2)
-                                .map(
-                                  (appointment) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 12),
-                                    child: _buildAppointmentCard(appointment),
-                                  ),
-                                )
-                                .toList(),
-                      );
-                    }
-                  }
+                  //   if (appointments.isEmpty) {
+                  //     return _buildEmptyState('No upcoming appointments');
+                  //   } else {
+                  //     return Column(
+                  //       children:
+                  //           appointments
+                  //               .take(2)
+                  //               .map(
+                  //                 (appointment) => Padding(
+                  //                   padding: const EdgeInsets.only(bottom: 12),
+                  //                   child: _buildAppointmentCard(appointment),
+                  //                 ),
+                  //               )
+                  //               .toList(),
+                  //     );
+                  //   }
+                  // }
                   return const SizedBox.shrink();
                 },
               ),
@@ -283,7 +576,7 @@ class HomePageContent extends StatelessWidget {
 
   Widget _buildAppointmentCard(Appointment appointment) {
     final dateFormatter = DateFormat('M/d/yyyy');
-    final formattedDate = dateFormatter.format(appointment.date);
+    final formattedDate = dateFormatter.format(appointment.appointmentDate);
 
     return Container(
       decoration: BoxDecoration(
@@ -304,33 +597,33 @@ class HomePageContent extends StatelessWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    appointment.type,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF333333),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    appointment.hospital,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF666666),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '$formattedDate from ${appointment.timeFrom} to ${appointment.timeTo}', // Updated to use timeFrom and timeTo
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF888888),
-                    ),
-                  ),
-                ],
+                // children: [
+                //   Text(
+                //     appointment.type,
+                //     style: const TextStyle(
+                //       fontSize: 16,
+                //       fontWeight: FontWeight.w600,
+                //       color: Color(0xFF333333),
+                //     ),
+                //   ),
+                //   const SizedBox(height: 4),
+                //   Text(
+                //     appointment.hospital,
+                //     style: const TextStyle(
+                //       fontSize: 14,
+                //       fontWeight: FontWeight.w600,
+                //       color: Color(0xFF666666),
+                //     ),
+                //   ),
+                //   const SizedBox(height: 4),
+                //   Text(
+                //     '$formattedDate from ${appointment.timeFrom} to ${appointment.timeTo}', // Updated to use timeFrom and timeTo
+                //     style: const TextStyle(
+                //       fontSize: 14,
+                //       color: Color(0xFF888888),
+                //     ),
+                //   ),
+                // ],
               ),
             ),
             Container(

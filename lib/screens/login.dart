@@ -50,19 +50,18 @@ class _LoginPageState extends State<LoginPage> {
                 if (state is AuthAuthenticated) {
                   print('LoginPage - Authentication successful');
                   print('LoginPage - User role: ${state.userData?.role}');
-                  print('LoginPage - User data: ${state.userData?.toJson()}');
                   // Add a small delay to ensure Firebase auth is fully processed
                   Future.delayed(const Duration(milliseconds: 500), () {
                     if (mounted) {
                       // Navigate back to home - AuthWrapper will handle the routing
-                      Navigator.of(
-                        context,
-                      ).pushNamedAndRemoveUntil('/', (route) => false);
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                        '/appointments',
+                        (route) => false,
+                      );
                     }
                   });
                 } else if (state is AuthError) {
                   // Show error message
-                  print('LoginPage - AuthError received: ${state.message}');
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(state.message),
@@ -72,7 +71,6 @@ class _LoginPageState extends State<LoginPage> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      duration: const Duration(seconds: 4),
                     ),
                   );
                 } else if (state is AuthPasswordResetSent) {
@@ -83,34 +81,6 @@ class _LoginPageState extends State<LoginPage> {
                         'Password reset email sent to ${state.email}',
                       ),
                       backgroundColor: Colors.green,
-                      behavior: SnackBarBehavior.floating,
-                      margin: const EdgeInsets.all(16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  );
-                } else if (state is AuthEmailVerificationSent) {
-                  // Show email verification confirmation
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Verification email sent to ${state.email}',
-                      ),
-                      backgroundColor: Colors.green,
-                      behavior: SnackBarBehavior.floating,
-                      margin: const EdgeInsets.all(16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  );
-                } else if (state is AuthEmailNotVerified) {
-                  // Show email not verified message
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
-                      backgroundColor: Colors.orange,
                       behavior: SnackBarBehavior.floating,
                       margin: const EdgeInsets.all(16),
                       shape: RoundedRectangleBorder(

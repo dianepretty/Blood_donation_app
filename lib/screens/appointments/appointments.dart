@@ -1,6 +1,11 @@
+import 'package:blood_system/blocs/appointment/bloc.dart';
+import 'package:blood_system/blocs/appointment/event.dart';
+import 'package:blood_system/blocs/appointment/state.dart';
+import 'package:blood_system/blocs/auth/bloc.dart';
+import 'package:blood_system/blocs/auth/state.dart';
 import 'package:blood_system/screens/appointments/ViewAppointment.dart';
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 class AppointmentsScreen extends StatefulWidget {
@@ -11,7 +16,6 @@ class AppointmentsScreen extends StatefulWidget {
 }
 
 class _AppointmentsScreenState extends State<AppointmentsScreen> {
-  PickerDateRange? selectedDateRange;
   DateTime? fromDate;
   DateTime? toDate;
 
@@ -22,57 +26,39 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     final today = DateTime(now.year, now.month, now.day);
     final weekStart = today.subtract(Duration(days: today.weekday - 1));
     final weekEnd = weekStart.add(Duration(days: 6));
-    selectedDateRange = PickerDateRange(weekStart, weekEnd);
     fromDate = weekStart;
     toDate = weekEnd;
+
+    // Load appointments when screen initializes
+    _loadAppointments();
   }
 
-  final List<Map<String, dynamic>> appointments = [
-    {
-      'name': 'Sophia Carter',
-      'specialty': 'Cardiology',
-      'time': '10:00 AM',
-      'date': DateTime.now(),
-      'department': 'Cardiology',
-      'doctor': 'Dr. Ethan Reinhart',
-      'reason': 'Routine Check-up',
-      'medicalHistory': 'No significant history',
-      'gender': 'Female',
-      'age': 25,
-    },
-    {
-      'name': 'John Doe',
-      'specialty': 'Neurology',
-      'time': '8:00 PM',
-      'date': DateTime.now().add(Duration(days: 1)),
-      'department': 'Neurology',
-      'doctor': 'Dr. Sarah Johnson',
-      'reason': 'Consultation',
-      'medicalHistory': 'Previous headaches',
-      'gender': 'Male',
-      'age': 32,
-    },
-    {
-      'name': 'John Baptist',
-      'specialty': 'Pediatrics',
-      'time': '8:00 PM',
-      'date': DateTime.now().add(Duration(days: 2)),
-      'department': 'Pediatrics',
-      'doctor': 'Dr. Michael Brown',
-      'reason': 'Follow-up',
-      'medicalHistory': 'Asthma',
-      'gender': 'Male',
-      'age': 8,
-    },
-  ];
+  void _loadAppointments() {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated && authState.userData != null) {
+      // For hospital admin, use the district name as hospital name
+      final hospitalName = authState.userData!.districtName;
+      
+      // Use the date filter event instead of the basic load event
+      context.read<AppointmentBloc>().add(
+        LoadAdminAppointmentsWithDateFilter(
+          hospitalName: hospitalName,
+          fromDate: fromDate,
+          toDate: toDate,
+        ),
+      );
+    }
+  }
 
-  List<Map<String, dynamic>> get filteredAppointments {
-    if (fromDate == null || toDate == null) return appointments;
-    return appointments.where((appointment) {
-      final appointmentDate = appointment['date'] as DateTime;
-      return !appointmentDate.isBefore(fromDate!) &&
-          !appointmentDate.isAfter(toDate!);
-    }).toList();
+  // Remove the local filtering method since we're now filtering at the bloc level
+  Map<String, dynamic> _appointmentToMap(dynamic appointment) {
+    return {
+      'id': appointment.id,
+      'userId': appointment.userId,
+      'hospitalName': appointment.hospitalName,
+      'appointmentDate': appointment.appointmentDate,
+      'appointmentTime': appointment.appointmentTime,
+    };
   }
 
   @override
@@ -167,6 +153,29 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
             ),
           ],
         ),
+        const SizedBox(height: 12),
+        // Add filter button to apply date range
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _loadAppointments,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFD7263D),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Apply Filter',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -179,6 +188,10 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         decoration: BoxDecoration(
           color: Colors.grey.shade200,
           borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: Colors.grey.shade300,
+            width: 1,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,12 +204,25 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              date != null ? DateFormat('MMM d, yyyy').format(date) : 'Select date',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+            Row(
+              children: [
+                Icon(
+                  Icons.calendar_today,
+                  size: 16,
+                  color: Colors.grey.shade600,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    date != null ? DateFormat('MMM d, yyyy').format(date) : 'Select date',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: date != null ? Colors.black87 : Colors.grey.shade500,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -207,30 +233,146 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   void _selectDate(String type) async {
     final date = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: type == 'from' ? (fromDate ?? DateTime.now()) : (toDate ?? DateTime.now()),
       firstDate: DateTime(2020),
       lastDate: DateTime(2030),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFFD7263D),
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
+    
     if (date != null) {
       setState(() {
         if (type == 'from') {
           fromDate = date;
+          // Ensure toDate is not before fromDate
+          if (toDate != null && toDate!.isBefore(date)) {
+            toDate = date;
+          }
         } else {
           toDate = date;
+          // Ensure fromDate is not after toDate
+          if (fromDate != null && fromDate!.isAfter(date)) {
+            fromDate = date;
+          }
         }
       });
+      
+      // Automatically apply filter when date is selected
+      _loadAppointments();
     }
   }
 
   Widget _buildAppointmentsList() {
-    final filteredList = filteredAppointments;
-    
     return Expanded(
-      child: ListView.builder(
-        itemCount: filteredList.length,
-        itemBuilder: (context, index) {
-          final appointment = filteredList[index];
-          return _buildAppointmentCard(appointment);
+      child: BlocBuilder<AppointmentBloc, AppointmentState>(
+        builder: (context, state) {
+          if (state.status == AppointmentStatus.loading) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFFD7263D),
+              ),
+            );
+          }
+
+          if (state.status == AppointmentStatus.error) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Colors.red.shade400,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error loading appointments',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    state.errorMessage ?? 'Unknown error occurred',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _loadAppointments,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFD7263D),
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          // No need for local filtering since the bloc handles it
+          final appointments = state.appointments.map((apt) => _appointmentToMap(apt)).toList();
+
+          if (appointments.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.calendar_today,
+                    size: 64,
+                    color: Colors.grey.shade400,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No appointments found',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'No appointments scheduled for the selected date range',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              _loadAppointments();
+            },
+            color: const Color(0xFFD7263D),
+            child: ListView.builder(
+              itemCount: appointments.length,
+              itemBuilder: (context, index) {
+                final appointment = appointments[index];
+                return _buildAppointmentCard(appointment);
+              },
+            ),
+          );
         },
       ),
     );
@@ -272,7 +414,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  appointment['name'],
+                  'User: ${appointment['userId']}',
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
@@ -280,10 +422,27 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${appointment['time']} - ${appointment['specialty']}',
+                  '${appointment['appointmentTime']} - Blood Donation',
                   style: TextStyle(
                     color: Colors.grey.shade600,
                     fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  appointment['hospitalName'],
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 11,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  DateFormat('MMM d, yyyy').format(appointment['appointmentDate']),
+                  style: TextStyle(
+                    color: const Color(0xFFD7263D),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -299,12 +458,19 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 ),
               );
             },
-            child: Text(
-              'view details',
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 12,
-                decoration: TextDecoration.underline,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFD7263D).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                'View Details',
+                style: TextStyle(
+                  color: const Color(0xFFD7263D),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ),

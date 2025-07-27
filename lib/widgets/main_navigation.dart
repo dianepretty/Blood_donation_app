@@ -82,6 +82,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
             onTap: (index) {
               _handleBottomNavigation(index, userRole ?? 'VOLUNTEER');
             },
+            child: SingleChildScrollView(child: SizedBox.shrink()),
           ),
         );
       },
