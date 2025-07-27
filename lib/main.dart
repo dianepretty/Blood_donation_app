@@ -1,17 +1,18 @@
+import 'package:blood_system/blocs/appointment/bloc.dart';
 import 'package:blood_system/blocs/auth/bloc.dart';
 import 'package:blood_system/blocs/auth/event.dart';
 import 'package:blood_system/blocs/auth/state.dart';
 import 'package:blood_system/blocs/hospital/bloc.dart';
-import 'package:blood_system/screens/login.dart';
+import 'package:blood_system/screens/appointments_router.dart';
 import 'package:blood_system/screens/userDetails.dart';
 import 'package:blood_system/screens/appointments/book_appointment.dart';
-import 'package:blood_system/screens/home.dart';
 import 'package:blood_system/screens/hospitalAdminRegister.dart';
 import 'package:blood_system/screens/landing.dart';
 import 'package:blood_system/screens/volunteerRegister.dart';
 import 'package:blood_system/screens/welcomepage.dart';
 // import 'package:blood_system/screens/profile.dart';
 import 'package:blood_system/screens/events_page.dart';
+import 'package:blood_system/service/appointment_service.dart';
 // import 'package:blood_system/screens/history.dart';
 import 'package:blood_system/service/hospital_service.dart';
 import 'package:blood_system/service/user_service.dart';
@@ -19,6 +20,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'firebase_options.dart';
+import 'package:blood_system/screens/home.dart';
+import 'package:blood_system/screens/login.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +44,13 @@ class MyApp extends StatelessWidget {
               (context) =>
                   AuthBloc(authService: AuthService())..add(AuthStarted()),
         ),
+        BlocProvider(
+          create:
+              (context) => AppointmentBloc(
+                appointmentService: AppointmentService(),
+                hospitalService: HospitalService(),
+              ),
+        ),
       ],
       child: MaterialApp(
         title: 'Blood Donation App',
@@ -52,7 +62,7 @@ class MyApp extends StatelessWidget {
           '/hospitalAdminRegister': (context) => const HospitalAdminRegister(),
           '/volunteerRegister': (context) => const VolunteerRegister(),
           '/userDetails': (context) => const UserDetailsPage(),
-          // '/appointments': (context) => const BookAppointmentScreen(),
+          '/appointments': (context) => const AppointmentsRouter(),
           '/login': (context) => const LoginPage(),
           '/events': (context) => const EventsPage(),
           // '/profile': (context) => const ProfilePage(),
