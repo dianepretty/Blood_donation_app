@@ -99,6 +99,14 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
           if (state is AuthAuthenticated) {
             // Authentication successful - AuthWrapper will handle navigation based on role
             // No need to navigate here as the app will automatically redirect
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (mounted) {
+                // Navigate back to home - AuthWrapper will handle the routing
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/', (route) => false);
+              }
+            });
           } else if (state is AuthError) {
             // Show error message
             ScaffoldMessenger.of(context).showSnackBar(
@@ -645,6 +653,7 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
           districtName: district ?? '',
           password: _passwordController.text,
           phoneNumber: _phoneController.text.trim(),
+          hospital: '',
           role: 'VOLUNTEER',
           gender: gender ?? '',
           bloodType: bloodGroup ?? '',

@@ -22,7 +22,7 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  String? selectedHospital;
+  Hospital? selectedHospital;
   bool _isPasswordVisible = false;
 
   @override
@@ -126,7 +126,7 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
                             } else if (state is HospitalsLoaded) {
                               print('WE ARE HERE now ${state.hospitals}');
                               return DropdownButtonFormField<String>(
-                                value: selectedHospital,
+                                value: selectedHospital?.name,
                                 hint: const Text('Select hospital'),
                                 isExpanded: true,
                                 decoration: InputDecoration(
@@ -168,7 +168,11 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
                                         .toList(),
                                 onChanged: (String? newValue) {
                                   setState(() {
-                                    selectedHospital = newValue;
+                                    selectedHospital = state.hospitals
+                                        .firstWhere(
+                                          (hospital) =>
+                                              hospital.name == newValue,
+                                        );
                                   });
                                 },
                                 validator: (value) {
@@ -463,7 +467,8 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
         AuthSignUpRequested(
           fullName: _emailController.text.trim(),
           email: _emailController.text.trim(),
-          districtName: selectedHospital ?? '',
+          districtName: selectedHospital?.district ?? '',
+          hospital: selectedHospital?.name ?? '',
           password: _passwordController.text,
           phoneNumber: _phoneController.text.trim(),
           role: 'HOSPITAL_ADMIN',

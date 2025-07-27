@@ -5,13 +5,15 @@ class CustomAppBar extends StatelessWidget {
   final String pageName;
   final VoidCallback? onMenuPressed;
   final VoidCallback? onNotificationPressed;
+  final GlobalKey<ScaffoldState>? scaffoldKey;
 
   const CustomAppBar({
-    Key? key,
+    super.key,
     required this.pageName,
     this.onMenuPressed,
     this.onNotificationPressed,
-  }) : super(key: key);
+    this.scaffoldKey,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -30,12 +32,14 @@ class CustomAppBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               GestureDetector(
-                onTap: onMenuPressed,
-                child: const Icon(
-                  Icons.menu,
-                  color: Colors.white,
-                  size: 24,
-                ),
+                onTap:
+                    onMenuPressed ??
+                    () {
+                      if (scaffoldKey?.currentState != null) {
+                        scaffoldKey!.currentState!.openDrawer();
+                      }
+                    },
+                child: const Icon(Icons.menu, color: Colors.white, size: 24),
               ),
               Text(
                 pageName,
