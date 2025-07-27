@@ -43,7 +43,7 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -54,23 +54,28 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
       ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthAuthenticated) {
-            // Authentication successful - AuthWrapper will handle navigation based on role
-            // No need to navigate here as the app will automatically redirect
-            Future.delayed(const Duration(milliseconds: 500), () {
-              if (mounted) {
-                // Navigate back to home - AuthWrapper will handle the routing
-                Navigator.of(
-                  context,
-                ).pushNamedAndRemoveUntil('/', (route) => false);
-              }
-            });
+          print(
+            'HospitalAdminRegister - AuthState changed: ${state.runtimeType}',
+          );
+
+          if (state is AuthEmailVerificationSent) {
+            // Email verification sent, navigate to verification screen
+            Navigator.of(context).pushReplacementNamed('/email-verification');
           } else if (state is AuthError) {
             // Show error message
+            print(
+              'HospitalAdminRegister - AuthError received: ${state.message}',
+            );
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
                 backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+                margin: const EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                duration: const Duration(seconds: 4),
               ),
             );
           }
@@ -100,22 +105,6 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        RichText(
-                          text: const TextSpan(
-                            text: 'Select hospital ',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: '*',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ],
-                          ),
-                        ),
                         const SizedBox(height: 8),
                         BlocBuilder<HospitalBloc, HospitalState>(
                           builder: (context, state) {
@@ -131,7 +120,7 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
                                 isExpanded: true,
                                 decoration: InputDecoration(
                                   filled: true,
-                                  fillColor: Colors.white,
+                                  fillColor: Colors.grey[50],
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
                                     borderSide: BorderSide(
@@ -208,29 +197,14 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        RichText(
-                          text: const TextSpan(
-                            text: 'Email ',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: '*',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ],
-                          ),
-                        ),
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: Colors.white,
+                            hintText: 'Email',
+                            fillColor: Colors.grey[50],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(color: Colors.grey[300]!),
@@ -268,21 +242,14 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Phone Number',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _phoneController,
                           keyboardType: TextInputType.phone,
                           decoration: InputDecoration(
+                            hintText: 'Phone Number',
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: Colors.grey[50],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(color: Colors.grey[300]!),
@@ -309,29 +276,14 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        RichText(
-                          text: const TextSpan(
-                            text: 'Password ',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: '*',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ],
-                          ),
-                        ),
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _passwordController,
                           obscureText: !_isPasswordVisible,
                           decoration: InputDecoration(
+                            hintText: 'Password',
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: Colors.grey[50],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(color: Colors.grey[300]!),
@@ -435,6 +387,90 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
                                 ),
                       ),
                     ),
+                    const SizedBox(height: 24),
+
+                    // Divider
+                    Row(
+                      children: [
+                        Expanded(child: Divider(color: Colors.grey[300])),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            'OR',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        Expanded(child: Divider(color: Colors.grey[300])),
+                      ],
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Google Sign-In Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: OutlinedButton.icon(
+                        onPressed: isLoading ? null : () {},
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: Colors.grey[300]!),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(28),
+                          ),
+                        ),
+                        icon: const Icon(
+                          Icons.g_mobiledata,
+                          size: 24,
+                          color: Colors.red,
+                        ),
+                        label: Text(
+                          'Sign up with Google',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[800],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    // Sign Up Link
+                    Center(
+                      child: RichText(
+                        text: TextSpan(
+                          text: "Already have an account? ",
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 16,
+                          ),
+                          children: [
+                            WidgetSpan(
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(
+                                    context,
+                                  ).pushReplacementNamed('/login');
+                                },
+                                child: const Text(
+                                  'Login',
+                                  style: TextStyle(
+                                    color: AppColors.red,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -446,23 +482,16 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
   }
 
   void _handleRegister() {
-    // Show success message
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   SnackBar(
-    //     content: Text('Account created successfully!'),
-    //     backgroundColor: Colors.green,
-    //     duration: const Duration(seconds: 2),
-    //   ),
-    // );
-
-    // You can add your registration logic here
-    // For example, calling an API to create the account
+    print('HospitalAdminRegister - _handleRegister called');
     print('Hospital: $selectedHospital');
     print('Email: ${_emailController.text}');
     print('Phone: ${_phoneController.text}');
     print('Password: ${_passwordController.text}');
 
     if (_formKey.currentState!.validate()) {
+      print(
+        'HospitalAdminRegister - Form validated, dispatching AuthSignUpRequested',
+      );
       context.read<AuthBloc>().add(
         AuthSignUpRequested(
           fullName: _emailController.text.trim(),
@@ -474,6 +503,18 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
           role: 'HOSPITAL_ADMIN',
           gender: '',
           bloodType: '',
+        ),
+      );
+    } else {
+      print('HospitalAdminRegister - Form validation failed');
+      // Show a general validation error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please check your form data'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       );
     }

@@ -90,3 +90,13 @@ class AuthUpdateUserDataRequested extends AuthEvent {
 }
 
 class AuthErrorCleared extends AuthEvent {}
+
+class AuthGoogleSignInRequested extends AuthEvent {}
+
+class AuthEmailVerificationRequested extends AuthEvent {}
+
+class AuthCheckEmailVerificationRequested extends AuthEvent {}
+
+class AuthStartEmailVerificationTimer extends AuthEvent {}
+
+class AuthStopEmailVerificationTimer extends AuthEvent {}

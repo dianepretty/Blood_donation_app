@@ -1,3 +1,4 @@
+import 'package:blood_system/widgets/red_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/auth/bloc.dart';
@@ -51,11 +52,15 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
           body: Column(
             children: [
               // Custom App Bar
-              CustomAppBar(
-                pageName: widget.pageTitle,
-                scaffoldKey: _scaffoldKey,
+              RedHeader(
+                title: widget.pageTitle,
+                onMenuPressed: () {
+                  if (_scaffoldKey.currentState != null) {
+                    _scaffoldKey.currentState!.openDrawer();
+                  }
+                },
                 onNotificationPressed: () {
-                  // Handle notification press
+                  // show snackbar
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Notifications coming soon!'),
@@ -63,6 +68,8 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                     ),
                   );
                 },
+                showBack: false,
+                showSettings: false,
               ),
 
               // Main Content

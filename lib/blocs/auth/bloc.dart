@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthService _authService;
   StreamSubscription<User?>? _authStateSubscription;
+  Timer? _emailVerificationTimer;
 
   AuthBloc({required AuthService authService})
     : _authService = authService,
@@ -21,6 +22,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthResetPasswordRequested>(_onAuthResetPasswordRequested);
     on<AuthUpdateUserDataRequested>(_onAuthUpdateUserDataRequested);
     on<AuthErrorCleared>(_onAuthErrorCleared);
+    on<AuthGoogleSignInRequested>(_onAuthGoogleSignInRequested);
+    on<AuthEmailVerificationRequested>(_onAuthEmailVerificationRequested);
+    on<AuthCheckEmailVerificationRequested>(
+      _onAuthCheckEmailVerificationRequested,
+    );
+    on<AuthStartEmailVerificationTimer>(_onAuthStartEmailVerificationTimer);
+    on<AuthStopEmailVerificationTimer>(_onAuthStopEmailVerificationTimer);
   }
 
   // Start listening to auth state changes
@@ -64,8 +72,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthSignUpRequested event,
     Emitter<AuthState> emit,
   ) async {
+    print('AuthBloc - _onAuthSignUpRequested called');
+    print('AuthBloc - Email: ${event.email}');
+    print('AuthBloc - Role: ${event.role}');
     emit(AuthLoading());
     try {
+      print('AuthBloc - Calling signUpWithEmailAndPassword');
       await _authService.signUpWithEmailAndPassword(
         fullName: event.fullName,
         email: event.email,
@@ -77,11 +89,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         bloodType: event.bloodType,
         imageUrl: event.imageUrl,
       );
-      // AuthUserChanged will be triggered automatically by auth state stream
+
+      // After successful signup, emit email verification sent state
+      final currentUser = _authService.currentUser;
+      if (currentUser != null) {
+        print(
+          'AuthBloc - Signup successful, emitting AuthEmailVerificationSent',
+        );
+        emit(AuthEmailVerificationSent(currentUser.email ?? ''));
+      }
     } on FirebaseAuthException catch (e) {
-      emit(AuthError(_getErrorMessage(e.code)));
+      print('AuthBloc - FirebaseAuthException during signup: ${e.code}');
+      final errorMessage = _getErrorMessage(e.code);
+      print('AuthBloc - Emitting AuthError during signup: $errorMessage');
+      emit(AuthError(errorMessage));
     } catch (e) {
-      emit(AuthError('An unexpected error occurred: ${e.toString()}'));
+      print('AuthBloc - Unexpected error during signup: ${e.toString()}');
+      final errorMessage = 'An unexpected error occurred: ${e.toString()}';
+      print('AuthBloc - Emitting AuthError during signup: $errorMessage');
+      emit(AuthError(errorMessage));
     }
   }
 
@@ -103,10 +129,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       // AuthUserChanged will be triggered automatically by auth state stream
     } on FirebaseAuthException catch (e) {
       print('AuthBloc - FirebaseAuthException: ${e.code}');
-      emit(AuthError(_getErrorMessage(e.code)));
+      final errorMessage = _getErrorMessage(e.code);
+      print('AuthBloc - Emitting AuthError: $errorMessage');
+      emit(AuthError(errorMessage));
     } catch (e) {
       print('AuthBloc - Unexpected error: ${e.toString()}');
-      emit(AuthError('An unexpected error occurred: ${e.toString()}'));
+      final errorMessage = 'An unexpected error occurred: ${e.toString()}';
+      print('AuthBloc - Emitting AuthError: $errorMessage');
+      emit(AuthError(errorMessage));
     }
   }
 
@@ -175,6 +205,93 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  // Handle Google sign in
+  Future<void> _onAuthGoogleSignInRequested(
+    AuthGoogleSignInRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      await _authService.signInWithGoogle();
+      // AuthUserChanged will be triggered automatically by auth state stream
+    } on FirebaseAuthException catch (e) {
+      emit(AuthError(_getErrorMessage(e.code)));
+    } catch (e) {
+      emit(AuthError('An unexpected error occurred: ${e.toString()}'));
+    }
+  }
+
+  // Handle email verification request
+  Future<void> _onAuthEmailVerificationRequested(
+    AuthEmailVerificationRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    try {
+      await _authService.sendEmailVerification();
+      final currentUser = _authService.currentUser;
+      if (currentUser != null) {
+        emit(AuthEmailVerificationSent(currentUser.email ?? ''));
+      }
+    } on FirebaseAuthException catch (e) {
+      emit(AuthError(_getErrorMessage(e.code)));
+    } catch (e) {
+      emit(AuthError('An unexpected error occurred: ${e.toString()}'));
+    }
+  }
+
+  // Handle email verification check
+  Future<void> _onAuthCheckEmailVerificationRequested(
+    AuthCheckEmailVerificationRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    try {
+      await _authService.reloadUser();
+      if (_authService.isEmailVerified()) {
+        // User is verified - update authentication state
+        final currentUser = _authService.currentUser;
+        if (currentUser != null) {
+          // Get updated user data and emit authenticated state
+          final userData = await _authService.getUserData(currentUser.uid);
+          emit(
+            AuthAuthenticated(firebaseUser: currentUser, userData: userData),
+          );
+        } else {
+          emit(AuthEmailVerified('Email verified successfully!'));
+        }
+      } else {
+        emit(
+          AuthEmailNotVerified(
+            'Please verify your email address before continuing.',
+          ),
+        );
+      }
+    } catch (e) {
+      emit(AuthError('Error checking email verification: ${e.toString()}'));
+    }
+  }
+
+  // Start email verification timer
+  void _onAuthStartEmailVerificationTimer(
+    AuthStartEmailVerificationTimer event,
+    Emitter<AuthState> emit,
+  ) {
+    _emailVerificationTimer?.cancel();
+    _emailVerificationTimer = Timer.periodic(const Duration(seconds: 3), (
+      timer,
+    ) {
+      add(AuthCheckEmailVerificationRequested());
+    });
+  }
+
+  // Stop email verification timer
+  void _onAuthStopEmailVerificationTimer(
+    AuthStopEmailVerificationTimer event,
+    Emitter<AuthState> emit,
+  ) {
+    _emailVerificationTimer?.cancel();
+    _emailVerificationTimer = null;
+  }
+
   // Get user-friendly error messages
   String _getErrorMessage(String errorCode) {
     switch (errorCode) {
@@ -194,6 +311,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         return 'Too many requests. Please try again later.';
       case 'operation-not-allowed':
         return 'Operation not allowed.';
+      case 'email-not-verified':
+        return 'Please verify your email address before signing in. Check your inbox for a verification link.';
+      case 'account-exists-with-different-credential':
+        return 'An account already exists with the same email address but different sign-in credentials.';
+      case 'popup-closed-by-user':
+        return 'Sign-in was cancelled.';
+      case 'popup-blocked':
+        return 'Sign-in popup was blocked. Please allow popups for this site.';
       default:
         return 'An error occurred. Please try again.';
     }
@@ -202,6 +327,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   @override
   Future<void> close() {
     _authStateSubscription?.cancel();
+    _emailVerificationTimer?.cancel();
     return super.close();
   }
 }

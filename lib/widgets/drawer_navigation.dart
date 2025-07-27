@@ -1,3 +1,4 @@
+import 'package:blood_system/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/auth/bloc.dart';
@@ -40,60 +41,103 @@ class CustomDrawer extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
-      decoration: const BoxDecoration(
-        color: Color(0xFFB83A3A),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(20),
-          bottomRight: Radius.circular(20),
+      height: 300,
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
+        fit: StackFit.expand,
         children: [
-          // User avatar
-          CircleAvatar(
-            radius: 30,
-            backgroundColor: Colors.white.withOpacity(0.2),
-            child: Icon(Icons.person, size: 35, color: Colors.white),
-          ),
-          const SizedBox(height: 16),
-
-          // User name
-          Text(
-            userName ?? 'User Name',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+          // Background image
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
+            ),
+            child: Image.asset(
+              'assets/images/header_bg.png',
+              fit: BoxFit.cover,
             ),
           ),
-          const SizedBox(height: 4),
-
-          // User email
-          Text(
-            userEmail ?? 'user@example.com',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 4),
-
-          // User role
+          // Semi-transparent red overlay
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              userRole ?? 'Volunteer',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
               ),
+              color: const Color(0xFFD7263D).withOpacity(0.7),
+            ),
+          ),
+          // User content
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // User avatar
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.white.withOpacity(0.2),
+                  child: const Icon(
+                    Icons.person,
+                    size: 35,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // User name
+                Text(
+                  userName ?? 'User Name',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+
+                // User email
+                Text(
+                  userEmail ?? 'user@example.com',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+
+                // User role
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    userRole ?? 'Volunteer',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -265,31 +309,23 @@ class CustomDrawer extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // App version
-          Text(
-            'Blood Donation App v1.0.0',
-            style: TextStyle(color: Colors.grey[600], fontSize: 12),
-          ),
-          const SizedBox(height: 16),
-
           // Logout button
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton.icon(
+            child: TextButton.icon(
               onPressed: () {
                 Navigator.pop(context); // Close drawer
                 _showLogoutDialog(context);
               },
-              icon: const Icon(Icons.logout, color: Colors.white),
+              icon: const Icon(Icons.logout, color: AppColors.red),
               label: const Text(
                 'Logout',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.red,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFB83A3A),
+              style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

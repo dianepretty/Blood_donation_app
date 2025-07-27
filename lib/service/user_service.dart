@@ -56,6 +56,9 @@ class AuthService {
 
         // Update display name
         await result.user!.updateDisplayName(fullName);
+
+        // Send email verification
+        await result.user!.sendEmailVerification();
       }
 
       return result;
@@ -140,6 +143,88 @@ class AuthService {
       await _auth.sendPasswordResetEmail(email: email);
     } catch (e) {
       debugPrint('Reset password error: $e');
+      rethrow;
+    }
+  }
+
+  // Sign in with Google
+  Future<UserCredential?> signInWithGoogle() async {
+    try {
+      // Create a new provider
+      GoogleAuthProvider googleProvider = GoogleAuthProvider();
+
+      // Add scopes if needed
+      googleProvider.addScope(
+        'https://www.googleapis.com/auth/contacts.readonly',
+      );
+
+      // Once signed in, return the UserCredential
+      UserCredential result = await _auth.signInWithPopup(googleProvider);
+
+      // Check if user exists in Firestore, if not create user document
+      if (result.user != null) {
+        final userDoc =
+            await _firestore.collection('users').doc(result.user!.uid).get();
+
+        if (!userDoc.exists) {
+          // Create new user document for Google sign-in
+          final now = DateTime.now();
+          final newUser = UserModel(
+            fullName: result.user!.displayName ?? 'Google User',
+            email: result.user!.email ?? '',
+            districtName: '',
+            password: '',
+            phoneNumber: result.user!.phoneNumber ?? '',
+            gender: '',
+            role: 'VOLUNTEER', // Default role for Google users
+            imageUrl: result.user!.photoURL ?? '',
+            bloodType: '',
+            createdAt: now,
+            updatedAt: now,
+          );
+
+          await _firestore
+              .collection('users')
+              .doc(result.user!.uid)
+              .set(newUser.toJson());
+        }
+      }
+
+      return result;
+    } catch (e) {
+      debugPrint('Google sign in error: $e');
+      rethrow;
+    }
+  }
+
+  // Send email verification
+  Future<void> sendEmailVerification() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+      }
+    } catch (e) {
+      debugPrint('Send email verification error: $e');
+      rethrow;
+    }
+  }
+
+  // Check if email is verified
+  bool isEmailVerified() {
+    final user = _auth.currentUser;
+    return user?.emailVerified ?? false;
+  }
+
+  // Reload user to check verification status
+  Future<void> reloadUser() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        await user.reload();
+      }
+    } catch (e) {
+      debugPrint('Reload user error: $e');
       rethrow;
     }
   }

@@ -85,7 +85,7 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -96,23 +96,24 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
       ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthAuthenticated) {
-            // Authentication successful - AuthWrapper will handle navigation based on role
-            // No need to navigate here as the app will automatically redirect
-            Future.delayed(const Duration(milliseconds: 500), () {
-              if (mounted) {
-                // Navigate back to home - AuthWrapper will handle the routing
-                Navigator.of(
-                  context,
-                ).pushNamedAndRemoveUntil('/', (route) => false);
-              }
-            });
+          print('VolunteerRegister - AuthState changed: ${state.runtimeType}');
+
+          if (state is AuthEmailVerificationSent) {
+            // Email verification sent, navigate to verification screen
+            Navigator.of(context).pushReplacementNamed('/email-verification');
           } else if (state is AuthError) {
             // Show error message
+            print('VolunteerRegister - AuthError received: ${state.message}');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
                 backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+                margin: const EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                duration: const Duration(seconds: 4),
               ),
             );
           }
@@ -142,29 +143,14 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        RichText(
-                          text: const TextSpan(
-                            text: 'Full Name ',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: '*',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ],
-                          ),
-                        ),
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _fullNameController,
                           keyboardType: TextInputType.name,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: Colors.white,
+                            hintText: 'Full Name ',
+                            fillColor: Colors.grey[50],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(color: Colors.grey[300]!),
@@ -197,29 +183,14 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        RichText(
-                          text: const TextSpan(
-                            text: 'Email ',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: '*',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ],
-                          ),
-                        ),
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: Colors.white,
+                            hintText: 'Email',
+                            fillColor: Colors.grey[50],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(color: Colors.grey[300]!),
@@ -257,21 +228,14 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Phone Number',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _phoneController,
                           keyboardType: TextInputType.phone,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: Colors.white,
+                            hintText: 'Phone Number',
+                            fillColor: Colors.grey[50],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(color: Colors.grey[300]!),
@@ -297,22 +261,6 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        RichText(
-                          text: const TextSpan(
-                            text: 'Select Blood Group ',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: '*',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ],
-                          ),
-                        ),
                         const SizedBox(height: 8),
                         DropdownButtonFormField<String>(
                           value: bloodGroup,
@@ -320,7 +268,8 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
                           isExpanded: true,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: Colors.white,
+                            // hintText: 'Select blood group',
+                            fillColor: Colors.grey[50],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(color: Colors.grey[300]!),
@@ -365,22 +314,6 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        RichText(
-                          text: const TextSpan(
-                            text: 'Select Gender ',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: '*',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ],
-                          ),
-                        ),
                         const SizedBox(height: 8),
                         DropdownButtonFormField<String>(
                           value: gender,
@@ -388,7 +321,7 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
                           isExpanded: true,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: Colors.grey[50],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(color: Colors.grey[300]!),
@@ -433,22 +366,6 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        RichText(
-                          text: const TextSpan(
-                            text: 'Select District ',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: '*',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ],
-                          ),
-                        ),
                         const SizedBox(height: 8),
                         DropdownButtonFormField<String>(
                           value: district,
@@ -456,7 +373,7 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
                           isExpanded: true,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: Colors.grey[50],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(color: Colors.grey[300]!),
@@ -501,29 +418,14 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        RichText(
-                          text: const TextSpan(
-                            text: 'Password ',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: '*',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ],
-                          ),
-                        ),
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _passwordController,
                           obscureText: !_isPasswordVisible,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: Colors.white,
+                            hintText: 'Password',
+                            fillColor: Colors.grey[50],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(color: Colors.grey[300]!),
@@ -626,6 +528,89 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
                                 ),
                       ),
                     ),
+                    const SizedBox(height: 24),
+                    // Divider
+                    Row(
+                      children: [
+                        Expanded(child: Divider(color: Colors.grey[300])),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            'OR',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        Expanded(child: Divider(color: Colors.grey[300])),
+                      ],
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Google Sign-In Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: OutlinedButton.icon(
+                        onPressed: isLoading ? null : () {},
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: Colors.grey[300]!),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(28),
+                          ),
+                        ),
+                        icon: const Icon(
+                          Icons.g_mobiledata,
+                          size: 24,
+                          color: Colors.red,
+                        ),
+                        label: Text(
+                          'Sign up with Google',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[800],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    // Sign Up Link
+                    Center(
+                      child: RichText(
+                        text: TextSpan(
+                          text: "Already have an account? ",
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 16,
+                          ),
+                          children: [
+                            WidgetSpan(
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(
+                                    context,
+                                  ).pushReplacementNamed('/login');
+                                },
+                                child: const Text(
+                                  'Login',
+                                  style: TextStyle(
+                                    color: AppColors.red,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -637,6 +622,7 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
   }
 
   void _handleRegister() {
+    print('VolunteerRegister - _handleRegister called');
     print('Full Name: ${_fullNameController.text}');
     print('Blood Group: $bloodGroup');
     print('Gender: $gender');
@@ -646,6 +632,9 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
     print('Password: ${_passwordController.text}');
 
     if (_formKey.currentState!.validate()) {
+      print(
+        'VolunteerRegister - Form validated, dispatching AuthSignUpRequested',
+      );
       context.read<AuthBloc>().add(
         AuthSignUpRequested(
           fullName: _fullNameController.text.trim(),
@@ -657,6 +646,18 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
           role: 'VOLUNTEER',
           gender: gender ?? '',
           bloodType: bloodGroup ?? '',
+        ),
+      );
+    } else {
+      print('VolunteerRegister - Form validation failed');
+      // Show a general validation error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please check your form data'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       );
     }

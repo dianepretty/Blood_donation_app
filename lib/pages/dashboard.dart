@@ -72,6 +72,15 @@ class DashboardScreen extends StatelessWidget {
             title: 'Dashboard',
             height: headerHeight,
             showSettings: true,
+            onNotificationPressed: () {
+              // show snackbar
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Notifications coming soon!'),
+                  backgroundColor: Color(0xFFB83A3A),
+                ),
+              );
+            },
           ),
           Expanded(
             child: SingleChildScrollView(
@@ -107,8 +116,6 @@ class DashboardScreen extends StatelessWidget {
       ),
     );
   }
-
-  
 
   Widget _buildSectionTitle(String title, bool isSmallScreen) {
     return Text(
@@ -345,6 +352,36 @@ class DashboardScreen extends StatelessWidget {
               ),
             );
           }).toList(),
+    );
+  }
+
+  // Show notification dialog
+  void _showNotificationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Notifications'),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('No new notifications'),
+              SizedBox(height: 8),
+              Text(
+                'You\'re all caught up!',
+                style: TextStyle(color: Colors.grey, fontSize: 14),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

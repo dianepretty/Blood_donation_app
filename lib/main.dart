@@ -10,9 +10,9 @@ import 'package:blood_system/screens/hospitalAdminRegister.dart';
 import 'package:blood_system/screens/landing.dart';
 import 'package:blood_system/screens/volunteerRegister.dart';
 import 'package:blood_system/screens/welcomepage.dart';
-import 'package:blood_system/screens/profile.dart';
 import 'package:blood_system/screens/events_page.dart';
-import 'package:blood_system/screens/history.dart';
+import 'package:blood_system/screens/email_verification.dart';
+
 import 'package:blood_system/service/hospital_service.dart';
 import 'package:blood_system/service/user_service.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -55,6 +55,8 @@ class MyApp extends StatelessWidget {
           // '/appointments': (context) => const BookAppointmentScreen(),
           '/login': (context) => const LoginPage(),
           '/events': (context) => const EventsPage(),
+          '/email-verification': (context) => const EmailVerificationScreen(),
+
           // '/profile': (context) => const ProfilePage(),
           // '/history': (context) => const HistoryPage(),
         },
@@ -75,24 +77,20 @@ class AuthWrapper extends StatelessWidget {
 
         if (state is AuthAuthenticated) {
           // User is logged in, check role and navigate accordingly
-          final userRole = state.userData?.role.toUpperCase();
-          final originalRole = state.userData?.role;
-          print('AuthWrapper - Original role: "$originalRole"');
-          print('AuthWrapper - Uppercase role: "$userRole"');
+          final userRole = state.userData?.role;
+          print('AuthWrapper - User role: "$userRole"');
           print('AuthWrapper - User data: ${state.userData?.toJson()}');
 
-          if (userRole == 'VOLUNTEER' || originalRole == 'Volunteer') {
-            print('AuthWrapper - Navigating to HomePage');
+          if (userRole == 'VOLUNTEER') {
+            print('AuthWrapper - Navigating to HomePage for Volunteer');
             return const HomePage();
-          } else if (userRole == 'HOSPITAL_ADMIN' ||
-              originalRole == 'Hospital admin' ||
-              originalRole == 'HOSPITAL_ADMIN') {
-            print('AuthWrapper - Navigating to EventsPage');
+          } else if (userRole == 'HOSPITAL_ADMIN') {
+            print('AuthWrapper - Navigating to EventsPage for Hospital Admin');
             return const EventsPage(); // Events page for hospital admin
           } else {
             // Unknown role, go to landing page
             print(
-              'AuthWrapper - Unknown role: "$originalRole", navigating to LandingPage',
+              'AuthWrapper - Unknown role: "$userRole", navigating to LandingPage',
             );
             return const LandingPage();
           }
