@@ -322,6 +322,7 @@ class HomePageContent extends StatelessWidget {
       // Bottom Navigation Bar
       bottomNavigationBar: CustomBottomNavigation(
         currentPage: 'home',
+        userRole: 'user', // <-- Add the required userRole argument here
         onTap: (index) {
           // Handle navigation based on index
           switch (index) {

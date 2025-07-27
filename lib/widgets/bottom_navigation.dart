@@ -11,6 +11,7 @@ class CustomBottomNavigation extends StatelessWidget {
     required this.currentPage,
     required this.onTap,
     required this.userRole,
+    required SingleChildScrollView child,
   });
 
   int _getCurrentIndex() {
