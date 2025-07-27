@@ -1,10 +1,9 @@
-import 'package:blood_system/pages/events.dart';
+import 'package:blood_system/widgets/red_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
-import '../widgets/red_header.dart';
 
 class EditEventScreen extends StatefulWidget {
   final Map<String, dynamic> event;
@@ -574,7 +573,8 @@ class _EditEventScreenState extends State<EditEventScreen>
           child: ElevatedButton(
             onPressed: isFormValid ? _handleSave : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: isFormValid ? const Color(0xFFD7263D) : Colors.grey[300],
+              backgroundColor:
+                  isFormValid ? const Color(0xFFD7263D) : Colors.grey[300],
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(28),
@@ -621,14 +621,20 @@ class _EditEventScreenState extends State<EditEventScreen>
       'name': titleController.text.trim(),
       'type': selectedType,
       'location': locationController.text.trim(),
-      'date': Timestamp.fromDate(selectedDate!), // Convert DateTime to Timestamp
+      'date': Timestamp.fromDate(
+        selectedDate!,
+      ), // Convert DateTime to Timestamp
       'timeFrom': '', // Add time fields if needed
       'timeTo': '',
-      'description': attendeesController.text.trim(), // Use correct field if needed
+      'description':
+          attendeesController.text.trim(), // Use correct field if needed
       'attendees': int.tryParse(attendeesController.text.trim()) ?? 0,
       'status': selectedStatus,
     };
-    await FirebaseFirestore.instance.collection('events').doc(docId).update(eventData);
+    await FirebaseFirestore.instance
+        .collection('events')
+        .doc(docId)
+        .update(eventData);
     if (mounted) Navigator.of(context).pop();
   }
 

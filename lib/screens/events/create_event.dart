@@ -1,7 +1,6 @@
-import 'package:blood_system/pages/events.dart';
+import 'package:blood_system/widgets/red_header.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../widgets/red_header.dart';
 
 class CreateEventScreen extends StatefulWidget {
   const CreateEventScreen({super.key});
@@ -566,7 +565,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       'name': _eventNameController.text.trim(),
       'type': _selectedEventType,
       'location': _locationController.text.trim(),
-      'date': Timestamp.fromDate(_selectedDate!), // Convert DateTime to Timestamp
+      'date': Timestamp.fromDate(
+        _selectedDate!,
+      ), // Convert DateTime to Timestamp
       'timeFrom': _fromTime != null ? _fromTime!.format(context) : '',
       'timeTo': _toTime != null ? _toTime!.format(context) : '',
       'description': _descriptionController.text.trim(),
@@ -574,7 +575,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       'status': 'upcoming', // Default status
     };
     print('DEBUG: Creating event with data: $eventData');
-    final docRef = await FirebaseFirestore.instance.collection('events').add(eventData);
+    final docRef = await FirebaseFirestore.instance
+        .collection('events')
+        .add(eventData);
     print('DEBUG: Event created with ID: ${docRef.id}');
   }
 

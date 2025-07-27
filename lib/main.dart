@@ -2,7 +2,7 @@ import 'package:blood_system/blocs/auth/bloc.dart';
 import 'package:blood_system/blocs/auth/event.dart';
 import 'package:blood_system/blocs/auth/state.dart';
 import 'package:blood_system/blocs/hospital/bloc.dart';
-import 'package:blood_system/pages/events.dart';
+import 'package:blood_system/screens/events/events.dart';
 import 'package:blood_system/screens/login.dart';
 import 'package:blood_system/screens/userDetails.dart';
 import 'package:blood_system/screens/appointments/book_appointment.dart';
