@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 class Appointment {
   final String id;
   final DateTime date;

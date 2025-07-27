@@ -20,6 +20,7 @@ class AuthSignUpRequested extends AuthEvent {
   final String role;
   final String bloodType;
   final String imageUrl;
+  final String hospital;
 
   const AuthSignUpRequested({
     required this.fullName,
@@ -31,6 +32,7 @@ class AuthSignUpRequested extends AuthEvent {
     required this.role,
     required this.bloodType,
     this.imageUrl = '',
+    required this.hospital,
   });
 
   @override
@@ -44,6 +46,7 @@ class AuthSignUpRequested extends AuthEvent {
     role,
     bloodType,
     imageUrl,
+    hospital,
   ];
 }
 

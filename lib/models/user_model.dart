@@ -8,6 +8,7 @@ class UserModel {
   final String role;
   final String imageUrl;
   final String bloodType;
+  final String hospital;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -21,6 +22,7 @@ class UserModel {
     required this.role,
     required this.imageUrl,
     required this.bloodType,
+    this.hospital = '', // Made optional with default empty string
     required this.createdAt,
     required this.updatedAt,
   });
@@ -35,6 +37,7 @@ class UserModel {
     String? role,
     String? imageUrl,
     String? bloodType,
+    String? hospital,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -48,6 +51,7 @@ class UserModel {
       role: role ?? this.role,
       imageUrl: imageUrl ?? this.imageUrl,
       bloodType: bloodType ?? this.bloodType,
+      hospital: hospital ?? this.hospital,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -64,6 +68,8 @@ class UserModel {
       'role': role,
       'imageUrl': imageUrl,
       'bloodType': bloodType,
+      'hospital':
+          hospital.isEmpty ? null : hospital, // Only include if not empty
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
@@ -80,6 +86,7 @@ class UserModel {
       role: json['role'] ?? '',
       imageUrl: json['imageUrl'] ?? '',
       bloodType: json['bloodType'] ?? '',
+      hospital: json['hospital'] ?? '', // Will use default empty string if null
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
     );
@@ -87,6 +94,6 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel{fullName: $fullName, email: $email, districtName: $districtName, phoneNumber: $phoneNumber, gender: $gender, role: $role, imageUrl: $imageUrl, bloodType: $bloodType, createdAt: $createdAt, updatedAt: $updatedAt}';
+    return 'UserModel{fullName: $fullName, email: $email, districtName: $districtName, phoneNumber: $phoneNumber, gender: $gender, role: $role, imageUrl: $imageUrl, bloodType: $bloodType, hospital: $hospital, createdAt: $createdAt, updatedAt: $updatedAt}';
   }
 }
