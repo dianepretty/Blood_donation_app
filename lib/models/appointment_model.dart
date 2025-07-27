@@ -1,4 +1,3 @@
-// models/appointment_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Appointment {
@@ -8,14 +7,12 @@ class Appointment {
   final DateTime appointmentDate;
   final String appointmentTime;
 
-
   const Appointment({
     this.id,
     required this.userId,
     required this.hospitalName,
     required this.appointmentDate,
     required this.appointmentTime,
-   
   });
 
   // Create from JSON
@@ -26,7 +23,6 @@ class Appointment {
       hospitalName: json['hospitalName'] ?? '',
       appointmentDate: _parseDateTime(json['appointmentDate']),
       appointmentTime: json['appointmentTime'] ?? '',
-    
     );
   }
 
@@ -37,7 +33,6 @@ class Appointment {
       'hospitalName': hospitalName,
       'appointmentDate': Timestamp.fromDate(appointmentDate),
       'appointmentTime': appointmentTime,
-    
     };
   }
 
@@ -46,7 +41,8 @@ class Appointment {
     if (dateTime == null) return DateTime.now();
     if (dateTime is Timestamp) return dateTime.toDate();
     if (dateTime is DateTime) return dateTime;
-    if (dateTime is String) return DateTime.tryParse(dateTime) ?? DateTime.now();
+    if (dateTime is String)
+      return DateTime.tryParse(dateTime) ?? DateTime.now();
     return DateTime.now();
   }
 
@@ -58,7 +54,6 @@ class Appointment {
     String? hospitalName,
     DateTime? appointmentDate,
     String? appointmentTime,
-  
   }) {
     return Appointment(
       id: id ?? this.id,
@@ -66,7 +61,6 @@ class Appointment {
       hospitalName: hospitalName ?? this.hospitalName,
       appointmentDate: appointmentDate ?? this.appointmentDate,
       appointmentTime: appointmentTime ?? this.appointmentTime,
-     
     );
   }
 
@@ -87,11 +81,6 @@ class Appointment {
 
   @override
   int get hashCode {
-    return Object.hash(
-      id,
-      userId,
-      appointmentDate,
-      appointmentTime,
-    );
+    return Object.hash(id, userId, appointmentDate, appointmentTime);
   }
 }

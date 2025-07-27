@@ -1,6 +1,4 @@
-import 'package:blood_system/screens/hospitalAdminRegister.dart';
 import 'package:blood_system/screens/login.dart';
-import 'package:blood_system/screens/volunteerRegister.dart';
 import 'package:blood_system/theme/theme.dart';
 import 'package:blood_system/widgets/select-role.dart';
 import 'package:flutter/cupertino.dart';

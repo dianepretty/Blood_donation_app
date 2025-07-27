@@ -10,7 +10,10 @@ import 'package:blood_system/screens/hospitalAdminRegister.dart';
 import 'package:blood_system/screens/landing.dart';
 import 'package:blood_system/screens/volunteerRegister.dart';
 import 'package:blood_system/screens/welcomepage.dart';
+// import 'package:blood_system/screens/profile.dart';
+import 'package:blood_system/screens/events_page.dart';
 import 'package:blood_system/service/appointment_service.dart';
+// import 'package:blood_system/screens/history.dart';
 import 'package:blood_system/service/hospital_service.dart';
 import 'package:blood_system/service/user_service.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -19,6 +22,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'firebase_options.dart';
 import 'package:blood_system/screens/home.dart';
 import 'package:blood_system/screens/login.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -41,10 +45,11 @@ class MyApp extends StatelessWidget {
                   AuthBloc(authService: AuthService())..add(AuthStarted()),
         ),
         BlocProvider(
-          create: (context) => AppointmentBloc(
-              appointmentService: AppointmentService(),
-              hospitalService: HospitalService()
-            ),
+          create:
+              (context) => AppointmentBloc(
+                appointmentService: AppointmentService(),
+                hospitalService: HospitalService(),
+              ),
         ),
       ],
       child: MaterialApp(
@@ -59,7 +64,9 @@ class MyApp extends StatelessWidget {
           '/userDetails': (context) => const UserDetailsPage(),
           '/appointments': (context) => const AppointmentsRouter(),
           '/login': (context) => const LoginPage(),
-          '/events': (context) => const Welcomepage(),
+          '/events': (context) => const EventsPage(),
+          // '/profile': (context) => const ProfilePage(),
+          // '/history': (context) => const HistoryPage(),
         },
       ),
     );
@@ -78,7 +85,7 @@ class AuthWrapper extends StatelessWidget {
 
         if (state is AuthAuthenticated) {
           // User is logged in, check role and navigate accordingly
-          final userRole = state.userData?.role?.toUpperCase();
+          final userRole = state.userData?.role.toUpperCase();
           final originalRole = state.userData?.role;
           print('AuthWrapper - Original role: "$originalRole"');
           print('AuthWrapper - Uppercase role: "$userRole"');
@@ -90,8 +97,8 @@ class AuthWrapper extends StatelessWidget {
           } else if (userRole == 'HOSPITAL_ADMIN' ||
               originalRole == 'Hospital admin' ||
               originalRole == 'HOSPITAL_ADMIN') {
-            print('AuthWrapper - Navigating to UserDetailsPage');
-            return const AppointmentsRouter(); // User details page for hospital admin
+            print('AuthWrapper - Navigating to EventsPage');
+            return const EventsPage(); // Events page for hospital admin
           } else {
             // Unknown role, go to landing page
             print(
