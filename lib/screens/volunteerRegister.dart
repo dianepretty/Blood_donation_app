@@ -653,6 +653,7 @@ class _VolunteerRegisterState extends State<VolunteerRegister> {
           districtName: district ?? '',
           password: _passwordController.text,
           phoneNumber: _phoneController.text.trim(),
+          hospital: '',
           role: 'VOLUNTEER',
           gender: gender ?? '',
           bloodType: bloodGroup ?? '',

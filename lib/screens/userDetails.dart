@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class UserDetailsPage extends StatelessWidget {
-  const UserDetailsPage({Key? key}) : super(key: key);
+  const UserDetailsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +141,7 @@ class UserDetailsPage extends StatelessWidget {
                               icon: Icons.work,
                               label: 'Role',
                               value: userData!.role,
-                              valueColor: _getRoleColor(userData!.role),
+                              valueColor: _getRoleColor(userData.role),
                             ),
                           const SizedBox(height: 12),
 
@@ -181,7 +181,7 @@ class UserDetailsPage extends StatelessWidget {
                                       ? Icons.male
                                       : Icons.female,
                               label: 'Gender',
-                              value: userData!.gender,
+                              value: userData.gender,
                             ),
                         ],
                       ),

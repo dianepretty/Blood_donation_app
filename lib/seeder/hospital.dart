@@ -1,6 +1,5 @@
 import 'package:blood_system/models/hospital_model.dart';
 import 'package:blood_system/service/hospital_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HospitalDataSeeder {
   static final HospitalService _hospitalService = HospitalService();

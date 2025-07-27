@@ -2,7 +2,6 @@ import 'package:blood_system/blocs/auth/bloc.dart';
 import 'package:blood_system/blocs/auth/event.dart';
 import 'package:blood_system/blocs/auth/state.dart';
 import 'package:blood_system/blocs/hospital/bloc.dart';
-import 'package:blood_system/pages/events.dart';
 import 'package:blood_system/screens/login.dart';
 import 'package:blood_system/screens/userDetails.dart';
 import 'package:blood_system/screens/appointments/book_appointment.dart';
@@ -11,6 +10,9 @@ import 'package:blood_system/screens/hospitalAdminRegister.dart';
 import 'package:blood_system/screens/landing.dart';
 import 'package:blood_system/screens/volunteerRegister.dart';
 import 'package:blood_system/screens/welcomepage.dart';
+import 'package:blood_system/screens/profile.dart';
+import 'package:blood_system/screens/events_page.dart';
+import 'package:blood_system/screens/history.dart';
 import 'package:blood_system/service/hospital_service.dart';
 import 'package:blood_system/service/user_service.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -43,16 +45,18 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Blood Donation App',
         debugShowCheckedModeBanner: false,
-        home: const EventsScreen(),
+        home: const AuthWrapper(),
         routes: {
-          '/landing': (context) => const EventsScreen(),
+          '/landing': (context) => const LandingPage(),
           '/home': (context) => const HomePage(),
           '/hospitalAdminRegister': (context) => const HospitalAdminRegister(),
           '/volunteerRegister': (context) => const VolunteerRegister(),
           '/userDetails': (context) => const UserDetailsPage(),
-          '/appointments': (context) => const BookAppointmentScreen(),
+          // '/appointments': (context) => const BookAppointmentScreen(),
           '/login': (context) => const LoginPage(),
-          '/events': (context) => const Welcomepage(),
+          '/events': (context) => const EventsPage(),
+          // '/profile': (context) => const ProfilePage(),
+          // '/history': (context) => const HistoryPage(),
         },
       ),
     );
@@ -71,7 +75,7 @@ class AuthWrapper extends StatelessWidget {
 
         if (state is AuthAuthenticated) {
           // User is logged in, check role and navigate accordingly
-          final userRole = state.userData?.role?.toUpperCase();
+          final userRole = state.userData?.role.toUpperCase();
           final originalRole = state.userData?.role;
           print('AuthWrapper - Original role: "$originalRole"');
           print('AuthWrapper - Uppercase role: "$userRole"');
@@ -83,8 +87,8 @@ class AuthWrapper extends StatelessWidget {
           } else if (userRole == 'HOSPITAL_ADMIN' ||
               originalRole == 'Hospital admin' ||
               originalRole == 'HOSPITAL_ADMIN') {
-            print('AuthWrapper - Navigating to UserDetailsPage');
-            return const UserDetailsPage(); // User details page for hospital admin
+            print('AuthWrapper - Navigating to EventsPage');
+            return const EventsPage(); // Events page for hospital admin
           } else {
             // Unknown role, go to landing page
             print(
