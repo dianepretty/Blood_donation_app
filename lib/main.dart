@@ -11,15 +11,9 @@ import 'package:blood_system/screens/hospitalAdminRegister.dart';
 import 'package:blood_system/screens/landing.dart';
 import 'package:blood_system/screens/volunteerRegister.dart';
 import 'package:blood_system/screens/welcomepage.dart';
-<<<<<<< HEAD
-import 'package:blood_system/screens/events_page.dart';
-import 'package:blood_system/screens/email_verification.dart';
-
-=======
 // import 'package:blood_system/screens/profile.dart';
 import 'package:blood_system/service/appointment_service.dart';
 // import 'package:blood_system/screens/history.dart';
->>>>>>> 7b563629a2b3ee0ca8cca905bec03768f5a28c20
 import 'package:blood_system/service/hospital_service.dart';
 import 'package:blood_system/service/user_service.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -70,13 +64,7 @@ class MyApp extends StatelessWidget {
           '/userDetails': (context) => const UserDetailsPage(),
           '/appointments': (context) => const AppointmentsRouter(),
           '/login': (context) => const LoginPage(),
-<<<<<<< HEAD
-          '/events': (context) => const EventsPage(),
-          '/email-verification': (context) => const EmailVerificationScreen(),
-
-=======
           '/events': (context) => const EventsScreen(),
->>>>>>> 7b563629a2b3ee0ca8cca905bec03768f5a28c20
           // '/profile': (context) => const ProfilePage(),
           // '/history': (context) => const HistoryPage(),
         },
@@ -104,17 +92,11 @@ class AuthWrapper extends StatelessWidget {
           if (userRole == 'VOLUNTEER') {
             print('AuthWrapper - Navigating to HomePage for Volunteer');
             return const HomePage();
-<<<<<<< HEAD
-          } else if (userRole == 'HOSPITAL_ADMIN') {
-            print('AuthWrapper - Navigating to EventsPage for Hospital Admin');
-            return const EventsPage(); // Events page for hospital admin
-=======
           } else if (userRole == 'HOSPITAL_ADMIN' ||
-              originalRole == 'Hospital admin' ||
-              originalRole == 'HOSPITAL_ADMIN') {
+              userRole == 'Hospital admin' ||
+              userRole == 'HOSPITAL_ADMIN') {
             print('AuthWrapper - Navigating to EventsPage');
             return const EventsScreen(); // Events page for hospital admin
->>>>>>> 7b563629a2b3ee0ca8cca905bec03768f5a28c20
           } else {
             // Unknown role, go to landing page
             print(
