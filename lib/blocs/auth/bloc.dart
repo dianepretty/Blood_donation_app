@@ -51,6 +51,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       print('AuthBloc - User is not null, emitting AuthLoading');
       emit(AuthLoading());
       try {
+        // Check if email is verified
+        if (!event.user!.emailVerified) {
+          print(
+            'AuthBloc - Email not verified, emitting AuthEmailVerificationSent',
+          );
+          emit(AuthEmailVerificationSent(event.user!.email ?? ''));
+          return;
+        }
+
         // Get user data from Firestore
         print('AuthBloc - Getting user data from Firestore');
         final userData = await _authService.getUserData(event.user!.uid);
@@ -72,12 +81,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthSignUpRequested event,
     Emitter<AuthState> emit,
   ) async {
-    print('AuthBloc - _onAuthSignUpRequested called');
-    print('AuthBloc - Email: ${event.email}');
-    print('AuthBloc - Role: ${event.role}');
     emit(AuthLoading());
     try {
-      print('AuthBloc - Calling signUpWithEmailAndPassword');
       await _authService.signUpWithEmailAndPassword(
         fullName: event.fullName,
         email: event.email,
@@ -90,24 +95,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         imageUrl: event.imageUrl,
       );
 
-      // After successful signup, emit email verification sent state
-      final currentUser = _authService.currentUser;
-      if (currentUser != null) {
-        print(
-          'AuthBloc - Signup successful, emitting AuthEmailVerificationSent',
-        );
-        emit(AuthEmailVerificationSent(currentUser.email ?? ''));
-      }
+      // Send verification email immediately after signup
+      await _authService.sendEmailVerification();
+
+      // Let AuthUserChanged handle the rest
     } on FirebaseAuthException catch (e) {
-      print('AuthBloc - FirebaseAuthException during signup: ${e.code}');
-      final errorMessage = _getErrorMessage(e.code);
-      print('AuthBloc - Emitting AuthError during signup: $errorMessage');
-      emit(AuthError(errorMessage));
+      emit(AuthError(_getErrorMessage(e.code)));
     } catch (e) {
-      print('AuthBloc - Unexpected error during signup: ${e.toString()}');
-      final errorMessage = 'An unexpected error occurred: ${e.toString()}';
-      print('AuthBloc - Emitting AuthError during signup: $errorMessage');
-      emit(AuthError(errorMessage));
+      emit(AuthError('An unexpected error occurred: ${e.toString()}'));
     }
   }
 
