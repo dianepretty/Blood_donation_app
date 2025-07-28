@@ -187,7 +187,12 @@ class CustomDrawer extends StatelessWidget {
     } else {
       // Volunteer navigation items
       navigationItems = [
-        {'title': 'Home', 'icon': Icons.home, 'route': '/home', 'page': 'home'},
+        {
+          'title': 'Home',
+          'icon': Icons.home,
+          'route': '/events',
+          'page': 'home',
+        },
         {
           'title': 'Appointments',
           'icon': Icons.calendar_today,
