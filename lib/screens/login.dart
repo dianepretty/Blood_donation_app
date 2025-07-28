@@ -323,18 +323,24 @@ class _LoginPageState extends State<LoginPage> {
                             width: double.infinity,
                             height: 56,
                             child: OutlinedButton.icon(
-                              onPressed: isLoading ? null : _handleGoogleSignIn,
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(color: Colors.grey[300]!),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(28),
-                                ),
-                              ),
-                              icon: const Icon(
-                                Icons.g_mobiledata,
-                                size: 24,
-                                color: Colors.red,
-                              ),
+                              onPressed:
+                                  isLoading
+                                      ? null
+                                      : () {
+                                        context.read<AuthBloc>().add(
+                                          AuthGoogleSignInRequested(),
+                                        );
+                                      },
+                              icon:
+                                  isLoading
+                                      ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                      : Image.asset("assets/images/google.png"),
                               label: Text(
                                 'Continue with Google',
                                 style: TextStyle(
