@@ -1,7 +1,15 @@
-// lib/screens/user/user_appointments_screen.dart
+import 'package:blood_system/blocs/appointment/bloc.dart';
+import 'package:blood_system/blocs/appointment/event.dart';
+import 'package:blood_system/blocs/appointment/state.dart';
+import 'package:blood_system/blocs/auth/bloc.dart';
+import 'package:blood_system/blocs/auth/state.dart';
+import 'package:blood_system/screens/appointments/book_appointment.dart';
 import 'package:blood_system/screens/appointments/rescheduleAppointment.dart';
 import 'package:blood_system/screens/appointments/user_appointmentDetails.dart';
+import 'package:blood_system/widgets/main_navigation.dart';
+// import 'package:blood_system/screens/appointments/booking_appointment.dart'; // Add your booking page import here
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 class UserAppointmentsScreen extends StatefulWidget {
@@ -12,92 +20,134 @@ class UserAppointmentsScreen extends StatefulWidget {
 }
 
 class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
-
-  // Mock user appointments - in real app, this would come from API
-  List<Map<String, dynamic>> get userAppointments => [
-    {
-      'id': '1',
-      'type': 'Blood Donation',
-      'location': 'City Hospital',
-      'date': DateTime.now().add(Duration(days: 3)),
-      'time': '10:00 AM - 4:00 PM',
-      'status': 'confirmed',
-      'donationType': 'Whole Blood',
-      'instructions': [
-        'Eat a healthy meal and drink water',
-        'Bring a valid photo ID',
-        'Avoid caffeine and alcohol for at least 24 hours'
-      ],
-    },
-    {
-      'id': '2',
-      'type': 'Blood Donation',
-      'location': 'Kibagabaga Hospital',
-      'date': DateTime.now().add(Duration(days: 10)),
-      'time': '2:00 PM - 6:00 PM',
-      'status': 'pending',
-      'donationType': 'Platelets',
-      'instructions': [
-        'Eat a healthy meal and drink water',
-        'Bring a valid photo ID',
-        'Avoid caffeine and alcohol for at least 24 hours'
-      ],
-    },
-    {
-      'id': '3',
-      'type': 'Blood Donation',
-      'location': 'City Hospital',
-      'date': DateTime.now().subtract(Duration(days: 30)),
-      'time': '10:00 AM - 4:00 PM',
-      'status': 'completed',
-      'donationType': 'Whole Blood',
-      'instructions': [
-        'Eat a healthy meal and drink water',
-        'Bring a valid photo ID',
-        'Avoid caffeine and alcohol for at least 24 hours'
-      ],
-    },
-  ];
-
-  List<Map<String, dynamic>> get upcomingAppointments {
-    final now = DateTime.now();
-    return userAppointments.where((appointment) {
-      final appointmentDate = appointment['date'] as DateTime;
-      return appointmentDate.isAfter(now);
-    }).toList();
+  @override
+  void initState() {
+    super.initState();
+    _loadUserAppointments();
   }
 
-  List<Map<String, dynamic>> get pastAppointments {
-    final now = DateTime.now();
-    return userAppointments.where((appointment) {
-      final appointmentDate = appointment['date'] as DateTime;
-      return appointmentDate.isBefore(now);
-    }).toList();
+  void _loadUserAppointments() {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      // Use the Firebase user ID to load appointments
+      context.read<AppointmentBloc>().add(
+        LoadUserAppointments(authState.firebaseUser.email!),
+      );
+    }
+  }
+
+  Map<String, dynamic> _appointmentToMap(dynamic appointment) {
+    return {
+      'id': appointment.id,
+      'userId': appointment.userId,
+      'hospitalName': appointment.hospitalName,
+      'appointmentDate': appointment.appointmentDate,
+      'appointmentTime': appointment.appointmentTime,
+      // Keep some display-friendly fields for UI
+      'type': 'Blood Donation',
+      'location': appointment.hospitalName,
+      'date': appointment.appointmentDate,
+      'time': appointment.appointmentTime,
+    };
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return MainNavigationWrapper(
       backgroundColor: const Color(0xFFF8F9FA),
-      body: Column(
+      currentPage: '/userAppointments',
+      pageTitle: 'My Appointments',
+      child: Column(
         children: [
-          _buildHeader(),
+          // _buildHeader(),
           Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildUpcomingAppointments(),
-                    const SizedBox(height: 24),
-                    // _buildAppointmentHistory(),
-                  ],
+            child: BlocListener<AppointmentBloc, AppointmentState>(
+              listener: (context, state) {
+                if (state.errorMessage != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.errorMessage!),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+                if (state.successMessage != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.successMessage!),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              },
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildUpcomingAppointments(),
+                      const SizedBox(height: 24),
+                      // _buildAppointmentHistory(),
+                      const SizedBox(
+                        height: 80,
+                      ), // Add space for floating button
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
         ],
+      ),
+      floatingActionButton: _buildBookAppointmentButton(),
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Widget _buildBookAppointmentButton() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      width: double.infinity,
+      child: FloatingActionButton.extended(
+        onPressed: () {
+          final authState = context.read<AuthBloc>().state;
+          if (authState is AuthAuthenticated) {
+            // Navigate to booking appointment page
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder:
+                    (context) => BookAppointmentScreen(
+                      userId: authState.firebaseUser.email!,
+                    ),
+              ),
+            );
+          } else {
+            // Handle case where user is not authenticated
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Please log in to book an appointment'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        backgroundColor: const Color(0xFFD7263D),
+        foregroundColor: Colors.white,
+        elevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        icon: Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Icon(Icons.add, size: 20),
+        ),
+        label: const Text(
+          'Book New Appointment',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
       ),
     );
   }
@@ -131,7 +181,7 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
               ),
               const SizedBox(width: 12),
               const Text(
-                'Upcoming appointments',
+                'My Appointments',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 18,
@@ -171,17 +221,38 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        upcomingAppointments.isEmpty
-            ? _buildEmptyState('No upcoming appointments')
-            : ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: upcomingAppointments.length,
-                itemBuilder: (context, index) {
-                  final appointment = upcomingAppointments[index];
-                  return _buildAppointmentCard(appointment, isUpcoming: true);
-                },
-              ),
+        BlocBuilder<AppointmentBloc, AppointmentState>(
+          builder: (context, state) {
+            if (state.status == AppointmentStatus.loading) {
+              return _buildLoadingState();
+            }
+
+            if (state.status == AppointmentStatus.error) {
+              return _buildErrorState(
+                state.errorMessage ?? 'Failed to load appointments',
+              );
+            }
+
+            final upcomingAppointments =
+                state.upcomingAppointments
+                    .map((apt) => _appointmentToMap(apt))
+                    .toList();
+
+            if (upcomingAppointments.isEmpty) {
+              return _buildEmptyState('No upcoming appointments');
+            }
+
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: upcomingAppointments.length,
+              itemBuilder: (context, index) {
+                final appointment = upcomingAppointments[index];
+                return _buildAppointmentCard(appointment, isUpcoming: true);
+              },
+            );
+          },
+        ),
       ],
     );
   }
@@ -199,18 +270,103 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        pastAppointments.isEmpty
-            ? _buildEmptyState('No past appointments')
-            : ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: pastAppointments.length,
-                itemBuilder: (context, index) {
-                  final appointment = pastAppointments[index];
-                  return _buildAppointmentCard(appointment, isUpcoming: false);
-                },
-              ),
+        BlocBuilder<AppointmentBloc, AppointmentState>(
+          builder: (context, state) {
+            if (state.status == AppointmentStatus.loading) {
+              return _buildLoadingState();
+            }
+
+            if (state.status == AppointmentStatus.error) {
+              return _buildErrorState(
+                state.errorMessage ?? 'Failed to load appointments',
+              );
+            }
+
+            final pastAppointments =
+                state.pastAppointments
+                    .map((apt) => _appointmentToMap(apt))
+                    .toList();
+
+            if (pastAppointments.isEmpty) {
+              return _buildEmptyState('No past appointments');
+            }
+
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: pastAppointments.length,
+              itemBuilder: (context, index) {
+                final appointment = pastAppointments[index];
+                return _buildAppointmentCard(appointment, isUpcoming: false);
+              },
+            );
+          },
+        ),
       ],
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: const Center(
+        child: CircularProgressIndicator(color: Color(0xFFD7263D)),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String errorMessage) {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Column(
+          children: [
+            Icon(Icons.error_outline, size: 48, color: Colors.red.shade400),
+            const SizedBox(height: 16),
+            Text(
+              'Error loading appointments',
+              style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              errorMessage,
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadUserAppointments,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFD7263D),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -231,18 +387,11 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
       child: Center(
         child: Column(
           children: [
-            Icon(
-              Icons.calendar_today,
-              size: 48,
-              color: Colors.grey.shade400,
-            ),
+            Icon(Icons.calendar_today, size: 48, color: Colors.grey.shade400),
             const SizedBox(height: 16),
             Text(
               message,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade600,
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
             ),
           ],
         ),
@@ -250,10 +399,12 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
     );
   }
 
-  Widget _buildAppointmentCard(Map<String, dynamic> appointment, {required bool isUpcoming}) {
+  Widget _buildAppointmentCard(
+    Map<String, dynamic> appointment, {
+    required bool isUpcoming,
+  }) {
     final status = appointment['status'];
-    Color statusColor = _getStatusColor(status);
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -273,49 +424,44 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
             leading: Container(
               width: 60,
               height: 60,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-              ),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.asset(
-                  'assets/images/hospital.png', // You can use a hospital image
+                  'assets/images/hospital.png',
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    color: Colors.grey.shade200,
-                    child: const Icon(
-                      Icons.local_hospital,
-                      color: Color(0xFFD7263D),
-                      size: 30,
-                    ),
-                  ),
+                  errorBuilder:
+                      (context, error, stackTrace) => Container(
+                        color: Colors.grey.shade200,
+                        child: const Icon(
+                          Icons.local_hospital,
+                          color: Color(0xFFD7263D),
+                          size: 30,
+                        ),
+                      ),
                 ),
               ),
             ),
             title: Text(
               appointment['type'],
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   appointment['location'],
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   DateFormat('EEEE, MMMM d, yyyy').format(appointment['date']),
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Time: ${appointment['time']}',
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
                 ),
               ],
             ),
@@ -323,9 +469,10 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => UserAppointmentDetailsScreen(
-                      appointment: appointment,
-                    ),
+                    builder:
+                        (context) => UserAppointmentDetailsScreen(
+                          appointment: appointment,
+                        ),
                   ),
                 );
               },
@@ -362,9 +509,10 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => RescheduleAppointmentScreen(
-                      appointment: appointment,
-                    ),
+                    builder:
+                        (context) => RescheduleAppointmentScreen(
+                          appointment: appointment,
+                        ),
                   ),
                 );
               },
@@ -378,10 +526,7 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
               ),
               child: const Text(
                 'Reschedule',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -413,53 +558,34 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
   }
 
   Color _getStatusColor(String status) {
-    switch (status) {
-      case 'confirmed':
-        return Colors.green;
-      case 'pending':
-        return Colors.orange;
-      case 'completed':
-        return Colors.blue;
-      case 'cancelled':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
+    // Since the Appointment model doesn't have a status field,
+    // we'll use a default color or you can add status to the model
+    return const Color(0xFFD7263D);
   }
 
   void _showCancelDialog(Map<String, dynamic> appointment) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Cancel Appointment'),
-        content: const Text('Are you sure you want to cancel this appointment?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('No'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Cancel Appointment'),
+            content: const Text(
+              'Are you sure you want to cancel this appointment?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('No'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  // _cancelAppointment(appointment);
+                },
+                child: const Text('Yes, Cancel'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _cancelAppointment(appointment);
-            },
-            child: const Text('Yes, Cancel'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _cancelAppointment(Map<String, dynamic> appointment) {
-    setState(() {
-      appointment['status'] = 'cancelled';
-    });
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Appointment cancelled successfully'),
-        backgroundColor: Colors.red,
-      ),
     );
   }
 }
