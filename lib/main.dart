@@ -97,9 +97,7 @@ class AuthWrapper extends StatelessWidget {
           if (userRole == 'VOLUNTEER') {
             print('AuthWrapper - Navigating to HomePage');
             return const HomePageContent();
-          } else if (userRole == 'HOSPITAL_ADMIN' ||
-              userRole == 'Hospital admin' ||
-              userRole == 'HOSPITAL_ADMIN') {
+          } else if (userRole == 'HOSPITAL_ADMIN') {
             print('AuthWrapper - Navigating to EventsPage');
             return const EventsScreen(); // Events page for hospital admin
           } else {
