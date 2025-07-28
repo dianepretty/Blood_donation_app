@@ -73,16 +73,11 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                   ? CustomAppBar(
                     pageName: widget.pageTitle,
                     scaffoldKey: _scaffoldKey,
-                    onNotificationPressed: () {
-                      // Handle notification press
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Notifications coming soon!'),
-                          backgroundColor: Color(0xFFB83A3A),
-                        ),
-                      );
-                    },
-                  )
+                onNotificationPressed: () {
+                  Navigator.pushNamed(context, '/notifications');
+                },
+
+              )
                   : null,
           body: widget.child,
           floatingActionButton: widget.floatingActionButton,

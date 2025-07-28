@@ -8,6 +8,7 @@ import 'package:blood_system/blocs/event_event.dart';
 import 'package:blood_system/blocs/hospital/bloc.dart';
 import 'package:blood_system/screens/appointments_router.dart';
 import 'package:blood_system/screens/events/events.dart';
+import 'package:blood_system/screens/notificationScreen.dart';
 import 'package:blood_system/screens/userDetails.dart';
 import 'package:blood_system/screens/appointments/book_appointment.dart';
 import 'package:blood_system/screens/hospitalAdminRegister.dart';
@@ -70,6 +71,7 @@ class MyApp extends StatelessWidget {
           '/appointments': (context) => const AppointmentsRouter(),
           '/login': (context) => const LoginPage(),
           '/events': (context) => const EventsScreen(),
+          '/notifications': (context) => const NotificationsScreen(),
           // '/profile': (context) => const ProfilePage(),
           // '/history': (context) => const HistoryPage(),
         },
