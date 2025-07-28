@@ -4,6 +4,7 @@ import 'package:blood_system/blocs/appointment/state.dart';
 import 'package:blood_system/blocs/auth/bloc.dart';
 import 'package:blood_system/blocs/auth/state.dart';
 import 'package:blood_system/screens/appointments/ViewAppointment.dart';
+import 'package:blood_system/widgets/main_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -38,7 +39,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     if (authState is AuthAuthenticated && authState.userData != null) {
       // For hospital admin, use the district name as hospital name
       final hospitalName = authState.userData!.districtName;
-      
+
       // Use the date filter event instead of the basic load event
       context.read<AppointmentBloc>().add(
         LoadAdminAppointmentsWithDateFilter(
@@ -63,11 +64,13 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      body: Column(
+    return MainNavigationWrapper(
+      currentPage: 'appointments',
+      pageTitle: 'Appointments',
+      // backgroundColor: const Color(0xFFF8F9FA),
+      child: Column(
         children: [
-          _buildHeader(),
+          // _buildHeader(),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
@@ -144,13 +147,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(
-              child: _buildDateField('From', fromDate),
-            ),
+            Expanded(child: _buildDateField('From', fromDate)),
             const SizedBox(width: 12),
-            Expanded(
-              child: _buildDateField('To', toDate),
-            ),
+            Expanded(child: _buildDateField('To', toDate)),
           ],
         ),
         const SizedBox(height: 12),
@@ -169,10 +168,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
             ),
             child: const Text(
               'Apply Filter',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
             ),
           ),
         ),
@@ -188,20 +184,14 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         decoration: BoxDecoration(
           color: Colors.grey.shade200,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: Colors.grey.shade300,
-            width: 1,
-          ),
+          border: Border.all(color: Colors.grey.shade300, width: 1),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               label,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
             ),
             const SizedBox(height: 4),
             Row(
@@ -214,11 +204,14 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    date != null ? DateFormat('MMM d, yyyy').format(date) : 'Select date',
+                    date != null
+                        ? DateFormat('MMM d, yyyy').format(date)
+                        : 'Select date',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: date != null ? Colors.black87 : Colors.grey.shade500,
+                      color:
+                          date != null ? Colors.black87 : Colors.grey.shade500,
                     ),
                   ),
                 ),
@@ -233,7 +226,10 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   void _selectDate(String type) async {
     final date = await showDatePicker(
       context: context,
-      initialDate: type == 'from' ? (fromDate ?? DateTime.now()) : (toDate ?? DateTime.now()),
+      initialDate:
+          type == 'from'
+              ? (fromDate ?? DateTime.now())
+              : (toDate ?? DateTime.now()),
       firstDate: DateTime(2020),
       lastDate: DateTime(2030),
       builder: (context, child) {
@@ -249,7 +245,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         );
       },
     );
-    
+
     if (date != null) {
       setState(() {
         if (type == 'from') {
@@ -266,7 +262,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
           }
         }
       });
-      
+
       // Automatically apply filter when date is selected
       _loadAppointments();
     }
@@ -278,9 +274,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         builder: (context, state) {
           if (state.status == AppointmentStatus.loading) {
             return const Center(
-              child: CircularProgressIndicator(
-                color: Color(0xFFD7263D),
-              ),
+              child: CircularProgressIndicator(color: Color(0xFFD7263D)),
             );
           }
 
@@ -297,18 +291,12 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   const SizedBox(height: 16),
                   Text(
                     'Error loading appointments',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey.shade600,
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     state.errorMessage ?? 'Unknown error occurred',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade500,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
@@ -326,7 +314,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
           }
 
           // No need for local filtering since the bloc handles it
-          final appointments = state.appointments.map((apt) => _appointmentToMap(apt)).toList();
+          final appointments =
+              state.appointments.map((apt) => _appointmentToMap(apt)).toList();
 
           if (appointments.isEmpty) {
             return Center(
@@ -341,18 +330,12 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   const SizedBox(height: 16),
                   Text(
                     'No appointments found',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey.shade600,
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'No appointments scheduled for the selected date range',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade500,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -402,11 +385,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               color: Colors.grey.shade200,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(
-              Icons.person,
-              color: Color(0xFFD7263D),
-              size: 20,
-            ),
+            child: const Icon(Icons.person, color: Color(0xFFD7263D), size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -423,22 +402,18 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 const SizedBox(height: 2),
                 Text(
                   '${appointment['appointmentTime']} - Blood Donation',
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   appointment['hospitalName'],
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 11,
-                  ),
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  DateFormat('MMM d, yyyy').format(appointment['appointmentDate']),
+                  DateFormat(
+                    'MMM d, yyyy',
+                  ).format(appointment['appointmentDate']),
                   style: TextStyle(
                     color: const Color(0xFFD7263D),
                     fontSize: 11,
@@ -452,9 +427,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => AppointmentDetailsScreen(
-                    appointment: appointment,
-                  ),
+                  builder:
+                      (context) =>
+                          AppointmentDetailsScreen(appointment: appointment),
                 ),
               );
             },

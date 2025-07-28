@@ -1,7 +1,10 @@
 import 'package:blood_system/blocs/appointment/bloc.dart';
+import 'package:blood_system/blocs/appointment/event.dart';
 import 'package:blood_system/blocs/auth/bloc.dart';
 import 'package:blood_system/blocs/auth/event.dart';
 import 'package:blood_system/blocs/auth/state.dart';
+import 'package:blood_system/blocs/event_bloc.dart';
+import 'package:blood_system/blocs/event_event.dart';
 import 'package:blood_system/blocs/hospital/bloc.dart';
 import 'package:blood_system/screens/appointments_router.dart';
 import 'package:blood_system/screens/events/events.dart';
@@ -51,6 +54,8 @@ class MyApp extends StatelessWidget {
                 hospitalService: HospitalService(),
               ),
         ),
+        // Remove this duplicate bloc provider
+        BlocProvider(create: (context) => EventBloc()..add(LoadEvents())),
       ],
       child: MaterialApp(
         title: 'Blood Donation App',
@@ -58,7 +63,7 @@ class MyApp extends StatelessWidget {
         home: const AuthWrapper(),
         routes: {
           '/landing': (context) => const LandingPage(),
-          '/home': (context) => const HomePage(),
+          '/home': (context) => const HomePageContent(),
           '/hospitalAdminRegister': (context) => const HospitalAdminRegister(),
           '/volunteerRegister': (context) => const VolunteerRegister(),
           '/userDetails': (context) => const UserDetailsPage(),
@@ -93,7 +98,7 @@ class AuthWrapper extends StatelessWidget {
 
           if (userRole == 'VOLUNTEER' || originalRole == 'Volunteer') {
             print('AuthWrapper - Navigating to HomePage');
-            return const HomePage();
+            return const HomePageContent();
           } else if (userRole == 'HOSPITAL_ADMIN' ||
               originalRole == 'Hospital admin' ||
               originalRole == 'HOSPITAL_ADMIN') {

@@ -1,12 +1,3 @@
-import 'package:blood_system/blocs/appointment/bloc.dart';
-import 'package:blood_system/blocs/appointment/event.dart'; // <-- Add this import
-import 'package:blood_system/blocs/appointment/state.dart';
-import 'package:blood_system/blocs/auth/bloc.dart';
-import 'package:blood_system/blocs/auth/event.dart';
-import 'package:blood_system/service/appointment_service.dart';
-import 'package:blood_system/service/hospital_service.dart';
-import 'package:blood_system/widgets/app_bar.dart';
-import 'package:blood_system/widgets/bottom_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -18,57 +9,41 @@ import '../blocs/event_state.dart'; // Import EventState
 import '../models/event_model.dart'; // Import EventModel
 import '../widgets/main_navigation.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+// class HomePage extends StatelessWidget {
+//   const HomePage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create:
-              (context) => AppointmentBloc(
-                appointmentService: AppointmentService(),
-                hospitalService: HospitalService(),
-              )..add(LoadAdminAppointments('put hospital name of logegd user')),
-        ),
-        BlocProvider(
-          create:
-              (context) => EventBloc()..add(LoadEvents()), // Provide EventBloc
-        ),
-      ],
-      child: const HomePageContent(),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return MultiBlocProvider(
+//       providers: [
+//         BlocProvider(
+//           create:
+//               (context) => AppointmentBloc(
+//                 appointmentService: AppointmentService(),
+//                 hospitalService: HospitalService(),
+//               )..add(LoadAdminAppointments('put hospital name of logegd user')),
+//         ),
+//         BlocProvider(
+//           create:
+//               (context) => EventBloc()..add(LoadEvents()), // Provide EventBloc
+//         ),
+//       ],
+//       child: const HomePageContent(),
+//     );
+//   }
+// }
 
 class HomePageContent extends StatelessWidget {
   const HomePageContent({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      body: Column(
+    return MainNavigationWrapper(
+      // backgroundColor: const Color(0xFFF5F5F5),
+      pageTitle: 'Home',
+      currentPage: '/home',
+      child: Column(
         children: [
-          // Header Section
-          CustomAppBar(
-            pageName: 'Home',
-            onMenuPressed: () {
-              // Handle menu press
-              print('Menu pressed');
-            },
-            onNotificationPressed: () {
-              // Handle notification press
-              // print('Notification pressed');
-
-              //navigate to login page
-              Navigator.of(context).pushNamed('/login');
-              context.read<AuthBloc>().add(AuthSignOutRequested());
-            },
-          ),
-
-          // Content Section
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async {
@@ -97,13 +72,21 @@ class HomePageContent extends StatelessWidget {
                         ),
                         Row(
                           children: [
-                            Text(
-                              'view more',
-                              style: TextStyle(
-                                color: Color(0xFFB83A3A),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                foregroundColor: const Color(0xFFB83A3A),
+                                textStyle: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
+                              child: const Text('view more'),
+                              onPressed: () {
+                                // Navigate to the appointments page
+                                Navigator.of(
+                                  context,
+                                ).pushNamed('/appointments');
+                              },
                             ),
                             const SizedBox(width: 4),
                             Icon(
@@ -117,88 +100,6 @@ class HomePageContent extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 16),
-
-                    // Appointment cards
-                    // BlocBuilder<AppointmentBloc, AppointmentState>(
-                    //   builder: (context, state) {
-                    //     if (state is AppointmentLoading) {
-                    //       return const Center(
-                    //         child: CircularProgressIndicator(
-                    //           color: Color(0xFFB83A3A),
-                    //         ),
-                    //       );
-                    //     }
-
-                    //     if (state is AppointmentError) {
-                    //       return Center(
-                    //         child: Column(
-                    //           mainAxisAlignment: MainAxisAlignment.center,
-                    //           children: [
-                    //             Icon(
-                    //               Icons.error_outline,
-                    //               size: 64,
-                    //               color: Colors.red[300],
-                    //             ),
-                    //             const SizedBox(height: 16),
-                    //             Text(
-                    //               'Error: ${state.message}',
-                    //               style: const TextStyle(
-                    //                 fontSize: 16,
-                    //                 color: Colors.red,
-                    //               ),
-                    //               textAlign: TextAlign.center,
-                    //             ),
-                    //             const SizedBox(height: 16),
-                    //             ElevatedButton(
-                    //               onPressed: () {
-                    //                 context.read<AppointmentBloc>().add(
-                    //                   LoadAppointments(),
-                    //                 );
-                    //               },
-                    //               style: ElevatedButton.styleFrom(
-                    //                 backgroundColor: const Color(0xFFB83A3A),
-                    //                 foregroundColor: Colors.white,
-                    //               ),
-                    //               child: const Text('Retry'),
-                    //             ),
-                    //           ],
-                    //         ),
-                    //       );
-                    //     }
-
-                    //     if (state is AppointmentLoaded ||
-                    //         state is AppointmentOperationSuccess) {
-                    //       // Access upcomingAppointments from both states
-                    //       final appointments =
-                    //           state is AppointmentLoaded
-                    //               ? state.upcomingAppointments
-                    //               : (state as AppointmentOperationSuccess)
-                    //                   .upcomingAppointments;
-
-                    //       if (appointments.isEmpty) {
-                    //         return _buildEmptyState('No upcoming appointments');
-                    //       } else {
-                    //         return Column(
-                    //           children:
-                    //               appointments
-                    //                   .take(2)
-                    //                   .map(
-                    //                     (appointment) => Padding(
-                    //                       padding: const EdgeInsets.only(
-                    //                         bottom: 12,
-                    //                       ),
-                    //                       child: _buildAppointmentCard(
-                    //                         appointment,
-                    //                       ),
-                    //                     ),
-                    //                   )
-                    //                   .toList(),
-                    //         );
-                    //       }
-                    //     }
-                    //     return const SizedBox.shrink();
-                    //   },
-                    // ),
                     const SizedBox(height: 32),
 
                     // Events section
@@ -317,259 +218,6 @@ class HomePageContent extends StatelessWidget {
             ),
           ),
         ],
-      ),
-
-      // Bottom Navigation Bar
-      bottomNavigationBar: CustomBottomNavigation(
-        currentPage: 'home',
-        userRole: 'user', // <-- Add the required userRole argument here
-        onTap: (index) {
-          // Handle navigation based on index
-          switch (index) {
-            case 0:
-              print('Navigate to Home');
-              break;
-            case 1:
-              print('Navigate to History');
-              break;
-            case 2:
-              print('Navigate to Profile');
-              break;
-            case 3:
-              Navigator.of(context).pushNamed('/appointments');
-          }
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Upcoming appointments section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Upcoming appointments',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF333333),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        'view more',
-                        style: TextStyle(
-                          color: Color(0xFFB83A3A),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.arrow_forward,
-                        color: Color(0xFFB83A3A),
-                        size: 16,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Appointment cards
-              BlocBuilder<AppointmentBloc, AppointmentState>(
-                builder: (context, state) {
-                  // if (state is isLoadingHospitals) {
-                  //   return const Center(
-                  //     child: CircularProgressIndicator(
-                  //       color: Color(0xFFB83A3A),
-                  //     ),
-                  //   );
-                  // }
-
-                  // if (state is AppointmentError) {
-                  //   return Center(
-                  //     child: Column(
-                  //       mainAxisAlignment: MainAxisAlignment.center,
-                  //       children: [
-                  //         Icon(
-                  //           Icons.error_outline,
-                  //           size: 64,
-                  //           color: Colors.red[300],
-                  //         ),
-                  //         const SizedBox(height: 16),
-                  //         Text(
-                  //           'Error: ${state.message}',
-                  //           style: const TextStyle(
-                  //             fontSize: 16,
-                  //             color: Colors.red,
-                  //           ),
-                  //           textAlign: TextAlign.center,
-                  //         ),
-                  //         const SizedBox(height: 16),
-                  //         ElevatedButton(
-                  //           onPressed: () {
-                  //             context.read<AppointmentBloc>().add(
-                  //               LoadAppointments(),
-                  //             );
-                  //           },
-                  //           style: ElevatedButton.styleFrom(
-                  //             backgroundColor: const Color(0xFFB83A3A),
-                  //             foregroundColor: Colors.white,
-                  //           ),
-                  //           child: const Text('Retry'),
-                  //         ),
-                  //       ],
-                  //     ),
-                  //   );
-                  // }
-
-                  // if (state is AppointmentLoaded ||
-                  //     state is AppointmentOperationSuccess) {
-                  //   // Access upcomingAppointments from both states
-                  //   final appointments =
-                  //       state is AppointmentLoaded
-                  //           ? state.upcomingAppointments
-                  //           : (state as AppointmentOperationSuccess)
-                  //               .upcomingAppointments;
-
-                  //   if (appointments.isEmpty) {
-                  //     return _buildEmptyState('No upcoming appointments');
-                  //   } else {
-                  //     return Column(
-                  //       children:
-                  //           appointments
-                  //               .take(2)
-                  //               .map(
-                  //                 (appointment) => Padding(
-                  //                   padding: const EdgeInsets.only(bottom: 12),
-                  //                   child: _buildAppointmentCard(appointment),
-                  //                 ),
-                  //               )
-                  //               .toList(),
-                  //     );
-                  //   }
-                  // }
-                  return const SizedBox.shrink();
-                },
-              ),
-
-              const SizedBox(height: 32),
-
-              // Events section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Events',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF333333),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        'view more',
-                        style: TextStyle(
-                          color: Color(0xFFB83A3A),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.arrow_forward,
-                        color: Color(0xFFB83A3A),
-                        size: 16,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Event cards (using BlocBuilder for events)
-              BlocBuilder<EventBloc, EventState>(
-                builder: (context, state) {
-                  if (state is EventLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        color: Color(0xFFB83A3A),
-                      ),
-                    );
-                  }
-
-                  if (state is EventError) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            size: 64,
-                            color: Colors.red[300],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Error: ${state.message}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.red,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () {
-                              context.read<EventBloc>().add(LoadEvents());
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFB83A3A),
-                              foregroundColor: Colors.white,
-                            ),
-                            child: const Text('Retry'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  if (state is EventLoaded || state is EventOperationSuccess) {
-                    final events =
-                        state is EventLoaded
-                            ? state.events
-                            : (state as EventOperationSuccess).events;
-
-                    if (events.isEmpty) {
-                      return _buildEmptyState('No upcoming events');
-                    } else {
-                      return Column(
-                        children:
-                            events
-                                .take(3)
-                                .map(
-                                  (event) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 12),
-                                    child: _buildEventCard(event),
-                                  ),
-                                )
-                                .toList(),
-                      );
-                    }
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

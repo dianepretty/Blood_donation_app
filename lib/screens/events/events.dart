@@ -1,6 +1,6 @@
 import 'package:blood_system/models/event_model.dart';
 import 'package:blood_system/screens/events/create_event.dart';
-import 'package:blood_system/widgets/red_header.dart';
+import 'package:blood_system/widgets/main_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
@@ -59,18 +59,23 @@ class _EventsScreenState extends State<EventsScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 400;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(120),
-        child: RedHeader(
-          title: 'Events',
-          onBack: widget.onBackToDashboard ?? () => Navigator.of(context).pop(),
-          showBack: true,
-          showSettings: false,
-        ),
+    return MainNavigationWrapper(
+      currentPage: 'events',
+      pageTitle: 'Events',
+      // backgroundColor: const Color(0xFFF8F9FA),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const CreateEventScreen()),
+          );
+        },
+        backgroundColor: const Color(0xFFD7263D),
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add),
+        label: const Text('Create Event'),
       ),
-      body: StreamBuilder<QuerySnapshot>(
+      child: StreamBuilder<QuerySnapshot>(
         stream:
             FirebaseFirestore.instance
                 .collection('events')
@@ -113,6 +118,7 @@ class _EventsScreenState extends State<EventsScreen> {
                 );
               }).toList();
           final filteredList = _filterEvents(events);
+
           return Column(
             children: [
               Expanded(
@@ -141,9 +147,7 @@ class _EventsScreenState extends State<EventsScreen> {
                             ),
                         ],
                       ),
-                      const SizedBox(
-                        height: 24,
-                      ), // Add padding between date range and events
+                      const SizedBox(height: 24),
                       _buildEventsList(filteredList, isSmallScreen),
                     ],
                   ),
@@ -152,18 +156,6 @@ class _EventsScreenState extends State<EventsScreen> {
             ],
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CreateEventScreen()),
-          );
-        },
-        backgroundColor: const Color(0xFFD7263D),
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add),
-        label: const Text('Create Event'),
       ),
     );
   }

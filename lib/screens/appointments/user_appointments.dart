@@ -6,6 +6,7 @@ import 'package:blood_system/blocs/auth/state.dart';
 import 'package:blood_system/screens/appointments/book_appointment.dart';
 import 'package:blood_system/screens/appointments/rescheduleAppointment.dart';
 import 'package:blood_system/screens/appointments/user_appointmentDetails.dart';
+import 'package:blood_system/widgets/main_navigation.dart';
 // import 'package:blood_system/screens/appointments/booking_appointment.dart'; // Add your booking page import here
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,7 +30,9 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       // Use the Firebase user ID to load appointments
-      context.read<AppointmentBloc>().add(LoadUserAppointments(authState.firebaseUser.email!));
+      context.read<AppointmentBloc>().add(
+        LoadUserAppointments(authState.firebaseUser.email!),
+      );
     }
   }
 
@@ -50,11 +53,13 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return MainNavigationWrapper(
       backgroundColor: const Color(0xFFF8F9FA),
-      body: Column(
+      currentPage: '/userAppointments',
+      pageTitle: 'My Appointments',
+      child: Column(
         children: [
-          _buildHeader(),
+          // _buildHeader(),
           Expanded(
             child: BlocListener<AppointmentBloc, AppointmentState>(
               listener: (context, state) {
@@ -84,7 +89,9 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
                       _buildUpcomingAppointments(),
                       const SizedBox(height: 24),
                       // _buildAppointmentHistory(),
-                      const SizedBox(height: 80), // Add space for floating button
+                      const SizedBox(
+                        height: 80,
+                      ), // Add space for floating button
                     ],
                   ),
                 ),
@@ -94,10 +101,9 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
         ],
       ),
       floatingActionButton: _buildBookAppointmentButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
-
 
   Widget _buildBookAppointmentButton() {
     return Container(
@@ -110,9 +116,10 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
             // Navigate to booking appointment page
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => BookAppointmentScreen(
-                  userId: authState.firebaseUser.email!,
-                ),
+                builder:
+                    (context) => BookAppointmentScreen(
+                      userId: authState.firebaseUser.email!,
+                    ),
               ),
             );
           } else {
@@ -128,31 +135,22 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
         backgroundColor: const Color(0xFFD7263D),
         foregroundColor: Colors.white,
         elevation: 8,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         icon: Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.2),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Icon(
-            Icons.add,
-            size: 20,
-          ),
+          child: const Icon(Icons.add, size: 20),
         ),
         label: const Text(
           'Book New Appointment',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
     );
   }
-
 
   Widget _buildHeader() {
     return Container(
@@ -230,10 +228,15 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
             }
 
             if (state.status == AppointmentStatus.error) {
-              return _buildErrorState(state.errorMessage ?? 'Failed to load appointments');
+              return _buildErrorState(
+                state.errorMessage ?? 'Failed to load appointments',
+              );
             }
 
-            final upcomingAppointments = state.upcomingAppointments.map((apt) => _appointmentToMap(apt)).toList();
+            final upcomingAppointments =
+                state.upcomingAppointments
+                    .map((apt) => _appointmentToMap(apt))
+                    .toList();
 
             if (upcomingAppointments.isEmpty) {
               return _buildEmptyState('No upcoming appointments');
@@ -274,10 +277,15 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
             }
 
             if (state.status == AppointmentStatus.error) {
-              return _buildErrorState(state.errorMessage ?? 'Failed to load appointments');
+              return _buildErrorState(
+                state.errorMessage ?? 'Failed to load appointments',
+              );
             }
 
-            final pastAppointments = state.pastAppointments.map((apt) => _appointmentToMap(apt)).toList();
+            final pastAppointments =
+                state.pastAppointments
+                    .map((apt) => _appointmentToMap(apt))
+                    .toList();
 
             if (pastAppointments.isEmpty) {
               return _buildEmptyState('No past appointments');
@@ -313,9 +321,7 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
         ],
       ),
       child: const Center(
-        child: CircularProgressIndicator(
-          color: Color(0xFFD7263D),
-        ),
+        child: CircularProgressIndicator(color: Color(0xFFD7263D)),
       ),
     );
   }
@@ -337,26 +343,16 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
       child: Center(
         child: Column(
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 48,
-              color: Colors.red.shade400,
-            ),
+            Icon(Icons.error_outline, size: 48, color: Colors.red.shade400),
             const SizedBox(height: 16),
             Text(
               'Error loading appointments',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade600,
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
             ),
             const SizedBox(height: 8),
             Text(
               errorMessage,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade500,
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -391,18 +387,11 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
       child: Center(
         child: Column(
           children: [
-            Icon(
-              Icons.calendar_today,
-              size: 48,
-              color: Colors.grey.shade400,
-            ),
+            Icon(Icons.calendar_today, size: 48, color: Colors.grey.shade400),
             const SizedBox(height: 16),
             Text(
               message,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade600,
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
             ),
           ],
         ),
@@ -410,9 +399,12 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
     );
   }
 
-  Widget _buildAppointmentCard(Map<String, dynamic> appointment, {required bool isUpcoming}) {
+  Widget _buildAppointmentCard(
+    Map<String, dynamic> appointment, {
+    required bool isUpcoming,
+  }) {
     final status = appointment['status'];
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -432,57 +424,44 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
             leading: Container(
               width: 60,
               height: 60,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-              ),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.asset(
                   'assets/images/hospital.png',
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    color: Colors.grey.shade200,
-                    child: const Icon(
-                      Icons.local_hospital,
-                      color: Color(0xFFD7263D),
-                      size: 30,
-                    ),
-                  ),
+                  errorBuilder:
+                      (context, error, stackTrace) => Container(
+                        color: Colors.grey.shade200,
+                        child: const Icon(
+                          Icons.local_hospital,
+                          color: Color(0xFFD7263D),
+                          size: 30,
+                        ),
+                      ),
                 ),
               ),
             ),
             title: Text(
               appointment['type'],
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   appointment['location'],
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   DateFormat('EEEE, MMMM d, yyyy').format(appointment['date']),
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Time: ${appointment['time']}',
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 11,
-                  ),
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
                 ),
               ],
             ),
@@ -490,9 +469,10 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => UserAppointmentDetailsScreen(
-                      appointment: appointment,
-                    ),
+                    builder:
+                        (context) => UserAppointmentDetailsScreen(
+                          appointment: appointment,
+                        ),
                   ),
                 );
               },
@@ -529,9 +509,10 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => RescheduleAppointmentScreen(
-                      appointment: appointment,
-                    ),
+                    builder:
+                        (context) => RescheduleAppointmentScreen(
+                          appointment: appointment,
+                        ),
                   ),
                 );
               },
@@ -545,10 +526,7 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
               ),
               child: const Text(
                 'Reschedule',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -588,23 +566,26 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
   void _showCancelDialog(Map<String, dynamic> appointment) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Cancel Appointment'),
-        content: const Text('Are you sure you want to cancel this appointment?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('No'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Cancel Appointment'),
+            content: const Text(
+              'Are you sure you want to cancel this appointment?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('No'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  // _cancelAppointment(appointment);
+                },
+                child: const Text('Yes, Cancel'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // _cancelAppointment(appointment);
-            },
-            child: const Text('Yes, Cancel'),
-          ),
-        ],
-      ),
     );
   }
 }
