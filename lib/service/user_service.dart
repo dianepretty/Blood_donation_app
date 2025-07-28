@@ -2,9 +2,11 @@ import 'package:blood_system/models/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Get current user
@@ -12,6 +14,83 @@ class AuthService {
 
   // Auth state changes stream
   Stream<User?> get authStateChanges => _auth.authStateChanges();
+
+  // Sign in with Google
+  Future<UserCredential?> signInWithGoogle() async {
+    try {
+      // Trigger the authentication flow
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+      if (googleUser == null) {
+        // User canceled the sign-in
+        throw FirebaseAuthException(
+          code: 'sign_in_canceled',
+          message: 'Google sign-in was canceled by the user',
+        );
+      }
+
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Sign in to Firebase with the Google credential
+      final UserCredential userCredential = await _auth.signInWithCredential(
+        credential,
+      );
+
+      // Check if this is a new user and create profile
+      if (userCredential.additionalUserInfo?.isNewUser == true) {
+        await _createUserProfile(userCredential.user!);
+      }
+
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      print('FirebaseAuthException during Google sign-in: ${e.code}');
+      rethrow;
+    } catch (e) {
+      print('Error during Google sign-in: $e');
+      throw FirebaseAuthException(
+        code: 'google-sign-in-failed',
+        message: 'Google sign-in failed: ${e.toString()}',
+      );
+    }
+  }
+
+  // Create user profile in Firestore for new Google users
+  Future<void> _createUserProfile(User user) async {
+    try {
+      final userDoc = _firestore.collection('users').doc(user.uid);
+
+      // Check if user document already exists
+      final docSnapshot = await userDoc.get();
+      if (!docSnapshot.exists) {
+        await userDoc.set({
+          'uid': user.uid,
+          'email': user.email,
+          'fullName': user.displayName ?? '',
+          'phoneNumber': user.phoneNumber ?? '',
+          'imageUrl': user.photoURL ?? '',
+          'createdAt': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
+          'signInMethod': 'google',
+          // Add default values for your app-specific fields
+          'bloodType': '',
+          'gender': '',
+          'districtName': '',
+          'role': 'user', // Default role
+        });
+      }
+    } catch (e) {
+      print('Error creating user profile: $e');
+      throw Exception('Failed to create user profile');
+    }
+  }
 
   // Sign up with email and password
   Future<UserCredential?> signUpWithEmailAndPassword({
@@ -56,6 +135,9 @@ class AuthService {
 
         // Update display name
         await result.user!.updateDisplayName(fullName);
+
+        // Send email verification
+        await result.user!.sendEmailVerification();
       }
 
       return result;
@@ -80,6 +162,17 @@ class AuthService {
       debugPrint('Sign in error: $e');
       rethrow;
     }
+  }
+
+  // Check if user is signed in with Google
+  bool isSignedInWithGoogle() {
+    final user = _auth.currentUser;
+    if (user != null) {
+      return user.providerData.any(
+        (provider) => provider.providerId == 'google.com',
+      );
+    }
+    return false;
   }
 
   // Get user data from Firestore
@@ -111,7 +204,7 @@ class AuthService {
   // Sign out
   Future<void> signOut() async {
     try {
-      await _auth.signOut();
+      await Future.wait([_auth.signOut(), _googleSignIn.signOut()]);
     } catch (e) {
       debugPrint('Sign out error: $e');
       rethrow;
@@ -140,6 +233,88 @@ class AuthService {
       await _auth.sendPasswordResetEmail(email: email);
     } catch (e) {
       debugPrint('Reset password error: $e');
+      rethrow;
+    }
+  }
+
+  // // Sign in with Google
+  // Future<UserCredential?> signInWithGoogle() async {
+  //   try {
+  //     // Create a new provider
+  //     GoogleAuthProvider googleProvider = GoogleAuthProvider();
+
+  //     // Add scopes if needed
+  //     googleProvider.addScope(
+  //       'https://www.googleapis.com/auth/contacts.readonly',
+  //     );
+
+  //     // Once signed in, return the UserCredential
+  //     UserCredential result = await _auth.signInWithPopup(googleProvider);
+
+  //     // Check if user exists in Firestore, if not create user document
+  //     if (result.user != null) {
+  //       final userDoc =
+  //           await _firestore.collection('users').doc(result.user!.uid).get();
+
+  //       if (!userDoc.exists) {
+  //         // Create new user document for Google sign-in
+  //         final now = DateTime.now();
+  //         final newUser = UserModel(
+  //           fullName: result.user!.displayName ?? 'Google User',
+  //           email: result.user!.email ?? '',
+  //           districtName: '',
+  //           password: '',
+  //           phoneNumber: result.user!.phoneNumber ?? '',
+  //           gender: '',
+  //           role: 'VOLUNTEER', // Default role for Google users
+  //           imageUrl: result.user!.photoURL ?? '',
+  //           bloodType: '',
+  //           createdAt: now,
+  //           updatedAt: now,
+  //         );
+
+  //         await _firestore
+  //             .collection('users')
+  //             .doc(result.user!.uid)
+  //             .set(newUser.toJson());
+  //       }
+  //     }
+
+  //     return result;
+  //   } catch (e) {
+  //     debugPrint('Google sign in error: $e');
+  //     rethrow;
+  //   }
+  // }
+
+  // Send email verification
+  Future<void> sendEmailVerification() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+      }
+    } catch (e) {
+      debugPrint('Send email verification error: $e');
+      rethrow;
+    }
+  }
+
+  // Check if email is verified
+  bool isEmailVerified() {
+    final user = _auth.currentUser;
+    return user?.emailVerified ?? false;
+  }
+
+  // Reload user to check verification status
+  Future<void> reloadUser() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        await user.reload();
+      }
+    } catch (e) {
+      debugPrint('Reload user error: $e');
       rethrow;
     }
   }
