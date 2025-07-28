@@ -6,6 +6,7 @@ import 'package:blood_system/blocs/auth/state.dart';
 import 'package:blood_system/blocs/event_bloc.dart';
 import 'package:blood_system/blocs/event_event.dart';
 import 'package:blood_system/blocs/hospital/bloc.dart';
+import 'package:blood_system/screens/FAQScreen.dart';
 import 'package:blood_system/screens/appointments_router.dart';
 import 'package:blood_system/screens/events/events.dart';
 import 'package:blood_system/screens/notificationScreen.dart';
@@ -72,6 +73,7 @@ class MyApp extends StatelessWidget {
           '/login': (context) => const LoginPage(),
           '/events': (context) => const EventsScreen(),
           '/notifications': (context) => const NotificationsScreen(),
+          '/faq': (context) => const FAQScreen(),
           // '/profile': (context) => const ProfilePage(),
           // '/history': (context) => const HistoryPage(),
         },

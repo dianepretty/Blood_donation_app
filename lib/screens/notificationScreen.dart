@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../models/notification_model.dart';
 import '../theme/theme.dart';
+import 'package:intl/intl.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -10,21 +13,31 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
-  // Use a non-const list for flexibility (can later update or fetch from backend)
-  final List<NotificationModel> reminders = [
-    NotificationModel(
-      title: 'Appointment reminder',
-      time: '10:30 AM',
-      details: 'Location: Community Center\nVolunteer: John Doe\nReminder: Bring ID.',
-      date: DateTime.now(),
-    ),
-    NotificationModel(
-      title: 'Appointment reminder',
-      time: '2:00 PM',
-      details: 'Location: Library\nVolunteer: Jane Smith\nNote: Bring documents.',
-      date: DateTime.now(),
-    ),
-  ];
+  List<NotificationModel> reminders = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchReminders();
+  }
+
+  Future<void> fetchReminders() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final snapshot = await FirebaseFirestore.instance
+        .collection('appointments')
+        .where('userId', isEqualTo: user.uid)
+        .get();
+
+    setState(() {
+      reminders = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return NotificationModel.fromFirestore(data);
+      }).toList();
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -70,13 +83,44 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Widget _buildReminderTile(BuildContext context, NotificationModel n) {
+    final formattedDate = DateFormat.yMMMd().format(n.date);
+    final formattedTime = n.time;
+
     return Column(
       children: [
         ListTile(
-          title: Text(n.title),
-          subtitle: Text(n.time),
+          title: Text(
+            n.title,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Text(
+                    formattedDate,
+                    style: const TextStyle(color: Colors.grey, fontSize: 13),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Icon(Icons.access_time, size: 16, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Text(
+                    formattedTime,
+                    style: const TextStyle(color: Colors.grey, fontSize: 13),
+                  ),
+                ],
+              ),
+            ],
+          ),
           trailing: IconButton(
-            icon: const Icon(Icons.remove_red_eye_outlined),
+            icon: const Icon(Icons.remove_red_eye_outlined, color: Colors.black),
             onPressed: () => _showDetailsDialog(context, n),
           ),
         ),
@@ -85,59 +129,160 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
   }
 
+
   void _showDetailsDialog(BuildContext context, NotificationModel n) {
+    final formattedDate = DateFormat.yMMMMEEEEd().format(n.date);
+    final formattedTime = DateFormat.jm().format(n.date);
+
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
         insetPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 64),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        elevation: 10,
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.38, // more trimmed height
+            maxHeight: MediaQuery.of(context).size.height * 0.5,
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 20,
+                  offset: Offset(0, 8),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // Close button aligned top right
                 Align(
                   alignment: Alignment.topRight,
                   child: InkWell(
                     onTap: () => Navigator.of(ctx).pop(),
-                    child: const Icon(Icons.close, size: 22),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  n.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 10),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Text(
-                      n.details,
-                      style: const TextStyle(fontSize: 16, height: 1.5),
-                      textAlign: TextAlign.center,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade100,
+                        shape: BoxShape.circle,
+                      ),
+                      padding: const EdgeInsets.all(6),
+                      child: const Icon(
+                        Icons.close,
+                        size: 22,
+                        color: Colors.red,
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 14),
-                SizedBox(
-                  width: double.infinity,
-                  child: InkWell(
-                    onTap: () => Navigator.of(ctx).pop(),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 14),
+
+                const SizedBox(height: 8),
+
+                // Title
+                Text(
+                  n.title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
+                    color: Colors.redAccent,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 12),
+
+                // Instead of Row, use Column for date and time to avoid horizontal overflow
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.calendar_today, size: 18, color: Colors.grey),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            formattedDate,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            softWrap: true,
+                            overflow: TextOverflow.visible,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.access_time, size: 18, color: Colors.grey),
+                        const SizedBox(width: 6),
+                        Text(
+                          formattedTime,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black87,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                // Details container with scroll if needed
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       child: Text(
-                        'OK',
-                        style: TextStyle(
-                          fontSize: 18,
-                          decoration: TextDecoration.underline,
+                        n.details,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          height: 1.5,
+                          color: Colors.black87,
                         ),
                         textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // OK button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: const Text(
+                      'OK',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -147,10 +292,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ),
         ),
       ),
-
-  );
+    );
   }
-
 
 
   bool _isToday(DateTime dt) {
