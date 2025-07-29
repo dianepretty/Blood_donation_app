@@ -1,3 +1,4 @@
+import 'package:blood_system/theme/theme.dart';
 import 'package:flutter/material.dart';
 
 class RedHeader extends StatelessWidget {
@@ -6,7 +7,10 @@ class RedHeader extends StatelessWidget {
   final VoidCallback? onBack;
   final bool showBack;
   final bool showSettings;
-  
+  final VoidCallback? onMenuPressed;
+  final VoidCallback? onNotificationPressed;
+  final GlobalKey<ScaffoldState>? scaffoldKey;
+
   const RedHeader({
     super.key,
     required this.title,
@@ -14,6 +18,9 @@ class RedHeader extends StatelessWidget {
     this.onBack,
     this.showBack = false,
     this.showSettings = false,
+    this.onMenuPressed,
+    this.onNotificationPressed,
+    this.scaffoldKey,
   });
 
   @override
@@ -21,7 +28,7 @@ class RedHeader extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
     final headerHeight = height ?? screenHeight * 0.18;
     final isSmallScreen = MediaQuery.of(context).size.width < 400;
-    
+
     return Container(
       width: double.infinity,
       height: headerHeight,
@@ -57,10 +64,30 @@ class RedHeader extends StatelessWidget {
                 bottomLeft: Radius.circular(24),
                 bottomRight: Radius.circular(24),
               ),
-              color: const Color(0xFFD7263D).withOpacity(0.7),
+              color: AppColors.red.withOpacity(0.7),
             ),
           ),
-          if (showBack && onBack != null)
+          // Menu button (left side)
+          if (onMenuPressed != null || scaffoldKey != null)
+            Positioned(
+              left: 16,
+              top: 32,
+              child: IconButton(
+                icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+                onPressed:
+                    onMenuPressed ??
+                    () {
+                      if (scaffoldKey?.currentState != null) {
+                        scaffoldKey!.currentState!.openDrawer();
+                      }
+                    },
+              ),
+            ),
+          // Back button (left side, only if menu is not shown)
+          if (showBack &&
+              onBack != null &&
+              onMenuPressed == null &&
+              scaffoldKey == null)
             Positioned(
               left: 16,
               top: 32,
@@ -73,6 +100,7 @@ class RedHeader extends StatelessWidget {
                 onPressed: onBack,
               ),
             ),
+          // Title (center)
           Positioned(
             left: isSmallScreen ? 56 : 64,
             right: isSmallScreen ? 56 : 64,
@@ -88,6 +116,7 @@ class RedHeader extends StatelessWidget {
               ),
             ),
           ),
+          // Settings button (right side)
           if (showSettings)
             Positioned(
               right: isSmallScreen ? 16 : 24,
@@ -105,8 +134,22 @@ class RedHeader extends StatelessWidget {
                 ),
               ),
             ),
+          // Notification button (right side)
+          if (onNotificationPressed != null)
+            Positioned(
+              right: isSmallScreen ? 16 : 24,
+              top: 32,
+              child: IconButton(
+                icon: const Icon(
+                  Icons.notifications,
+                  color: Colors.white,
+                  size: 28,
+                ),
+                onPressed: onNotificationPressed,
+              ),
+            ),
         ],
       ),
     );
   }
-} 
+}

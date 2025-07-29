@@ -8,6 +8,7 @@ class UserModel {
   final String role;
   final String imageUrl;
   final String bloodType;
+  final bool isProfileComplete;
   final String hospital;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -22,6 +23,7 @@ class UserModel {
     required this.role,
     required this.imageUrl,
     required this.bloodType,
+    this.isProfileComplete = false, // Default to false
     this.hospital = '', // Made optional with default empty string
     required this.createdAt,
     required this.updatedAt,

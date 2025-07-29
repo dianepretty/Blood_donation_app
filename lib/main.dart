@@ -96,24 +96,20 @@ class AuthWrapper extends StatelessWidget {
 
         if (state is AuthAuthenticated) {
           // User is logged in, check role and navigate accordingly
-          final userRole = state.userData?.role.toUpperCase();
-          final originalRole = state.userData?.role;
-          print('AuthWrapper - Original role: "$originalRole"');
-          print('AuthWrapper - Uppercase role: "$userRole"');
+          final userRole = state.userData?.role;
+          print('AuthWrapper - User role: "$userRole"');
           print('AuthWrapper - User data: ${state.userData?.toJson()}');
 
-          if (userRole == 'VOLUNTEER' || originalRole == 'Volunteer') {
+          if (userRole == 'VOLUNTEER') {
             print('AuthWrapper - Navigating to HomePage');
             return const HomePageContent();
-          } else if (userRole == 'HOSPITAL_ADMIN' ||
-              originalRole == 'Hospital admin' ||
-              originalRole == 'HOSPITAL_ADMIN') {
+          } else if (userRole == 'HOSPITAL_ADMIN') {
             print('AuthWrapper - Navigating to EventsPage');
             return const EventsScreen(); // Events page for hospital admin
           } else {
             // Unknown role, go to landing page
             print(
-              'AuthWrapper - Unknown role: "$originalRole", navigating to LandingPage',
+              'AuthWrapper - Unknown role: "$userRole", navigating to LandingPage',
             );
             return const LandingPage();
           }
