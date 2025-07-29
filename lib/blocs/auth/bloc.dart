@@ -36,6 +36,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     _authStateSubscription?.cancel();
     _authStateSubscription = _authService.authStateChanges.listen(
       (user) => add(AuthUserChanged(user)),
+      onError: (error) {
+        print('AuthBloc - Auth state stream error: $error');
+        add(AuthUserChanged(null));
+      },
     );
   }
 
@@ -189,14 +193,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
         // Get user data from Firestore
         print('AuthBloc - Getting user data from Firestore');
-        final userData = await _authService.getUserData(event.user!.uid);
+        final userData = await _authService.getUserData(event.user!.uid)
+            .timeout(const Duration(seconds: 15));
         print('AuthBloc - User data retrieved: $userData');
 
-        emit(AuthAuthenticated(firebaseUser: event.user!, userData: userData));
-        print('AuthBloc - Emitted AuthAuthenticated');
+        if (userData != null) {
+          emit(AuthAuthenticated(firebaseUser: event.user!, userData: userData));
+          print('AuthBloc - Emitted AuthAuthenticated');
+        } else {
+          // If user data is null, emit unauthenticated state
+          print('AuthBloc - User data is null, emitting AuthUnauthenticated');
+          emit(AuthUnauthenticated());
+        }
       } catch (e) {
         print('AuthBloc - Error getting user data: ${e.toString()}');
-        emit(AuthError('Failed to load user data: ${e.toString()}'));
+        // Instead of emitting error, emit unauthenticated to prevent infinite loading
+        emit(AuthUnauthenticated());
       }
     } else {
       print('AuthBloc - User is null, emitting AuthUnauthenticated');

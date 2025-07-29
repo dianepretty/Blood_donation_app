@@ -70,20 +70,21 @@ class AuthService {
       // Check if user document already exists
       final docSnapshot = await userDoc.get();
       if (!docSnapshot.exists) {
+        final now = DateTime.now();
         await userDoc.set({
           'uid': user.uid,
           'email': user.email,
           'fullName': user.displayName ?? '',
           'phoneNumber': user.phoneNumber ?? '',
           'imageUrl': user.photoURL ?? '',
-          'createdAt': FieldValue.serverTimestamp(),
-          'updatedAt': FieldValue.serverTimestamp(),
+          'createdAt': now.toIso8601String(),
+          'updatedAt': now.toIso8601String(),
           'signInMethod': 'google',
           // Add default values for your app-specific fields
           'bloodType': '',
           'gender': '',
           'districtName': '',
-          'role': 'user', // Default role
+          'role': 'VOLUNTEER', // Default role for Google users
         });
       }
     } catch (e) {
@@ -178,8 +179,11 @@ class AuthService {
   // Get user data from Firestore
   Future<UserModel?> getUserData(String uid) async {
     try {
-      DocumentSnapshot doc =
-          await _firestore.collection('users').doc(uid).get();
+      DocumentSnapshot doc = await _firestore
+          .collection('users')
+          .doc(uid)
+          .get()
+          .timeout(const Duration(seconds: 10));
       if (doc.exists) {
         return UserModel.fromJson(doc.data() as Map<String, dynamic>);
       }
