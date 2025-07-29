@@ -78,6 +78,21 @@ class UserModel {
   }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    // Helper function to parse DateTime from various formats
+    DateTime parseDateTime(dynamic value) {
+      if (value == null) return DateTime.now();
+      if (value is DateTime) return value;
+      if (value is String) {
+        try {
+          return DateTime.parse(value);
+        } catch (e) {
+          return DateTime.now();
+        }
+      }
+      // If it's a Timestamp or other format, return current time
+      return DateTime.now();
+    }
+
     return UserModel(
       fullName: json['fullName'] ?? '',
       email: json['email'] ?? '',
@@ -89,8 +104,8 @@ class UserModel {
       imageUrl: json['imageUrl'] ?? '',
       bloodType: json['bloodType'] ?? '',
       hospital: json['hospital'] ?? '', // Will use default empty string if null
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: parseDateTime(json['createdAt']),
+      updatedAt: parseDateTime(json['updatedAt']),
     );
   }
 
