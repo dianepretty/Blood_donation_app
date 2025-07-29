@@ -1,25 +1,19 @@
 import 'package:blood_system/models/event_model.dart';
-import 'package:blood_system/screens/events/create_event.dart';
 import 'package:blood_system/widgets/main_navigation.dart';
-import 'package:blood_system/blocs/auth/bloc.dart';
-import 'package:blood_system/blocs/auth/state.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
 import 'view_event.dart';
-import 'edit_event.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class EventsScreen extends StatefulWidget {
-  final VoidCallback? onBackToDashboard;
-  const EventsScreen({super.key, this.onBackToDashboard});
+class UserEventsScreen extends StatefulWidget {
+  const UserEventsScreen({super.key});
 
   @override
-  State<EventsScreen> createState() => _EventsScreenState();
+  State<UserEventsScreen> createState() => _UserEventsScreenState();
 }
 
-class _EventsScreenState extends State<EventsScreen> {
+class _UserEventsScreenState extends State<UserEventsScreen> {
   PickerDateRange? selectedDateRange;
 
   @override
@@ -40,21 +34,13 @@ class _EventsScreenState extends State<EventsScreen> {
 
   List<Event> _filterEvents(List<Event> events) {
     if (selectedDateRange == null) {
-      print(
-        'DEBUG: No date range selected, showing all ${events.length} events',
-      );
       return events;
     }
     final start = selectedDateRange!.startDate;
     final end = selectedDateRange!.endDate ?? selectedDateRange!.startDate;
-    final filtered =
-        events.where((event) {
-          return !event.date.isBefore(start!) && !event.date.isAfter(end!);
-        }).toList();
-    print(
-      'DEBUG: Filtered ${events.length} events to ${filtered.length} events (range: ${start} to ${end})',
-    );
-    return filtered;
+    return events.where((event) {
+      return !event.date.isBefore(start!) && !event.date.isAfter(end!);
+    }).toList();
   }
 
   @override
@@ -65,57 +51,33 @@ class _EventsScreenState extends State<EventsScreen> {
     return MainNavigationWrapper(
       currentPage: 'events',
       pageTitle: 'Events',
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CreateEventScreen()),
-          );
-        },
-        backgroundColor: const Color(0xFFD7263D),
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add),
-        label: const Text('Create Event'),
-      ),
-      child: BlocBuilder<AuthBloc, AuthState>(
-        builder: (context, authState) {
-          if (authState is AuthAuthenticated) {
-            final userRole = authState.userData?.role ?? 'USER';
-            final hospitalName = authState.userData?.districtName ?? '';
-            
-            // Filter events based on user role
-            Query query = FirebaseFirestore.instance.collection('events');
-            
-            if (userRole == 'HOSPITAL_ADMIN' && hospitalName.isNotEmpty) {
-              // For hospital admin, only show events for their hospital
-              query = query.where('hospitalId', isEqualTo: hospitalName);
+      child: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('events')
+            .orderBy('date')
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          final docs = snapshot.data?.docs ?? [];
+          final events = docs.map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            // Handle both Timestamp and DateTime formats for backward compatibility
+            DateTime eventDate;
+            if (data['date'] is Timestamp) {
+              eventDate = (data['date'] as Timestamp).toDate();
+            } else if (data['date'] is DateTime) {
+              eventDate = data['date'] as DateTime;
+            } else {
+              // Fallback to current date if date is missing or invalid
+              eventDate = DateTime.now();
             }
-            
-            return StreamBuilder<QuerySnapshot>(
-              stream: query.orderBy('date').snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
-                final docs = snapshot.data?.docs ?? [];
-                print('DEBUG: Found ${docs.length} events in Firestore');
-                final events = docs.map((doc) {
-                  final data = doc.data() as Map<String, dynamic>;
-                  // Handle both Timestamp and DateTime formats for backward compatibility
-                  DateTime eventDate;
-                  if (data['date'] is Timestamp) {
-                    eventDate = (data['date'] as Timestamp).toDate();
-                  } else if (data['date'] is DateTime) {
-                    eventDate = data['date'] as DateTime;
-                  } else {
-                    // Fallback to current date if date is missing or invalid
-                    eventDate = DateTime.now();
-                  }
 
-                  return Event(
+                              return Event(
                     id: doc.id,
                     name: data['name'] ?? '',
                     date: eventDate,
@@ -127,49 +89,45 @@ class _EventsScreenState extends State<EventsScreen> {
                     hospitalId: data['hospitalId'] ?? '',
                     adminId: data['adminId'] ?? '',
                   );
-                }).toList();
-                final filteredList = _filterEvents(events);
+          }).toList();
+          final filteredList = _filterEvents(events);
 
-                return Column(
-                  children: [
-                    Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isSmallScreen ? 16.0 : 24.0,
-                          vertical: 16.0,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildDateRangeSelector(isSmallScreen),
-                                ),
-                                if (selectedDateRange != null)
-                                  IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        selectedDateRange = null;
-                                      });
-                                    },
-                                    icon: const Icon(Icons.clear),
-                                    tooltip: 'Clear filter',
-                                  ),
-                              ],
+          return Column(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isSmallScreen ? 16.0 : 24.0,
+                    vertical: 16.0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildDateRangeSelector(isSmallScreen),
+                          ),
+                          if (selectedDateRange != null)
+                            IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  selectedDateRange = null;
+                                });
+                              },
+                              icon: const Icon(Icons.clear),
+                              tooltip: 'Clear filter',
                             ),
-                            const SizedBox(height: 24),
-                            _buildEventsList(filteredList, isSmallScreen),
-                          ],
-                        ),
+                        ],
                       ),
-                    ),
-                  ],
-                );
-              },
-            );
-          }
-          return const Center(child: Text('Please log in to view events'));
+                      const SizedBox(height: 24),
+                      _buildEventsList(filteredList, isSmallScreen),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
         },
       ),
     );
@@ -393,83 +351,44 @@ class _EventsScreenState extends State<EventsScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ViewEventScreen(
-                          event: {
-                            'id': event.id,
-                            'title': event.name,
-                            'location': event.location,
-                            'date': event.date,
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ViewEventScreen(
+                      event: {
+                        'id': event.id,
+                        'title': event.name,
+                        'location': event.location,
+                                                    'date': event.date,
                             'status': event.status,
-                            'description': event.description,
-                            'timeFrom': event.timeFrom,
-                            'timeTo': event.timeTo,
-                            'hospitalId': event.hospitalId,
-                            'adminId': event.adminId,
-                          },
-                        ),
-                      ),
-                    );
-                  },
-                  icon: Icon(Icons.visibility, size: 16),
-                  label: const Text('View Details'),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: Colors.grey.shade300),
-                    foregroundColor: Colors.black87,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                        'description': event.description,
+                        'timeFrom': event.timeFrom,
+                        'timeTo': event.timeTo,
+                        'hospitalId': event.hospitalId,
+                        'adminId': event.adminId,
+                      },
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
                   ),
+                );
+              },
+              icon: Icon(Icons.visibility, size: 16),
+              label: const Text('View Details'),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: Colors.grey.shade300),
+                foregroundColor: Colors.black87,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
+                padding: const EdgeInsets.symmetric(vertical: 8),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => EditEventScreen(
-                          event: {
-                            'id': event.id,
-                            'title': event.name,
-                            'location': event.location,
-                            'date': event.date,
-                            'status': event.status,
-                            'description': event.description,
-                            'timeFrom': event.timeFrom,
-                            'timeTo': event.timeTo,
-                            'hospitalId': event.hospitalId,
-                            'adminId': event.adminId,
-                          },
-                        ),
-                      ),
-                    );
-                  },
-                  icon: Icon(Icons.edit, size: 16),
-                  label: const Text('Edit Event'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFD7263D),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),
     );
   }
-}
+} 

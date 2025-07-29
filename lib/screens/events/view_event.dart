@@ -109,15 +109,10 @@ class ViewEventScreen extends StatelessWidget {
                                 ),
                                 // Enhanced badges
                                 Positioned(
-                                  top: 16,
-                                  right: 16,
-                                  child: _buildStatusBadge(event['type']),
-                                ),
-                                Positioned(
                                   bottom: 16,
                                   left: 16,
-                                  child: _buildAttendeesBadge(
-                                    event['attendees'],
+                                  child: _buildTimeBadge(
+                                    '${event['timeFrom'] ?? ''} - ${event['timeTo'] ?? ''}',
                                   ),
                                 ),
                               ],
@@ -160,47 +155,9 @@ class ViewEventScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(dynamic type) {
-    final typeStr = (type ?? '').toString().toUpperCase();
-    final color = _getTypeColor(typeStr);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            typeStr,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: color,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildAttendeesBadge(dynamic attendees) {
+  Widget _buildTimeBadge(String time) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -214,7 +171,7 @@ class ViewEventScreen extends StatelessWidget {
           const Icon(Icons.people_rounded, color: Colors.white, size: 16),
           const SizedBox(width: 6),
           Text(
-            '$attendees',
+            time,
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -238,15 +195,11 @@ class ViewEventScreen extends StatelessWidget {
         'label': 'Location',
         'value': event['location'] ?? '',
       },
+
       {
-        'icon': Icons.category_rounded,
-        'label': 'Type',
-        'value': (event['type'] ?? '').toString().toUpperCase(),
-      },
-      {
-        'icon': Icons.people_rounded,
-        'label': 'Attendees',
-        'value': '${event['attendees']} people',
+        'icon': Icons.schedule_rounded,
+        'label': 'Time',
+        'value': '${event['timeFrom'] ?? ''} - ${event['timeTo'] ?? ''}',
       },
       {
         'icon': Icons.info_outline_rounded,
@@ -343,24 +296,13 @@ class ViewEventScreen extends StatelessWidget {
     }).toList();
   }
 
-  Color _getTypeColor(String type) {
-    switch (type.toLowerCase()) {
-      case 'donation':
-        return const Color(0xFF10B981);
-      case 'campaign':
-        return const Color(0xFF3B82F6);
-      case 'awareness':
-        return const Color(0xFFF59E0B);
-      default:
-        return const Color(0xFFD7263D);
-    }
-  }
+
 
   Color _getIconColor(IconData icon) {
     if (icon == Icons.calendar_today_rounded) return const Color(0xFF3B82F6);
     if (icon == Icons.location_on_rounded) return const Color(0xFF10B981);
-    if (icon == Icons.category_rounded) return const Color(0xFFF59E0B);
-    if (icon == Icons.people_rounded) return const Color(0xFF8B5CF6);
+    if (icon == Icons.schedule_rounded) return const Color(0xFFF59E0B);
+    if (icon == Icons.info_outline_rounded) return const Color(0xFF8B5CF6);
     return const Color(0xFFD7263D);
   }
 }

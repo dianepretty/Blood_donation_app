@@ -25,42 +25,42 @@ class EventBloc extends Bloc<EventEvent, EventState> {
       Event(
         id: _uuid.v4(),
         name: 'Tech Conference',
-        type: 'Conference',
-        attendees: 200,
         status: 'Upcoming',
         date: DateTime.now().add(const Duration(days: 7)),
         timeFrom: '10:00 AM',
         timeTo: '12:00 PM',
         location: 'Kigali Convention Centre',
         description: 'Annual Tech Conference 2025',
+        hospitalId: 'Kigali Hospital',
+        adminId: 'admin@example.com',
       ),
     );
     _events.add(
       Event(
         id: _uuid.v4(),
         name: 'Blood Donation Drive',
-        type: 'Donation',
-        attendees: 500,
         status: 'Upcoming',
         date: DateTime.now().add(const Duration(days: 14)),
         timeFrom: '09:00 AM',
         timeTo: '05:00 PM',
         location: 'Amahoro Stadium',
         description: 'National Blood Donation Drive',
+        hospitalId: 'Kigali Hospital',
+        adminId: 'admin@example.com',
       ),
     );
     _events.add(
       Event(
         id: _uuid.v4(),
         name: 'Innovation Workshop',
-        type: 'Workshop',
-        attendees: 100,
         status: 'Upcoming',
         date: DateTime.now().add(const Duration(days: 21)),
         timeFrom: '02:00 PM',
         timeTo: '04:00 PM',
         location: 'Serena Hotel',
         description: 'Healthcare Innovation Workshop',
+        hospitalId: 'Kigali Hospital',
+        adminId: 'admin@example.com',
       ),
     );
   }

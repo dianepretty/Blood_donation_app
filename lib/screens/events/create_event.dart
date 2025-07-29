@@ -1,5 +1,8 @@
 import 'package:blood_system/widgets/red_header.dart';
+import 'package:blood_system/blocs/auth/bloc.dart';
+import 'package:blood_system/blocs/auth/state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CreateEventScreen extends StatefulWidget {
@@ -18,15 +21,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   DateTime? _selectedDate;
   TimeOfDay? _fromTime;
   TimeOfDay? _toTime;
-  String _selectedEventType = 'medical';
   bool _isLoading = false;
-
-  final List<Map<String, dynamic>> _eventTypes = [
-    {'name': 'Medical', 'value': 'medical', 'icon': Icons.local_hospital},
-    {'name': 'Community', 'value': 'community', 'icon': Icons.group},
-    {'name': 'Social', 'value': 'social', 'icon': Icons.celebration},
-    {'name': 'Other', 'value': 'other', 'icon': Icons.event},
-  ];
 
   @override
   void dispose() {
@@ -62,8 +57,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                     children: [
                       const SizedBox(height: 12),
                       _buildEventNameField(),
-                      const SizedBox(height: 16),
-                      _buildEventTypeSelector(),
                       const SizedBox(height: 16),
                       _buildLocationField(),
                       const SizedBox(height: 16),
@@ -136,76 +129,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     );
   }
 
-  Widget _buildEventTypeSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Event Type',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey[700],
-          ),
-        ),
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 60,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: _eventTypes.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              final eventType = _eventTypes[index];
-              final isSelected = _selectedEventType == eventType['value'];
 
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedEventType = eventType['value'];
-                  });
-                },
-                child: Container(
-                  width: 80,
-                  decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFFD7263D) : Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color:
-                          isSelected
-                              ? const Color(0xFFD7263D)
-                              : Colors.grey.shade300,
-                    ),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        eventType['icon'],
-                        color: isSelected ? Colors.white : Colors.grey.shade600,
-                        size: 20,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        eventType['name'],
-                        style: TextStyle(
-                          color:
-                              isSelected ? Colors.white : Colors.grey.shade600,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildLocationField() {
     return Column(
@@ -561,9 +485,18 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   }
 
   Future<void> _createEvent() async {
+    // Get current user info
+    final authState = context.read<AuthBloc>().state;
+    String hospitalId = '';
+    String adminId = '';
+    
+    if (authState is AuthAuthenticated) {
+      hospitalId = authState.userData?.districtName ?? '';
+      adminId = authState.firebaseUser.email ?? '';
+    }
+    
     final eventData = {
       'name': _eventNameController.text.trim(),
-      'type': _selectedEventType,
       'location': _locationController.text.trim(),
       'date': Timestamp.fromDate(
         _selectedDate!,
@@ -571,8 +504,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       'timeFrom': _fromTime != null ? _fromTime!.format(context) : '',
       'timeTo': _toTime != null ? _toTime!.format(context) : '',
       'description': _descriptionController.text.trim(),
-      'attendees': 0, // Default attendees count
       'status': 'upcoming', // Default status
+      'hospitalId': hospitalId,
+      'adminId': adminId,
     };
     print('DEBUG: Creating event with data: $eventData');
     final docRef = await FirebaseFirestore.instance
