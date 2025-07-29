@@ -6,7 +6,11 @@ import 'package:blood_system/blocs/auth/state.dart';
 import 'package:blood_system/blocs/event_bloc.dart';
 import 'package:blood_system/blocs/event_event.dart';
 import 'package:blood_system/blocs/hospital/bloc.dart';
+import 'package:blood_system/screens/FAQScreen.dart';
 import 'package:blood_system/screens/appointments_router.dart';
+import 'package:blood_system/screens/events/events.dart';
+import 'package:blood_system/screens/notificationScreen.dart';
+import 'package:blood_system/screens/securityScreen.dart';
 import 'package:blood_system/screens/events_router.dart';
 import 'package:blood_system/screens/userDetails.dart';
 import 'package:blood_system/screens/appointments/book_appointment.dart';
@@ -70,6 +74,10 @@ class MyApp extends StatelessWidget {
           '/userDetails': (context) => const UserDetailsPage(),
           '/appointments': (context) => const AppointmentsRouter(),
           '/login': (context) => const LoginPage(),
+          '/events': (context) => const EventsScreen(),
+          '/notifications': (context) => const NotificationsScreen(),
+          '/faq': (context) => const FAQScreen(),
+          '/settings': (context) => const SecurityScreen(),
           '/events': (context) => const EventsRouter(),
           // '/profile': (context) => const ProfilePage(),
           // '/history': (context) => const HistoryPage(),
