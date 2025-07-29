@@ -1,25 +1,34 @@
 // lib/screens/user/user_appointment_details.dart
 import 'package:blood_system/screens/appointments/rescheduleAppointment.dart';
+import 'package:blood_system/widgets/main_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class UserAppointmentDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> appointment;
-  
+
   const UserAppointmentDetailsScreen({super.key, required this.appointment});
 
   @override
-  State<UserAppointmentDetailsScreen> createState() => _UserAppointmentDetailsScreenState();
+  State<UserAppointmentDetailsScreen> createState() =>
+      _UserAppointmentDetailsScreenState();
 }
 
-class _UserAppointmentDetailsScreenState extends State<UserAppointmentDetailsScreen> {
+class _UserAppointmentDetailsScreenState
+    extends State<UserAppointmentDetailsScreen> {
   @override
   Widget build(BuildContext context) {
-    final isUpcoming = (widget.appointment['date'] as DateTime).isAfter(DateTime.now());
-    
-    return Scaffold(
+    final appointmentDate =
+        widget.appointment['appointmentDate'] ??
+        widget.appointment['date'] ??
+        DateTime.now();
+    final isUpcoming = appointmentDate.isAfter(DateTime.now());
+
+    return MainNavigationWrapper(
+      currentPage: '/userAppointmentDetails',
+      pageTitle: 'Appointment Details',
       backgroundColor: const Color(0xFFF8F9FA),
-      body: Column(
+      child: Column(
         children: [
           _buildHeader(),
           Expanded(
@@ -93,6 +102,11 @@ class _UserAppointmentDetailsScreenState extends State<UserAppointmentDetailsScr
   }
 
   Widget _buildAppointmentCard() {
+    final appointmentDate =
+        widget.appointment['appointmentDate'] ??
+        widget.appointment['date'] ??
+        DateTime.now();
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -129,7 +143,7 @@ class _UserAppointmentDetailsScreenState extends State<UserAppointmentDetailsScr
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.appointment['type'],
+                      'Blood Donation',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -137,7 +151,7 @@ class _UserAppointmentDetailsScreenState extends State<UserAppointmentDetailsScr
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      widget.appointment['location'],
+                      widget.appointment['hospitalName'] ?? 'Unknown Hospital',
                       style: TextStyle(
                         color: Colors.grey.shade600,
                         fontSize: 14,
@@ -164,7 +178,7 @@ class _UserAppointmentDetailsScreenState extends State<UserAppointmentDetailsScr
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      DateFormat('EEEE, MMMM d, yyyy').format(widget.appointment['date']),
+                      DateFormat('EEEE, MMMM d, yyyy').format(appointmentDate),
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -186,7 +200,7 @@ class _UserAppointmentDetailsScreenState extends State<UserAppointmentDetailsScr
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      widget.appointment['time'],
+                      widget.appointment['appointmentTime'] ?? 'Unknown Time',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -203,6 +217,11 @@ class _UserAppointmentDetailsScreenState extends State<UserAppointmentDetailsScr
   }
 
   Widget _buildAppointmentDetails() {
+    final appointmentDate =
+        widget.appointment['appointmentDate'] ??
+        widget.appointment['date'] ??
+        DateTime.now();
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -221,23 +240,39 @@ class _UserAppointmentDetailsScreenState extends State<UserAppointmentDetailsScr
         children: [
           const Text(
             'Appointment',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 16),
-          _buildDetailRow('Date', DateFormat('EEEE, MMMM d, yyyy').format(widget.appointment['date'])),
-          _buildDetailRow('Time', widget.appointment['time']),
-          _buildDetailRow('Location', widget.appointment['location']),
-          _buildDetailRow('Donation Type', widget.appointment['donationType']),
-          _buildDetailRow('Status', widget.appointment['status'].toString().toUpperCase()),
+          _buildDetailRow(
+            'Date',
+            DateFormat('EEEE, MMMM d, yyyy').format(appointmentDate),
+          ),
+          _buildDetailRow(
+            'Time',
+            widget.appointment['appointmentTime'] ?? 'Unknown Time',
+          ),
+          _buildDetailRow(
+            'Location',
+            widget.appointment['hospitalName'] ?? 'Unknown Hospital',
+          ),
+          _buildDetailRow('Donation Type', 'Blood Donation'),
+          _buildDetailRow('Status', 'Scheduled'),
         ],
       ),
     );
   }
 
   Widget _buildPreparationInstructions() {
+    // Default preparation instructions since they're not in the model
+    final defaultInstructions = [
+      'Get a good night\'s sleep before your appointment',
+      'Eat a healthy meal 3 hours before donating',
+      'Stay hydrated by drinking plenty of water',
+      'Avoid alcohol 24 hours before donating',
+      'Bring a valid ID and any required documents',
+      'Wear comfortable clothing with sleeves that can be rolled up',
+    ];
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -256,41 +291,40 @@ class _UserAppointmentDetailsScreenState extends State<UserAppointmentDetailsScr
         children: [
           const Text(
             'How to prepare',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 16),
-          ...widget.appointment['instructions'].map<Widget>((instruction) => 
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 6,
-                    height: 6,
-                    margin: const EdgeInsets.only(top: 6, right: 12),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFD7263D),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      instruction,
-                      style: TextStyle(
-                        color: Colors.grey.shade700,
-                        fontSize: 14,
-                        height: 1.4,
+          ...defaultInstructions
+              .map<Widget>(
+                (instruction) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        margin: const EdgeInsets.only(top: 6, right: 12),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFD7263D),
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                    ),
+                      Expanded(
+                        child: Text(
+                          instruction,
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: 14,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          ).toList(),
+                ),
+              )
+              .toList(),
         ],
       ),
     );
@@ -306,19 +340,13 @@ class _UserAppointmentDetailsScreenState extends State<UserAppointmentDetailsScr
             width: 100,
             child: Text(
               label,
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -335,9 +363,10 @@ class _UserAppointmentDetailsScreenState extends State<UserAppointmentDetailsScr
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => RescheduleAppointmentScreen(
-                    appointment: widget.appointment,
-                  ),
+                  builder:
+                      (context) => RescheduleAppointmentScreen(
+                        appointment: widget.appointment,
+                      ),
                 ),
               );
             },
@@ -351,10 +380,7 @@ class _UserAppointmentDetailsScreenState extends State<UserAppointmentDetailsScr
             ),
             child: const Text(
               'Reschedule',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
         ),
@@ -382,38 +408,37 @@ class _UserAppointmentDetailsScreenState extends State<UserAppointmentDetailsScr
   void _showCancelDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Cancel Appointment'),
-        content: const Text('Are you sure you want to cancel this appointment?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('No'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Cancel Appointment'),
+            content: const Text(
+              'Are you sure you want to cancel this appointment?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('No'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _cancelAppointment();
+                },
+                child: const Text('Yes, Cancel'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _cancelAppointment();
-            },
-            child: const Text('Yes, Cancel'),
-          ),
-        ],
-      ),
     );
   }
 
   void _cancelAppointment() {
-    setState(() {
-      widget.appointment['status'] = 'cancelled';
-    });
-    
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Appointment cancelled successfully'),
         backgroundColor: Colors.red,
       ),
     );
-    
+
     Navigator.pop(context);
   }
 }

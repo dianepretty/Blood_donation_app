@@ -29,9 +29,10 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       // Use the Firebase user ID to load appointments
-      final userEmail = authState.firebaseUser.email;
-      if (userEmail != null) {
-        context.read<AppointmentBloc>().add(LoadUserAppointments(userEmail));
+      final userId = authState.firebaseUser.uid;
+      print('UserAppointmentsScreen - User ID: $userId');
+      if (userId != null) {
+        context.read<AppointmentBloc>().add(LoadUserAppointments(userId));
       }
     }
   }
@@ -244,6 +245,9 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
                 state.upcomingAppointments
                     .map((apt) => _appointmentToMap(apt))
                     .toList();
+            print(
+              'UserAppointmentsScreen - Upcoming Appointments: $upcomingAppointments',
+            );
 
             if (upcomingAppointments.isEmpty) {
               return _buildEmptyState('No upcoming appointments');
