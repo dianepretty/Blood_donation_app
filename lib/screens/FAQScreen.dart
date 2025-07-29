@@ -1,3 +1,4 @@
+import 'package:blood_system/widgets/main_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -9,26 +10,26 @@ class FAQScreen extends StatelessWidget {
   static const List<Map<String, String>> faqItems = [
     {
       'title': 'Getting Started',
-      'subtitle': 'Learn about managing events, appointments, and profiles.'
+      'subtitle': 'Learn about managing events, appointments, and profiles.',
     },
     {
       'title': 'General Questions',
-      'subtitle': 'Find answers to common questions about Linklife.'
+      'subtitle': 'Find answers to common questions about Linklife.',
     },
     {
       'title': 'Troubleshooting',
-      'subtitle': 'Troubleshoot issues with the app.'
+      'subtitle': 'Troubleshoot issues with the app.',
     },
   ];
 
   static const List<Map<String, String>> supportItems = [
     {
       'title': 'How‑to Guides',
-      'subtitle': 'Step‑by‑step guides for using Linklife features.'
+      'subtitle': 'Step‑by‑step guides for using Linklife features.',
     },
     {
       'title': 'Feature Documentation',
-      'subtitle': "Detailed information about Linklife's features."
+      'subtitle': "Detailed information about Linklife's features.",
     },
   ];
 
@@ -55,33 +56,11 @@ class FAQScreen extends StatelessWidget {
       ),
     );
 
-    return Scaffold(
+    return MainNavigationWrapper(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: AppColors.red,
-        elevation: 0,
-        title: const Text(
-          'Help',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        centerTitle: true,
-        toolbarHeight: 100,
-        leading: Padding(
-          padding: const EdgeInsets.only(top: 8.0, left: 16.0),
-          child: Align(
-            alignment: Alignment.topRight,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ),
-        ),
-      ),
-      body: Theme(
+      currentPage: '/help',
+      pageTitle: 'Help',
+      child: Theme(
         data: theme,
         child: ListView(
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
@@ -102,11 +81,17 @@ class FAQScreen extends StatelessWidget {
                   ),
                   child: const Icon(Icons.help_outline, color: Colors.grey),
                 ),
-                title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                title: Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
                 children: [
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: Text(subtitle, style: TextStyle(color: Colors.grey[600])),
+                    child: Text(
+                      subtitle,
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
                   ),
                 ],
               );
@@ -125,10 +110,19 @@ class FAQScreen extends StatelessWidget {
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.insert_drive_file_outlined, color: Colors.grey),
+                  child: const Icon(
+                    Icons.insert_drive_file_outlined,
+                    color: Colors.grey,
+                  ),
                 ),
-                title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: Text(subtitle, style: TextStyle(color: Colors.grey[600])),
+                title: Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  subtitle,
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
                 onTap: () {},
               );
             }).toList(),
@@ -149,8 +143,14 @@ class FAQScreen extends StatelessWidget {
                   ),
                   child: Icon(icon, color: Colors.grey),
                 ),
-                title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: Text(subtitle, style: TextStyle(color: Colors.grey[600])),
+                title: Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  subtitle,
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
                 onTap: () {},
               );
             }).toList(),
@@ -169,9 +169,9 @@ class SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = Theme.of(context).appBarTheme.titleTextStyle;
     return Text(
-      title,
-      style: (style ?? const TextStyle(fontSize: 20, color: Colors.black))
-          .copyWith(fontWeight: FontWeight.bold),
-    );
-  }
+        title,
+        style: (style ?? const TextStyle(fontSize: 20, color: Colors.black))
+            .copyWith(fontWeight: FontWeight.bold),
+        );
+    }
 }

@@ -1,8 +1,8 @@
+import 'package:blood_system/widgets/main_navigation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../models/notification_model.dart';
-import '../theme/theme.dart';
 import 'package:intl/intl.dart';
 
 class NotificationsScreen extends StatefulWidget {
@@ -35,48 +35,37 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         final data = doc.data() as Map<String, dynamic>;
         return NotificationModel.fromFirestore(data);
       }).toList();
+
+      // Add a sample card for demo purposes
+      reminders.insert(
+        0,
+        NotificationModel(
+          title: 'Sample Appointment Reminder',
+          time: '10:00 AM',
+          details: 'Location: Kigali Hospital\nReminder: Bring your ID and arrive 15 minutes early.',
+          date: DateTime.now().add(Duration(days: 1)), // Tomorrow
+        ),
+      );
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-    final today = reminders.where((r) => _isToday(r.date)).toList();
-
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.red,
-        elevation: 0,
-        title: const Text(
-          'Notifications',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        centerTitle: true,
-        toolbarHeight: 100,
-        leading: Padding(
-          padding: const EdgeInsets.only(top: 8.0, left: 16.0),
-          child: Align(
-            alignment: Alignment.topRight,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ),
-        ),
-      ),
-      body: ListView(
+    return MainNavigationWrapper(
+      backgroundColor: Colors.white,
+      currentPage: '/notifications',
+      pageTitle: 'Notifications',
+      child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           const Text(
-            'Today',
+            'All Reminders',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(height: 8),
-          ...today.map((n) => _buildReminderTile(context, n)).toList(),
+          if (reminders.isEmpty)
+            Center(child: Text('No reminders available.')),
+          ...reminders.map((n) => _buildReminderTile(context, n)).toList(),
         ],
       ),
     );
@@ -100,10 +89,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 children: [
                   const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
                   const SizedBox(width: 4),
-                  Text(
-                    formattedDate,
-                    style: const TextStyle(color: Colors.grey, fontSize: 13),
-                  ),
+                  Text(formattedDate, style: const TextStyle(color: Colors.grey, fontSize: 13)),
                 ],
               ),
               const SizedBox(height: 4),
@@ -111,10 +97,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 children: [
                   const Icon(Icons.access_time, size: 16, color: Colors.grey),
                   const SizedBox(width: 4),
-                  Text(
-                    formattedTime,
-                    style: const TextStyle(color: Colors.grey, fontSize: 13),
-                  ),
+                  Text(formattedTime, style: const TextStyle(color: Colors.grey, fontSize: 13)),
                 ],
               ),
             ],
@@ -128,7 +111,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       ],
     );
   }
-
 
   void _showDetailsDialog(BuildContext context, NotificationModel n) {
     final formattedDate = DateFormat.yMMMMEEEEd().format(n.date);
@@ -149,72 +131,43 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
               boxShadow: const [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 20,
-                  offset: Offset(0, 8),
-                ),
+                BoxShadow(color: Colors.black26, blurRadius: 20, offset: Offset(0, 8)),
               ],
             ),
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Close button aligned top right
                 Align(
                   alignment: Alignment.topRight,
                   child: InkWell(
                     onTap: () => Navigator.of(ctx).pop(),
                     child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade100,
-                        shape: BoxShape.circle,
-                      ),
+                      decoration: BoxDecoration(color: Colors.red.shade100, shape: BoxShape.circle),
                       padding: const EdgeInsets.all(6),
-                      child: const Icon(
-                        Icons.close,
-                        size: 22,
-                        color: Colors.red,
-                      ),
+                      child: const Icon(Icons.close, size: 22, color: Colors.red),
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 8),
-
-                // Title
                 Text(
                   n.title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 22,
-                    color: Colors.redAccent,
-                  ),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: Colors.redAccent),
                   textAlign: TextAlign.center,
                 ),
-
                 const SizedBox(height: 12),
-
-                // Instead of Row, use Column for date and time to avoid horizontal overflow
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Row(
                       mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(Icons.calendar_today, size: 18, color: Colors.grey),
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(
                             formattedDate,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.black87,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            softWrap: true,
-                            overflow: TextOverflow.visible,
+                            style: const TextStyle(fontSize: 16, color: Colors.black87, fontWeight: FontWeight.w600),
                           ),
                         ),
                       ],
@@ -222,69 +175,42 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     const SizedBox(height: 6),
                     Row(
                       mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(Icons.access_time, size: 18, color: Colors.grey),
                         const SizedBox(width: 6),
                         Text(
                           formattedTime,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.black87,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: const TextStyle(fontSize: 16, color: Colors.black87, fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 16),
-
-                // Details container with scroll if needed
                 Expanded(
                   child: SingleChildScrollView(
                     child: Container(
                       padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(12)),
                       child: Text(
                         n.details,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          height: 1.5,
-                          color: Colors.black87,
-                        ),
+                        style: const TextStyle(fontSize: 16, height: 1.5, color: Colors.black87),
                         textAlign: TextAlign.center,
                       ),
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
-                // OK button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.redAccent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text(
-                      'OK',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: const Text('OK', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],
@@ -293,11 +219,5 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ),
       ),
     );
-  }
-
-
-  bool _isToday(DateTime dt) {
-    final now = DateTime.now();
-    return dt.year == now.year && dt.month == now.month && dt.day == now.day;
   }
 }

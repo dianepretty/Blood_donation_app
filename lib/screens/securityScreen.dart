@@ -1,5 +1,5 @@
+import 'package:blood_system/widgets/main_navigation.dart';
 import 'package:flutter/material.dart';
-
 import '../theme/theme.dart';
 
 class SecurityScreen extends StatefulWidget {
@@ -14,36 +14,14 @@ class _SecurityScreenState extends State<SecurityScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.red,
-        elevation: 0,
-        title: const Text(
-          'Security',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        centerTitle: true,
-        toolbarHeight: 100,
-        leading: Padding(
-          padding: const EdgeInsets.only(top: 8.0, left: 16.0),
-          child: Align(
-            alignment: Alignment.topRight,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ),
-        ),
-      ),
+    return MainNavigationWrapper(
       backgroundColor: Colors.white,
-      body: ListView(
+      currentPage: '/security',
+      pageTitle: 'Settings',
+      child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         children: [
-          const SectionTitle(title: 'Password'),
+          const SectionTitle(title: 'Security'),
           ListTile(
             contentPadding: EdgeInsets.zero,
             title: const Text('Change password'),
@@ -52,14 +30,15 @@ class _SecurityScreenState extends State<SecurityScreen> {
               style: TextStyle(color: Colors.blueGrey),
             ),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () {},
+            onTap: () {
+              Navigator.pushNamed(context, '/changePassword');
+            },
           ),
           const SizedBox(height: 24),
-
-          const SectionTitle(title: 'Two-factor authentication'),
+          const SectionTitle(title: 'Two‑factor authentication'),
           ListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Two-factor authentication'),
+            title: const Text('Two‑factor authentication'),
             subtitle: const Text(
               'Recommended',
               style: TextStyle(color: Colors.blueGrey),
@@ -74,7 +53,6 @@ class _SecurityScreenState extends State<SecurityScreen> {
             ),
           ),
           const SizedBox(height: 24),
-
           const SectionTitle(title: 'Other'),
           ListTile(
             contentPadding: EdgeInsets.zero,
@@ -114,7 +92,7 @@ class SectionTitle extends StatelessWidget {
       child: Text(
         title,
         style: const TextStyle(
-          fontSize: 18, // Increased font size
+          fontSize: 18,
           fontWeight: FontWeight.bold,
         ),
       ),
