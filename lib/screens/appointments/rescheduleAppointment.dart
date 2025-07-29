@@ -4,14 +4,16 @@ import 'package:intl/intl.dart';
 
 class RescheduleAppointmentScreen extends StatefulWidget {
   final Map<String, dynamic> appointment;
-  
+
   const RescheduleAppointmentScreen({super.key, required this.appointment});
 
   @override
-  State<RescheduleAppointmentScreen> createState() => _RescheduleAppointmentScreenState();
+  State<RescheduleAppointmentScreen> createState() =>
+      _RescheduleAppointmentScreenState();
 }
 
-class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScreen> {
+class _RescheduleAppointmentScreenState
+    extends State<RescheduleAppointmentScreen> {
   DateTime? selectedDate;
   String? selectedLocation;
 
@@ -25,7 +27,7 @@ class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScree
   @override
   void initState() {
     super.initState();
-    selectedDate = widget.appointment['date'];
+    selectedDate = widget.appointment['appointmentDate'];
     selectedLocation = widget.appointment['location'];
   }
 
@@ -133,7 +135,10 @@ class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScree
             ),
           ),
           const SizedBox(height: 12),
-          _buildDetailRow('Date', DateFormat('EEEE, MMMM d, yyyy').format(widget.appointment['date'])),
+          _buildDetailRow(
+            'Date',
+            DateFormat('EEEE, MMMM d, yyyy').format(widget.appointment['date']),
+          ),
           _buildDetailRow('Time', widget.appointment['time']),
           _buildDetailRow('Location', widget.appointment['location']),
           _buildDetailRow('Type', widget.appointment['donationType']),
@@ -168,13 +173,16 @@ class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScree
               children: [
                 Expanded(
                   child: Text(
-                    selectedDate != null 
+                    selectedDate != null
                         ? DateFormat('EEEE, MMMM d, yyyy').format(selectedDate!)
                         : 'Select date',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: selectedDate != null ? Colors.black87 : Colors.grey.shade600,
+                      color:
+                          selectedDate != null
+                              ? Colors.black87
+                              : Colors.grey.shade600,
                     ),
                   ),
                 ),
@@ -221,7 +229,10 @@ class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScree
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: selectedLocation != null ? Colors.black87 : Colors.grey.shade600,
+                      color:
+                          selectedLocation != null
+                              ? Colors.black87
+                              : Colors.grey.shade600,
                     ),
                   ),
                 ),
@@ -248,19 +259,13 @@ class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScree
             width: 80,
             child: Text(
               label,
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -269,7 +274,8 @@ class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScree
   }
 
   Widget _buildActionButtons() {
-    final bool hasChanges = selectedDate != widget.appointment['date'] ||
+    final bool hasChanges =
+        selectedDate != widget.appointment['date'] ||
         selectedLocation != widget.appointment['location'];
 
     return Column(
@@ -289,10 +295,7 @@ class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScree
             ),
             child: const Text(
               'Confirm',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
         ),
@@ -341,41 +344,37 @@ class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScree
             children: [
               const Text(
                 'Select Hospital',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 16),
-              ...locations.map((location) => GestureDetector(
-                onTap: () {
-                  setState(() {
-                    selectedLocation = location;
-                  });
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          location,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
+              ...locations.map(
+                (location) => GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      selectedLocation = location;
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            location,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
-                      ),
-                      if (selectedLocation == location)
-                        const Icon(
-                          Icons.check,
-                          color: Color(0xFFD7263D),
-                        ),
-                    ],
+                        if (selectedLocation == location)
+                          const Icon(Icons.check, color: Color(0xFFD7263D)),
+                      ],
+                    ),
                   ),
                 ),
-              )),
+              ),
             ],
           ),
         );
@@ -384,24 +383,24 @@ class _RescheduleAppointmentScreenState extends State<RescheduleAppointmentScree
   }
 
   void _rescheduleAppointment() {
-    
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Appointment Rescheduled'),
-        content: Text(
-          'Your appointment has been successfully rescheduled to ${DateFormat('EEEE, MMMM d, yyyy').format(selectedDate!)} at $selectedLocation.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close dialog
-              Navigator.pop(context); // Go back to previous screen
-            },
-            child: const Text('OK'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Appointment Rescheduled'),
+            content: Text(
+              'Your appointment has been successfully rescheduled to ${DateFormat('EEEE, MMMM d, yyyy').format(selectedDate!)} at $selectedLocation.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // Close dialog
+                  Navigator.pop(context); // Go back to previous screen
+                },
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }

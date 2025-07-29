@@ -41,6 +41,7 @@ class AppointmentBloc extends Bloc<AppointmentEvent, AppointmentState> {
   }
 
   // ADD THIS METHOD to handle LoadAdminAppointments
+  // Handle LoadAdminAppointments - Fixed implementation
   Future<void> _onLoadAdminAppointments(
     LoadAdminAppointments event,
     Emitter<AppointmentState> emit,

@@ -7,7 +7,6 @@ import 'package:blood_system/screens/appointments/book_appointment.dart';
 import 'package:blood_system/screens/appointments/rescheduleAppointment.dart';
 import 'package:blood_system/screens/appointments/user_appointmentDetails.dart';
 import 'package:blood_system/widgets/main_navigation.dart';
-// import 'package:blood_system/screens/appointments/booking_appointment.dart'; // Add your booking page import here
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -30,24 +29,27 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       // Use the Firebase user ID to load appointments
-      context.read<AppointmentBloc>().add(
-        LoadUserAppointments(authState.firebaseUser.email!),
-      );
+      final userEmail = authState.firebaseUser.email;
+      if (userEmail != null) {
+        context.read<AppointmentBloc>().add(LoadUserAppointments(userEmail));
+      }
     }
   }
 
+  // Fixed _appointmentToMap with null safety
   Map<String, dynamic> _appointmentToMap(dynamic appointment) {
     return {
-      'id': appointment.id,
-      'userId': appointment.userId,
-      'hospitalName': appointment.hospitalName,
-      'appointmentDate': appointment.appointmentDate,
-      'appointmentTime': appointment.appointmentTime,
+      'id': appointment.id ?? '',
+      'userId': appointment.userId ?? '',
+      'hospitalName': appointment.hospitalName ?? 'Unknown Hospital',
+      'appointmentDate': appointment.appointmentDate ?? DateTime.now(),
+      'appointmentTime': appointment.appointmentTime ?? 'Unknown Time',
       // Keep some display-friendly fields for UI
       'type': 'Blood Donation',
-      'location': appointment.hospitalName,
-      'date': appointment.appointmentDate,
-      'time': appointment.appointmentTime,
+      'location': appointment.hospitalName ?? 'Unknown Hospital',
+      'date': appointment.appointmentDate ?? DateTime.now(),
+      'time': appointment.appointmentTime ?? 'Unknown Time',
+      'donationType': 'Blood Donation', // Added for reschedule screen
     };
   }
 
@@ -59,7 +61,6 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
       pageTitle: 'My Appointments',
       child: Column(
         children: [
-          // _buildHeader(),
           Expanded(
             child: BlocListener<AppointmentBloc, AppointmentState>(
               listener: (context, state) {
@@ -88,7 +89,7 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
                     children: [
                       _buildUpcomingAppointments(),
                       const SizedBox(height: 24),
-                      // _buildAppointmentHistory(),
+                      _buildAppointmentHistory(),
                       const SizedBox(
                         height: 80,
                       ), // Add space for floating button
@@ -101,7 +102,6 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
         ],
       ),
       floatingActionButton: _buildBookAppointmentButton(),
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -113,15 +113,22 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
         onPressed: () {
           final authState = context.read<AuthBloc>().state;
           if (authState is AuthAuthenticated) {
-            // Navigate to booking appointment page
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder:
-                    (context) => BookAppointmentScreen(
-                      userId: authState.firebaseUser.email!,
-                    ),
-              ),
-            );
+            final userId = authState.firebaseUser.uid;
+            if (userId != null) {
+              // Navigate to booking appointment page
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => BookAppointmentScreen(userId: userId),
+                ),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Unable to get user information'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
           } else {
             // Handle case where user is not authenticated
             ScaffoldMessenger.of(context).showSnackBar(
@@ -403,8 +410,6 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
     Map<String, dynamic> appointment, {
     required bool isUpcoming,
   }) {
-    final status = appointment['status'];
-
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -424,43 +429,39 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
             leading: Container(
               width: 60,
               height: 60,
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-              child: ClipRRect(
+              decoration: BoxDecoration(
+                color: const Color(0xFFD7263D).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                  'assets/images/hospital.png',
-                  fit: BoxFit.cover,
-                  errorBuilder:
-                      (context, error, stackTrace) => Container(
-                        color: Colors.grey.shade200,
-                        child: const Icon(
-                          Icons.local_hospital,
-                          color: Color(0xFFD7263D),
-                          size: 30,
-                        ),
-                      ),
-                ),
+              ),
+              child: const Icon(
+                Icons.local_hospital,
+                color: Color(0xFFD7263D),
+                size: 30,
               ),
             ),
             title: Text(
-              appointment['type'],
+              appointment['type'] ?? 'Blood Donation',
               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  appointment['location'],
+                  appointment['location'] ?? 'Unknown Hospital',
                   style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  DateFormat('EEEE, MMMM d, yyyy').format(appointment['date']),
+                  appointment['date'] != null
+                      ? DateFormat(
+                        'EEEE, MMMM d, yyyy',
+                      ).format(appointment['date'])
+                      : 'Unknown Date',
                   style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Time: ${appointment['time']}',
+                  'Time: ${appointment['time'] ?? 'Unknown Time'}',
                   style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
                 ),
               ],
@@ -557,12 +558,6 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
     );
   }
 
-  Color _getStatusColor(String status) {
-    // Since the Appointment model doesn't have a status field,
-    // we'll use a default color or you can add status to the model
-    return const Color(0xFFD7263D);
-  }
-
   void _showCancelDialog(Map<String, dynamic> appointment) {
     showDialog(
       context: context,
@@ -580,6 +575,7 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
+                  // TODO: Implement cancel appointment functionality
                   // _cancelAppointment(appointment);
                 },
                 child: const Text('Yes, Cancel'),
