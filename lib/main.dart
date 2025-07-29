@@ -1,17 +1,21 @@
+import 'package:blood_system/blocs/appointment/bloc.dart';
+import 'package:blood_system/blocs/appointment/event.dart';
 import 'package:blood_system/blocs/auth/bloc.dart';
 import 'package:blood_system/blocs/auth/event.dart';
 import 'package:blood_system/blocs/auth/state.dart';
+import 'package:blood_system/blocs/event_bloc.dart';
+import 'package:blood_system/blocs/event_event.dart';
 import 'package:blood_system/blocs/hospital/bloc.dart';
-import 'package:blood_system/screens/login.dart';
+import 'package:blood_system/screens/appointments_router.dart';
+import 'package:blood_system/screens/events/events.dart';
 import 'package:blood_system/screens/userDetails.dart';
 import 'package:blood_system/screens/appointments/book_appointment.dart';
-import 'package:blood_system/screens/home.dart';
 import 'package:blood_system/screens/hospitalAdminRegister.dart';
 import 'package:blood_system/screens/landing.dart';
 import 'package:blood_system/screens/volunteerRegister.dart';
 import 'package:blood_system/screens/welcomepage.dart';
 // import 'package:blood_system/screens/profile.dart';
-import 'package:blood_system/screens/events_page.dart';
+import 'package:blood_system/service/appointment_service.dart';
 // import 'package:blood_system/screens/history.dart';
 import 'package:blood_system/service/hospital_service.dart';
 import 'package:blood_system/service/user_service.dart';
@@ -19,6 +23,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'firebase_options.dart';
+import 'package:blood_system/screens/home.dart';
+import 'package:blood_system/screens/login.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +47,15 @@ class MyApp extends StatelessWidget {
               (context) =>
                   AuthBloc(authService: AuthService())..add(AuthStarted()),
         ),
+        BlocProvider(
+          create:
+              (context) => AppointmentBloc(
+                appointmentService: AppointmentService(),
+                hospitalService: HospitalService(),
+              ),
+        ),
+        // Remove this duplicate bloc provider
+        BlocProvider(create: (context) => EventBloc()..add(LoadEvents())),
       ],
       child: MaterialApp(
         title: 'Blood Donation App',
@@ -48,13 +63,13 @@ class MyApp extends StatelessWidget {
         home: const AuthWrapper(),
         routes: {
           '/landing': (context) => const LandingPage(),
-          '/home': (context) => const HomePage(),
+          '/home': (context) => const HomePageContent(),
           '/hospitalAdminRegister': (context) => const HospitalAdminRegister(),
           '/volunteerRegister': (context) => const VolunteerRegister(),
           '/userDetails': (context) => const UserDetailsPage(),
-          // '/appointments': (context) => const BookAppointmentScreen(),
+          '/appointments': (context) => const AppointmentsRouter(),
           '/login': (context) => const LoginPage(),
-          '/events': (context) => const EventsPage(),
+          '/events': (context) => const EventsScreen(),
           // '/profile': (context) => const ProfilePage(),
           // '/history': (context) => const HistoryPage(),
         },
@@ -75,24 +90,20 @@ class AuthWrapper extends StatelessWidget {
 
         if (state is AuthAuthenticated) {
           // User is logged in, check role and navigate accordingly
-          final userRole = state.userData?.role.toUpperCase();
-          final originalRole = state.userData?.role;
-          print('AuthWrapper - Original role: "$originalRole"');
-          print('AuthWrapper - Uppercase role: "$userRole"');
+          final userRole = state.userData?.role;
+          print('AuthWrapper - User role: "$userRole"');
           print('AuthWrapper - User data: ${state.userData?.toJson()}');
 
-          if (userRole == 'VOLUNTEER' || originalRole == 'Volunteer') {
+          if (userRole == 'VOLUNTEER') {
             print('AuthWrapper - Navigating to HomePage');
-            return const HomePage();
-          } else if (userRole == 'HOSPITAL_ADMIN' ||
-              originalRole == 'Hospital admin' ||
-              originalRole == 'HOSPITAL_ADMIN') {
+            return const HomePageContent();
+          } else if (userRole == 'HOSPITAL_ADMIN') {
             print('AuthWrapper - Navigating to EventsPage');
-            return const EventsPage(); // Events page for hospital admin
+            return const EventsScreen(); // Events page for hospital admin
           } else {
             // Unknown role, go to landing page
             print(
-              'AuthWrapper - Unknown role: "$originalRole", navigating to LandingPage',
+              'AuthWrapper - Unknown role: "$userRole", navigating to LandingPage',
             );
             return const LandingPage();
           }

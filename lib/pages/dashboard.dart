@@ -72,6 +72,15 @@ class DashboardScreen extends StatelessWidget {
             title: 'Dashboard',
             height: headerHeight,
             showSettings: true,
+            onNotificationPressed: () {
+              // show snackbar
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Notifications coming soon!'),
+                  backgroundColor: Color(0xFFB83A3A),
+                ),
+              );
+            },
           ),
           Expanded(
             child: SingleChildScrollView(
@@ -107,8 +116,6 @@ class DashboardScreen extends StatelessWidget {
       ),
     );
   }
-
-  
 
   Widget _buildSectionTitle(String title, bool isSmallScreen) {
     return Text(

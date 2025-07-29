@@ -1,11 +1,7 @@
-import 'package:blood_system/blocs/auth/bloc.dart';
-import 'package:blood_system/blocs/auth/event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import '../blocs/appointment_bloc.dart';
-import '../blocs/appointment_event.dart';
-import '../blocs/appointment_state.dart';
+
 import '../models/appointment_model.dart';
 import '../blocs/event_bloc.dart'; // Import EventBloc
 import '../blocs/event_event.dart'; // Import EventEvent
@@ -13,25 +9,29 @@ import '../blocs/event_state.dart'; // Import EventState
 import '../models/event_model.dart'; // Import EventModel
 import '../widgets/main_navigation.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+// class HomePage extends StatelessWidget {
+//   const HomePage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => AppointmentBloc()..add(LoadAppointments()),
-        ),
-        BlocProvider(
-          create:
-              (context) => EventBloc()..add(LoadEvents()), // Provide EventBloc
-        ),
-      ],
-      child: const HomePageContent(),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return MultiBlocProvider(
+//       providers: [
+//         BlocProvider(
+//           create:
+//               (context) => AppointmentBloc(
+//                 appointmentService: AppointmentService(),
+//                 hospitalService: HospitalService(),
+//               )..add(LoadAdminAppointments('put hospital name of logegd user')),
+//         ),
+//         BlocProvider(
+//           create:
+//               (context) => EventBloc()..add(LoadEvents()), // Provide EventBloc
+//         ),
+//       ],
+//       child: const HomePageContent(),
+//     );
+//   }
+// }
 
 class HomePageContent extends StatelessWidget {
   const HomePageContent({super.key});
@@ -39,251 +39,192 @@ class HomePageContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MainNavigationWrapper(
-      currentPage: 'home',
+      // backgroundColor: const Color(0xFFF5F5F5),
       pageTitle: 'Home',
-      child: RefreshIndicator(
-        onRefresh: () async {
-          context.read<AppointmentBloc>().add(RefreshAppointments());
-          context.read<EventBloc>().add(RefreshEvents()); // Refresh events
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Upcoming appointments section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Upcoming appointments',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF333333),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        'view more',
-                        style: TextStyle(
-                          color: Color(0xFFB83A3A),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+      currentPage: '/home',
+      child: Column(
+        children: [
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () async {
+                // context.read<AppointmentBloc>().add(RefreshAppointments());
+                context.read<EventBloc>().add(
+                  RefreshEvents(),
+                ); // Refresh events
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Upcoming appointments section
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Upcoming appointments',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF333333),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.arrow_forward,
-                        color: Color(0xFFB83A3A),
-                        size: 16,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Appointment cards
-              BlocBuilder<AppointmentBloc, AppointmentState>(
-                builder: (context, state) {
-                  if (state is AppointmentLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        color: Color(0xFFB83A3A),
-                      ),
-                    );
-                  }
-
-                  if (state is AppointmentError) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            size: 64,
-                            color: Colors.red[300],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Error: ${state.message}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.red,
+                        Row(
+                          children: [
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                foregroundColor: const Color(0xFFB83A3A),
+                                textStyle: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              child: const Text('view more'),
+                              onPressed: () {
+                                // Navigate to the appointments page
+                                Navigator.of(
+                                  context,
+                                ).pushNamed('/appointments');
+                              },
                             ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () {
-                              context.read<AppointmentBloc>().add(
-                                LoadAppointments(),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFB83A3A),
-                              foregroundColor: Colors.white,
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.arrow_forward,
+                              color: Color(0xFFB83A3A),
+                              size: 16,
                             ),
-                            child: const Text('Retry'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  if (state is AppointmentLoaded ||
-                      state is AppointmentOperationSuccess) {
-                    // Access upcomingAppointments from both states
-                    final appointments =
-                        state is AppointmentLoaded
-                            ? state.upcomingAppointments
-                            : (state as AppointmentOperationSuccess)
-                                .upcomingAppointments;
-
-                    if (appointments.isEmpty) {
-                      return _buildEmptyState('No upcoming appointments');
-                    } else {
-                      return Column(
-                        children:
-                            appointments
-                                .take(2)
-                                .map(
-                                  (appointment) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 12),
-                                    child: _buildAppointmentCard(appointment),
-                                  ),
-                                )
-                                .toList(),
-                      );
-                    }
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-
-              const SizedBox(height: 32),
-
-              // Events section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Events',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF333333),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        'view more',
-                        style: TextStyle(
-                          color: Color(0xFFB83A3A),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                          ],
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.arrow_forward,
-                        color: Color(0xFFB83A3A),
-                        size: 16,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                      ],
+                    ),
 
-              const SizedBox(height: 16),
+                    const SizedBox(height: 16),
+                    const SizedBox(height: 32),
 
-              // Event cards (using BlocBuilder for events)
-              BlocBuilder<EventBloc, EventState>(
-                builder: (context, state) {
-                  if (state is EventLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        color: Color(0xFFB83A3A),
-                      ),
-                    );
-                  }
-
-                  if (state is EventError) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            size: 64,
-                            color: Colors.red[300],
+                    // Events section
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Events',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF333333),
                           ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Error: ${state.message}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.red,
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              'view more',
+                              style: TextStyle(
+                                color: Color(0xFFB83A3A),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () {
-                              context.read<EventBloc>().add(LoadEvents());
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFB83A3A),
-                              foregroundColor: Colors.white,
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.arrow_forward,
+                              color: Color(0xFFB83A3A),
+                              size: 16,
                             ),
-                            child: const Text('Retry'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
+                          ],
+                        ),
+                      ],
+                    ),
 
-                  if (state is EventLoaded || state is EventOperationSuccess) {
-                    final events =
-                        state is EventLoaded
-                            ? state.events
-                            : (state as EventOperationSuccess).events;
+                    const SizedBox(height: 16),
 
-                    if (events.isEmpty) {
-                      return _buildEmptyState('No upcoming events');
-                    } else {
-                      return Column(
-                        children:
-                            events
-                                .take(3)
-                                .map(
-                                  (event) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 12),
-                                    child: _buildEventCard(event),
+                    // Event cards (using BlocBuilder for events)
+                    BlocBuilder<EventBloc, EventState>(
+                      builder: (context, state) {
+                        if (state is EventLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(
+                              color: Color(0xFFB83A3A),
+                            ),
+                          );
+                        }
+
+                        if (state is EventError) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.error_outline,
+                                  size: 64,
+                                  color: Colors.red[300],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Error: ${state.message}',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.red,
                                   ),
-                                )
-                                .toList(),
-                      );
-                    }
-                  }
-                  return const SizedBox.shrink();
-                },
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 16),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    context.read<EventBloc>().add(LoadEvents());
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFB83A3A),
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: const Text('Retry'),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        if (state is EventLoaded ||
+                            state is EventOperationSuccess) {
+                          final events =
+                              state is EventLoaded
+                                  ? state.events
+                                  : (state as EventOperationSuccess).events;
+
+                          if (events.isEmpty) {
+                            return _buildEmptyState('No upcoming events');
+                          } else {
+                            return Column(
+                              children:
+                                  events
+                                      .take(3)
+                                      .map(
+                                        (event) => Padding(
+                                          padding: const EdgeInsets.only(
+                                            bottom: 12,
+                                          ),
+                                          child: _buildEventCard(event),
+                                        ),
+                                      )
+                                      .toList(),
+                            );
+                          }
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildAppointmentCard(Appointment appointment) {
     final dateFormatter = DateFormat('M/d/yyyy');
-    final formattedDate = dateFormatter.format(appointment.date);
+    final formattedDate = dateFormatter.format(appointment.appointmentDate);
 
     return Container(
       decoration: BoxDecoration(
@@ -304,33 +245,33 @@ class HomePageContent extends StatelessWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    appointment.type,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF333333),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    appointment.hospital,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF666666),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '$formattedDate from ${appointment.timeFrom} to ${appointment.timeTo}', // Updated to use timeFrom and timeTo
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF888888),
-                    ),
-                  ),
-                ],
+                // children: [
+                //   Text(
+                //     appointment.type,
+                //     style: const TextStyle(
+                //       fontSize: 16,
+                //       fontWeight: FontWeight.w600,
+                //       color: Color(0xFF333333),
+                //     ),
+                //   ),
+                //   const SizedBox(height: 4),
+                //   Text(
+                //     appointment.hospital,
+                //     style: const TextStyle(
+                //       fontSize: 14,
+                //       fontWeight: FontWeight.w600,
+                //       color: Color(0xFF666666),
+                //     ),
+                //   ),
+                //   const SizedBox(height: 4),
+                //   Text(
+                //     '$formattedDate from ${appointment.timeFrom} to ${appointment.timeTo}', // Updated to use timeFrom and timeTo
+                //     style: const TextStyle(
+                //       fontSize: 14,
+                //       color: Color(0xFF888888),
+                //     ),
+                //   ),
+                // ],
               ),
             ),
             Container(

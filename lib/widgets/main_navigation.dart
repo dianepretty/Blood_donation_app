@@ -1,3 +1,4 @@
+import 'package:blood_system/widgets/red_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/auth/bloc.dart';
@@ -10,12 +11,24 @@ class MainNavigationWrapper extends StatefulWidget {
   final Widget child;
   final String currentPage;
   final String pageTitle;
+  final Widget? floatingActionButton;
+  final bool wrapWithScaffold;
+  final bool showAppBar;
+  final bool showDrawer;
+  final bool showBottomNav;
+  final Color? backgroundColor;
 
   const MainNavigationWrapper({
     super.key,
     required this.child,
     required this.currentPage,
     required this.pageTitle,
+    this.floatingActionButton,
+    this.wrapWithScaffold = true,
+    this.showAppBar = true,
+    this.showDrawer = true,
+    this.showBottomNav = true,
+    this.backgroundColor,
   });
 
   @override
@@ -39,43 +52,53 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
           userRole = authState.userData?.role;
         }
 
+        // If wrapWithScaffold is false, just return the child with navigation logic
+        if (!widget.wrapWithScaffold) {
+          return widget.child;
+        }
+
         return Scaffold(
           key: _scaffoldKey,
-          backgroundColor: const Color(0xFFF5F5F5),
-          drawer: CustomDrawer(
-            currentPage: widget.currentPage,
-            userName: userName,
-            userEmail: userEmail,
-            userRole: userRole,
-          ),
-          body: Column(
-            children: [
-              // Custom App Bar
-              CustomAppBar(
-                pageName: widget.pageTitle,
-                scaffoldKey: _scaffoldKey,
-                onNotificationPressed: () {
-                  // Handle notification press
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Notifications coming soon!'),
-                      backgroundColor: Color(0xFFB83A3A),
-                    ),
-                  );
-                },
-              ),
-
-              // Main Content
-              Expanded(child: widget.child),
-            ],
-          ),
-          bottomNavigationBar: CustomBottomNavigation(
-            currentPage: widget.currentPage,
-            userRole: userRole ?? 'VOLUNTEER',
-            onTap: (index) {
-              _handleBottomNavigation(index, userRole ?? 'VOLUNTEER');
-            },
-          ),
+          backgroundColor: widget.backgroundColor ?? const Color(0xFFF5F5F5),
+          drawer:
+              widget.showDrawer
+                  ? CustomDrawer(
+                    currentPage: widget.currentPage,
+                    userName: userName,
+                    userEmail: userEmail,
+                    userRole: userRole,
+                  )
+                  : null,
+          appBar:
+              widget.showAppBar
+                  ? CustomAppBar(
+                    pageName: widget.pageTitle,
+                    scaffoldKey: _scaffoldKey,
+                    onNotificationPressed: () {
+                      // Handle notification press
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Notifications coming soon!'),
+                          backgroundColor: Color(0xFFB83A3A),
+                        ),
+                      );
+                    },
+                  )
+                  : null,
+          body: widget.child,
+          floatingActionButton: widget.floatingActionButton,
+          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+          bottomNavigationBar:
+              widget.showBottomNav
+                  ? CustomBottomNavigation(
+                    currentPage: widget.currentPage,
+                    userRole: userRole ?? 'VOLUNTEER',
+                    onTap: (index) {
+                      _handleBottomNavigation(index, userRole ?? 'VOLUNTEER');
+                    },
+                    child: SingleChildScrollView(child: SizedBox.shrink()),
+                  )
+                  : null,
         );
       },
     );
@@ -132,6 +155,86 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
       return 'events';
     } else {
       return 'home';
+    }
+  }
+
+  // Static method to provide navigation functionality to existing Scaffolds
+  static Widget withNavigation({
+    required BuildContext context,
+    required String currentPage,
+    required String userRole,
+  }) {
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, authState) {
+        String? actualUserRole = userRole;
+
+        if (authState is AuthAuthenticated) {
+          actualUserRole = authState.userData?.role ?? userRole;
+        }
+
+        return CustomBottomNavigation(
+          currentPage: currentPage,
+          userRole: actualUserRole,
+          onTap: (index) {
+            _handleBottomNavigationStatic(
+              context,
+              index,
+              actualUserRole ?? 'VOLUNTEER',
+              currentPage,
+            );
+          },
+          child: SingleChildScrollView(child: SizedBox.shrink()),
+        );
+      },
+    );
+  }
+
+  static void _handleBottomNavigationStatic(
+    BuildContext context,
+    int index,
+    String userRole,
+    String currentPage,
+  ) {
+    final role = userRole.toUpperCase();
+
+    if (role == 'HOSPITAL_ADMIN' || role == 'HOSPITAL ADMIN') {
+      // Hospital Admin navigation
+      switch (index) {
+        case 0:
+          if (currentPage != 'events') {
+            Navigator.pushReplacementNamed(context, '/events');
+          }
+          break;
+        case 1:
+          if (currentPage != 'appointments') {
+            Navigator.pushReplacementNamed(context, '/appointments');
+          }
+          break;
+        case 2:
+          if (currentPage != 'profile') {
+            Navigator.pushReplacementNamed(context, '/profile');
+          }
+          break;
+      }
+    } else {
+      // Volunteer navigation
+      switch (index) {
+        case 0:
+          if (currentPage != 'home') {
+            Navigator.pushReplacementNamed(context, '/home');
+          }
+          break;
+        case 1:
+          if (currentPage != 'history') {
+            Navigator.pushReplacementNamed(context, '/history');
+          }
+          break;
+        case 2:
+          if (currentPage != 'profile') {
+            Navigator.pushReplacementNamed(context, '/profile');
+          }
+          break;
+      }
     }
   }
 }
