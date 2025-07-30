@@ -10,12 +10,15 @@ class CustomDrawer extends StatelessWidget {
   final String? userEmail;
   final String? userRole;
 
+  final VoidCallback? onNavigateToFAQ;
+
   const CustomDrawer({
     super.key,
     required this.currentPage,
     this.userName,
     this.userEmail,
     this.userRole,
+    this.onNavigateToFAQ, // <-- Add the new param here
   });
 
   @override
@@ -25,13 +28,8 @@ class CustomDrawer extends StatelessWidget {
         color: Colors.white,
         child: Column(
           children: [
-            // Header with user info
             _buildHeader(context),
-
-            // Navigation items
             Expanded(child: _buildNavigationItems(context)),
-
-            // Logout section
             _buildLogoutSection(context),
           ],
         ),
@@ -58,7 +56,6 @@ class CustomDrawer extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Background image
           ClipRRect(
             borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(24),
@@ -69,7 +66,6 @@ class CustomDrawer extends StatelessWidget {
               fit: BoxFit.cover,
             ),
           ),
-          // Semi-transparent red overlay
           Container(
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.only(
@@ -79,13 +75,11 @@ class CustomDrawer extends StatelessWidget {
               color: const Color(0xFFD7263D).withOpacity(0.7),
             ),
           ),
-          // User content
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // User avatar
                 CircleAvatar(
                   radius: 30,
                   backgroundColor: Colors.white.withOpacity(0.2),
@@ -96,8 +90,6 @@ class CustomDrawer extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // User name
                 Text(
                   userName ?? 'User Name',
                   style: const TextStyle(
@@ -107,8 +99,6 @@ class CustomDrawer extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-
-                // User email
                 Text(
                   userEmail ?? 'user@example.com',
                   style: TextStyle(
@@ -117,8 +107,6 @@ class CustomDrawer extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-
-                // User role
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
@@ -151,7 +139,6 @@ class CustomDrawer extends StatelessWidget {
     List<Map<String, dynamic>> navigationItems = [];
 
     if (role == 'HOSPITAL_ADMIN' || role == 'HOSPITAL ADMIN') {
-      // Hospital Admin navigation items
       navigationItems = [
         {
           'title': 'Events',
@@ -180,12 +167,11 @@ class CustomDrawer extends StatelessWidget {
         {
           'title': 'Help & Support',
           'icon': Icons.help_outline,
-          'route': '/help',
+          'route': '/faq',
           'page': 'help',
         },
       ];
     } else {
-      // Volunteer navigation items
       navigationItems = [
         {
           'title': 'Home',
@@ -226,7 +212,7 @@ class CustomDrawer extends StatelessWidget {
         {
           'title': 'Help & Support',
           'icon': Icons.help_outline,
-          'route': '/help',
+          'route': '/faq',
           'page': 'help',
         },
       ];
@@ -239,6 +225,16 @@ class CustomDrawer extends StatelessWidget {
         final item = navigationItems[index];
         final isSelected = currentPage.toLowerCase() == item['page'];
 
+        if (item['page'] == 'help') {
+          return _buildHelpNavigationItem(
+            context,
+            title: item['title'] as String,
+            icon: item['icon'] as IconData,
+            route: item['route'] as String,
+            isSelected: isSelected,
+          );
+        }
+
         return _buildNavigationItem(
           context,
           title: item['title'] as String,
@@ -250,20 +246,17 @@ class CustomDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildNavigationItem(
-    BuildContext context, {
-    required String title,
-    required IconData icon,
-    required String route,
-    required bool isSelected,
-  }) {
+  Widget _buildHelpNavigationItem(
+      BuildContext context, {
+        required String title,
+        required IconData icon,
+        required String route,
+        required bool isSelected,
+      }) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color:
-            isSelected
-                ? const Color(0xFFB83A3A).withOpacity(0.1)
-                : Colors.transparent,
+        color: isSelected ? const Color(0xFFB83A3A).withOpacity(0.1) : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
@@ -280,29 +273,85 @@ class CustomDrawer extends StatelessWidget {
             fontSize: 16,
           ),
         ),
-        trailing:
-            isSelected
-                ? Container(
-                  width: 4,
-                  height: 24,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFB83A3A),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(2),
-                      bottomLeft: Radius.circular(2),
-                    ),
-                  ),
-                )
-                : null,
+        trailing: isSelected
+            ? Container(
+          width: 4,
+          height: 24,
+          decoration: const BoxDecoration(
+            color: Color(0xFFB83A3A),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(2),
+              bottomLeft: Radius.circular(2),
+            ),
+          ),
+        )
+            : null,
         onTap: () {
-          Navigator.pop(context); // Close drawer
-          if (route != '/home') {
-            Navigator.pushNamed(context, route);
+          Navigator.pop(context); // Close drawer first
+
+          if (onNavigateToFAQ != null) {
+            onNavigateToFAQ!(); // call callback if provided
+          } else {
+            // fallback navigation
+            if (route != '/home') {
+              Navigator.pushNamed(context, route);
+            }
           }
         },
       ),
     );
   }
+
+  Widget _buildNavigationItem(
+      BuildContext context, {
+        required String title,
+        required IconData icon,
+        required String route,
+        required bool isSelected,
+      }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: isSelected
+            ? const Color(0xFFB83A3A).withOpacity(0.1)
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ListTile(
+        leading: Icon(
+          icon,
+          color: isSelected ? const Color(0xFFB83A3A) : Colors.grey[600],
+          size: 24,
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            color: isSelected ? const Color(0xFFB83A3A) : Colors.grey[800],
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            fontSize: 16,
+          ),
+        ),
+        trailing: isSelected
+            ? Container(
+          width: 4,
+          height: 24,
+          decoration: const BoxDecoration(
+            color: Color(0xFFB83A3A),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(2),
+              bottomLeft: Radius.circular(2),
+            ),
+          ),
+        )
+            : null,
+        onTap: () {
+          Navigator.pop(context); // Close drawer
+          Navigator.pushNamed(context, route); // Always navigate
+        },
+      ),
+    );
+  }
+
 
   Widget _buildLogoutSection(BuildContext context) {
     return Container(
@@ -314,7 +363,6 @@ class CustomDrawer extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Logout button
           SizedBox(
             width: double.infinity,
             child: TextButton.icon(

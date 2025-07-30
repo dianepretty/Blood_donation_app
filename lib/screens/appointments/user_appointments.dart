@@ -174,38 +174,19 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.event_note,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                'My Appointments',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              // Existing back and title logic...
               const Spacer(),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.notifications,
-                  color: Colors.white,
-                  size: 20,
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pushNamed('/notifications');
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.notifications, color: Colors.white, size: 20),
                 ),
               ),
             ],
@@ -214,6 +195,7 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
       ),
     );
   }
+
 
   Widget _buildUpcomingAppointments() {
     return Column(

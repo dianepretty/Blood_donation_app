@@ -17,30 +17,27 @@ class _EditEventScreenState extends State<EditEventScreen>
     with TickerProviderStateMixin {
   late TextEditingController titleController;
   late TextEditingController locationController;
-  late TextEditingController attendeesController;
+  late TextEditingController descriptionController;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
-  String? selectedType;
   String? selectedStatus;
   DateTime? selectedDate;
-  final List<String> types = ['medical', 'community', 'social'];
   final List<String> statuses = ['active', 'upcoming', 'completed'];
 
   // Focus nodes for better form navigation
   final FocusNode _titleFocusNode = FocusNode();
   final FocusNode _locationFocusNode = FocusNode();
-  final FocusNode _attendeesFocusNode = FocusNode();
+  final FocusNode _descriptionFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     titleController = TextEditingController(text: widget.event['title']);
     locationController = TextEditingController(text: widget.event['location']);
-    attendeesController = TextEditingController(
-      text: widget.event['attendees'].toString(),
+    descriptionController = TextEditingController(
+      text: widget.event['description'] ?? '',
     );
-    selectedType = widget.event['type'];
     selectedStatus = widget.event['status'];
     selectedDate = widget.event['date'];
 
@@ -62,7 +59,7 @@ class _EditEventScreenState extends State<EditEventScreen>
     _animationController.dispose();
     _titleFocusNode.dispose();
     _locationFocusNode.dispose();
-    _attendeesFocusNode.dispose();
+    _descriptionFocusNode.dispose();
     super.dispose();
   }
 
@@ -226,34 +223,17 @@ class _EditEventScreenState extends State<EditEventScreen>
                           controller: locationController,
                           focusNode: _locationFocusNode,
                           hintText: 'Enter event location',
-                          nextFocusNode: _attendeesFocusNode,
+                          nextFocusNode: _descriptionFocusNode,
                         ),
                       ),
 
                       _buildFormField(
-                        label: 'Type',
-                        icon: Icons.category_rounded,
-                        child: _buildDropdown(
-                          value: selectedType,
-                          items: types,
-                          hint: 'Select event type',
-                          onChanged: (value) {
-                            setState(() {
-                              selectedType = value;
-                            });
-                            HapticFeedback.selectionClick();
-                          },
-                        ),
-                      ),
-
-                      _buildFormField(
-                        label: 'Attendees',
-                        icon: Icons.people_rounded,
+                        label: 'Description',
+                        icon: Icons.description_rounded,
                         child: _buildTextField(
-                          controller: attendeesController,
-                          focusNode: _attendeesFocusNode,
-                          hintText: 'Number of attendees',
-                          keyboardType: TextInputType.number,
+                          controller: descriptionController,
+                          focusNode: _descriptionFocusNode,
+                          hintText: 'Event description',
                         ),
                       ),
 
@@ -563,8 +543,7 @@ class _EditEventScreenState extends State<EditEventScreen>
         titleController.text.isNotEmpty &&
         selectedDate != null &&
         locationController.text.isNotEmpty &&
-        selectedType != null &&
-        attendeesController.text.isNotEmpty &&
+        descriptionController.text.isNotEmpty &&
         selectedStatus != null;
 
     return Row(
@@ -619,17 +598,16 @@ class _EditEventScreenState extends State<EditEventScreen>
     final docId = widget.event['id'];
     final eventData = {
       'name': titleController.text.trim(),
-      'type': selectedType,
       'location': locationController.text.trim(),
       'date': Timestamp.fromDate(
         selectedDate!,
       ), // Convert DateTime to Timestamp
-      'timeFrom': '', // Add time fields if needed
-      'timeTo': '',
-      'description':
-          attendeesController.text.trim(), // Use correct field if needed
-      'attendees': int.tryParse(attendeesController.text.trim()) ?? 0,
+      'timeFrom': widget.event['timeFrom'] ?? '',
+      'timeTo': widget.event['timeTo'] ?? '',
+      'description': descriptionController.text.trim(),
       'status': selectedStatus,
+      'hospitalId': widget.event['hospitalId'] ?? '',
+      'adminId': widget.event['adminId'] ?? '',
     };
     await FirebaseFirestore.instance
         .collection('events')

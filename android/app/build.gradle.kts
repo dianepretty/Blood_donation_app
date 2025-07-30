@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.blood"
+    namespace = "com.example.blood_donation_app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "26.3.11579264"
 
