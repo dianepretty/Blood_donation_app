@@ -50,6 +50,7 @@ class _LoginPageState extends State<LoginPage> {
                 if (state is AuthAuthenticated) {
                   print('LoginPage - Authentication successful');
                   print('LoginPage - User role: ${state.userData?.role}');
+                  print('LoginPage - User data: ${state.userData?.toJson()}');
                   // Add a small delay to ensure Firebase auth is fully processed
                   Future.delayed(const Duration(milliseconds: 500), () {
                     if (mounted) {
@@ -61,6 +62,7 @@ class _LoginPageState extends State<LoginPage> {
                   });
                 } else if (state is AuthError) {
                   // Show error message
+                  print('LoginPage - AuthError received: ${state.message}');
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(state.message),
@@ -70,6 +72,7 @@ class _LoginPageState extends State<LoginPage> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
+                      duration: const Duration(seconds: 4),
                     ),
                   );
                 } else if (state is AuthPasswordResetSent) {
@@ -80,6 +83,34 @@ class _LoginPageState extends State<LoginPage> {
                         'Password reset email sent to ${state.email}',
                       ),
                       backgroundColor: Colors.green,
+                      behavior: SnackBarBehavior.floating,
+                      margin: const EdgeInsets.all(16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  );
+                } else if (state is AuthEmailVerificationSent) {
+                  // Show email verification confirmation
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Verification email sent to ${state.email}',
+                      ),
+                      backgroundColor: Colors.green,
+                      behavior: SnackBarBehavior.floating,
+                      margin: const EdgeInsets.all(16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  );
+                } else if (state is AuthEmailNotVerified) {
+                  // Show email not verified message
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: Colors.orange,
                       behavior: SnackBarBehavior.floating,
                       margin: const EdgeInsets.all(16),
                       shape: RoundedRectangleBorder(
@@ -322,24 +353,14 @@ class _LoginPageState extends State<LoginPage> {
                             width: double.infinity,
                             height: 56,
                             child: OutlinedButton.icon(
-                              onPressed:
-                                  _rememberMe
-                                      ? null
-                                      : () {
-                                        context.read<AuthBloc>().add(
-                                          AuthGoogleSignInRequested(),
-                                        );
-                                      },
-                              icon:
-                                  _rememberMe
-                                      ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                      : Image.asset("assets/images/google.png"),
+                              onPressed: () {},
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: Colors.grey[300]!),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(28),
+                                ),
+                              ),
+                              icon: Image.asset('assets/images/google.png'),
                               label: Text(
                                 'Continue with Google',
                                 style: TextStyle(
@@ -429,10 +450,6 @@ class _LoginPageState extends State<LoginPage> {
       context: context,
       builder: (context) => const RoleSelectionDialog(),
     );
-  }
-
-  void _handleGoogleSignIn() {
-    context.read<AuthBloc>().add(AuthGoogleSignInRequested());
   }
 
   void _showForgotPasswordDialog() {

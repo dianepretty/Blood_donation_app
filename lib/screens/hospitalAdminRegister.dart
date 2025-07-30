@@ -387,7 +387,7 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
                                 ),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // Sign Up Link
                     Center(
@@ -439,8 +439,9 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
 
     if (_formKey.currentState!.validate()) {
       print(
-        'HospitalAdminRegister - Form validated, dispatching AuthSignUpRequested',
+        'HospitalAdminRegister - Form validated, dispatching AuthSignUpRequested ${selectedHospital?.name}',
       );
+
       context.read<AuthBloc>().add(
         AuthSignUpRequested(
           fullName: _emailController.text.trim(),
