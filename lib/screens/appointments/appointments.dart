@@ -317,49 +317,25 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   Widget _buildAppointmentCard(Map<String, dynamic> appointment) {
     final userId = appointment['userId'] as String;
 
-    return BlocListener<AuthBloc, AuthState>(
-      listener: (context, state) {
-        if (state is AuthUserDataLoaded && state.userId == userId) {
-          setState(() {
-            userDataCache[userId] = {
-              'fullName': state.userData?.fullName ?? 'Unknown User',
-              'phoneNumber': state.userData?.phoneNumber ?? 'N/A',
-              'bloodType': state.userData?.bloodType ?? 'N/A',
-              'email': state.userData?.email ?? 'N/A',
-            };
-          });
-        }
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: _buildCardContent(appointment, userId),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
+      child: _buildCardContent(appointment),
     );
   }
 
-  Widget _buildCardContent(Map<String, dynamic> appointment, String userId) {
-    // Check if user data is cached
-    final userData = userDataCache[userId];
-
-    // If not cached, trigger the event to load user data
-    if (userData == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<AuthBloc>().add(AuthGetUserDataRequested(userId));
-      });
-    }
-
+  Widget _buildCardContent(Map<String, dynamic> appointment) {
     return Row(
       children: [
         Container(
@@ -376,13 +352,13 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'User: ${userData?['fullName'] ?? 'Loading...'}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
+              // Text(
+              //   'User: ${userData?['fullName'] ?? 'Loading...'}',
+              //   style: const TextStyle(
+              //     fontWeight: FontWeight.w600,
+              //     fontSize: 14,
+              //   ),
+              // ),
               const SizedBox(height: 2),
               Text(
                 '${appointment['appointmentTime']} - Blood Donation',
@@ -404,17 +380,6 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              if (userData != null) ...[
-                const SizedBox(height: 2),
-                Text(
-                  'Blood Type: ${userData['bloodType']}',
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
             ],
           ),
         ),
@@ -422,9 +387,6 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
           onTap: () {
             // Create enhanced appointment data with user info
             final enhancedAppointment = Map<String, dynamic>.from(appointment);
-            if (userData != null) {
-              enhancedAppointment.addAll(userData);
-            }
 
             Navigator.of(context).push(
               MaterialPageRoute(

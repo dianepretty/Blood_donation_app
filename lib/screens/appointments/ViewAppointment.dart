@@ -1,23 +1,26 @@
+import 'package:blood_system/widgets/main_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class AppointmentDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> appointment;
-  
+
   const AppointmentDetailsScreen({super.key, required this.appointment});
 
   @override
-  State<AppointmentDetailsScreen> createState() => _AppointmentDetailsScreenState();
+  State<AppointmentDetailsScreen> createState() =>
+      _AppointmentDetailsScreenState();
 }
 
 class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return MainNavigationWrapper(
       backgroundColor: const Color(0xFFF8F9FA),
-      body: Column(
+      currentPage: '/appointmentDetails',
+      pageTitle: 'Appointment Details',
+      child: Column(
         children: [
-          _buildHeader(),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
@@ -38,52 +41,6 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      height: 120,
-      decoration: const BoxDecoration(
-        color: Color(0xFFD7263D),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            children: [
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.close,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                'Appointment Details',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildPatientInfo() {
     return Row(
       children: [
@@ -94,11 +51,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
             color: Colors.grey.shade200,
             borderRadius: BorderRadius.circular(25),
           ),
-          child: const Icon(
-            Icons.person,
-            color: Color(0xFFD7263D),
-            size: 24,
-          ),
+          child: const Icon(Icons.person, color: Color(0xFFD7263D), size: 24),
         ),
         const SizedBox(width: 12),
         Column(
@@ -106,17 +59,11 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
           children: [
             Text(
               'Patient',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             Text(
               'Blood Donor',
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
             ),
           ],
         ),
@@ -143,16 +90,22 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
         children: [
           const Text(
             'Appointment Details',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 12),
           _buildDetailRow('Appointment ID', widget.appointment['id'] ?? 'N/A'),
-          _buildDetailRow('Date', _formatDate(widget.appointment['appointmentDate'])),
-          _buildDetailRow('Time', widget.appointment['appointmentTime'] ?? 'N/A'),
-          _buildDetailRow('Hospital', widget.appointment['hospitalName'] ?? 'N/A'),
+          _buildDetailRow(
+            'Date',
+            _formatDate(widget.appointment['appointmentDate']),
+          ),
+          _buildDetailRow(
+            'Time',
+            widget.appointment['appointmentTime'] ?? 'N/A',
+          ),
+          _buildDetailRow(
+            'Hospital',
+            widget.appointment['hospitalName'] ?? 'N/A',
+          ),
           _buildDetailRow('Type', 'Blood Donation'),
         ],
       ),
@@ -178,14 +131,14 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
         children: [
           const Text(
             'Patient Information',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 12),
           _buildDetailRow('User ID', widget.appointment['userId'] ?? 'N/A'),
-          _buildDetailRow('Email', widget.appointment['userId'] ?? 'N/A'), // Using userId as email identifier
+          _buildDetailRow(
+            'Email',
+            widget.appointment['userId'] ?? 'N/A',
+          ), // Using userId as email identifier
         ],
       ),
     );
@@ -201,19 +154,13 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
             width: 100,
             child: Text(
               label,
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -223,13 +170,15 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
 
   String _formatDate(dynamic date) {
     if (date == null) return 'N/A';
-    
+
     try {
       if (date is DateTime) {
         return DateFormat('MMM d, yyyy').format(date);
       } else if (date is String) {
         final parsedDate = DateTime.tryParse(date);
-        return parsedDate != null ? DateFormat('MMM d, yyyy').format(parsedDate) : date;
+        return parsedDate != null
+            ? DateFormat('MMM d, yyyy').format(parsedDate)
+            : date;
       }
       return date.toString();
     } catch (e) {

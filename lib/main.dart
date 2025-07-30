@@ -128,6 +128,8 @@ class MyApp extends StatelessWidget {
               '/events': (context) => const EventsRouter(),
               '/profile': (context) => const ProfilePage(),
               '/history': (context) => const HistoryPage(),
+              '/email-verification':
+                  (context) => const EmailVerificationScreen(),
             },
           );
         },
@@ -150,7 +152,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
   void initState() {
     super.initState();
     // Set a timeout to prevent infinite loading
-    _timeoutTimer = Timer(const Duration(seconds: 30), () {
+    _timeoutTimer = Timer(const Duration(seconds: 3000), () {
       if (mounted) {
         print(
           'AuthWrapper - Timeout reached, forcing navigation to landing page',

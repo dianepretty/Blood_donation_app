@@ -47,12 +47,27 @@ class _LoginPageState extends State<LoginPage> {
               listener: (context, state) {
                 print('LoginPage - AuthState changed: ${state.runtimeType}');
 
-                if (state is AuthAuthenticated) {
+                if (state is AuthSignInSuccess) {
+                  // Show success message
+                  print('LoginPage - Login success: ${state.message}');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: Colors.green,
+                      behavior: SnackBarBehavior.floating,
+                      margin: const EdgeInsets.all(16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      duration: const Duration(seconds: 3),
+                    ),
+                  );
+                } else if (state is AuthAuthenticated) {
                   print('LoginPage - Authentication successful');
                   print('LoginPage - User role: ${state.userData?.role}');
                   print('LoginPage - User data: ${state.userData?.toJson()}');
                   // Add a small delay to ensure Firebase auth is fully processed
-                  Future.delayed(const Duration(milliseconds: 500), () {
+                  Future.delayed(const Duration(milliseconds: 1000), () {
                     if (mounted) {
                       // Navigate back to home - AuthWrapper will handle the routing
                       Navigator.of(

@@ -3,6 +3,7 @@ import 'package:blood_system/blocs/appointment/event.dart';
 import 'package:blood_system/blocs/appointment/state.dart';
 import 'package:blood_system/blocs/auth/bloc.dart';
 import 'package:blood_system/blocs/auth/state.dart';
+import 'package:blood_system/widgets/main_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -105,11 +106,12 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     AppointmentState state,
     String userId,
   ) {
-    return Scaffold(
+    return MainNavigationWrapper(
       backgroundColor: const Color(0xFFF8F9FA),
-      body: Column(
+      currentPage: '/bookAppointment',
+      pageTitle: 'Book Appointment',
+      child: Column(
         children: [
-          _buildHeader(),
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
@@ -131,7 +133,6 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
               ),
             ),
           ),
-          _buildBottomNavigation(),
         ],
       ),
     );

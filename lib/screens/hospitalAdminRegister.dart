@@ -54,18 +54,45 @@ class _HospitalAdminRegisterState extends State<HospitalAdminRegister> {
       ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          print(
-            'HospitalAdminRegister - AuthState changed: ${state.runtimeType}',
-          );
+          print('Register - AuthState changed: ${state.runtimeType}');
 
-          if (state is AuthEmailVerificationSent) {
-            // Email verification sent, navigate to verification screen
+          if (state is AuthSignUpSuccess) {
+            // Show success message
+            print('Register - Signup success: ${state.message}');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.green,
+                behavior: SnackBarBehavior.floating,
+                margin: const EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          } else if (state is AuthEmailVerificationSent) {
+            // Show email verification message and navigate
+            print('Register - Email verification sent: ${state.email}');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Verification email sent to ${state.email}. Please check your inbox.',
+                ),
+                backgroundColor: Colors.blue,
+                behavior: SnackBarBehavior.floating,
+                margin: const EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                duration: const Duration(seconds: 4),
+              ),
+            );
+            // Navigate to verification screen
             Navigator.of(context).pushReplacementNamed('/email-verification');
           } else if (state is AuthError) {
             // Show error message
-            print(
-              'HospitalAdminRegister - AuthError received: ${state.message}',
-            );
+            print('Register - AuthError received: ${state.message}');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),

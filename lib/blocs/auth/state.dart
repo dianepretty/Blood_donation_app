@@ -80,3 +80,21 @@ class AuthUserDataLoaded extends AuthState {
   @override
   List<Object?> get props => [userId, userData];
 }
+
+class AuthSignInSuccess extends AuthState {
+  final String message;
+
+  const AuthSignInSuccess(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+class AuthSignUpSuccess extends AuthState {
+  final String message;
+
+  const AuthSignUpSuccess(this.message);
+
+  @override
+  List<Object> get props => [message];
+}

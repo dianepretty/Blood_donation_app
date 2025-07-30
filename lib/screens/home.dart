@@ -1,3 +1,4 @@
+import 'package:blood_system/screens/appointments/book_appointment.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -548,7 +549,34 @@ class _HomePageContentState extends State<HomePageContent> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              Navigator.of(context).pushNamed('/book-appointment');
+              final authState = context.read<AuthBloc>().state;
+              if (authState is AuthAuthenticated) {
+                final userId = authState.firebaseUser.uid;
+                if (userId != null) {
+                  // Navigate to booking appointment page
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder:
+                          (context) => BookAppointmentScreen(userId: userId),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Unable to get user information'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              } else {
+                // Handle case where user is not authenticated
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please log in to book an appointment'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFB83A3A),

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:blood_system/blocs/auth/event.dart';
 import 'package:blood_system/blocs/auth/state.dart';
 import 'package:blood_system/service/user_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -115,6 +116,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         hospital: event.hospital,
       );
 
+      // After successful signup, emit success state first
+      print('AuthBloc - Signup successful, emitting AuthSignUpSuccess');
+      emit(AuthSignUpSuccess('Account created successfully!'));
+
       // After successful signup, emit email verification sent state
       final currentUser = _authService.currentUser;
       if (currentUser != null) {
@@ -150,12 +155,29 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         email: event.email,
         password: event.password,
       );
+
+      // Emit success state
+      emit(AuthSignInSuccess('Login successful! Welcome back.'));
       print('AuthBloc - Sign in successful, AuthUserChanged will be triggered');
+
       // AuthUserChanged will be triggered automatically by auth state stream
     } on FirebaseAuthException catch (e) {
       print('AuthBloc - FirebaseAuthException: ${e.code}');
       final errorMessage = _getErrorMessage(e.code);
       print('AuthBloc - Emitting AuthError: $errorMessage');
+      debugPrint('FirebaseAuthException in signIn: ${e.code} - ${e.message}');
+
+      // Handle specific reCAPTCHA related errors
+      if (e.code == 'recaptcha-not-enabled' ||
+          e.code == 'missing-recaptcha-token' ||
+          e.message?.contains('reCAPTCHA') == true) {
+        throw FirebaseAuthException(
+          code: 'recaptcha-error',
+          message:
+              'reCAPTCHA verification failed. Please try again or contact support.',
+        );
+      }
+
       emit(AuthError(errorMessage));
     } catch (e) {
       print('AuthBloc - Unexpected error: ${e.toString()}');
@@ -344,6 +366,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         return 'Sign-in was cancelled.';
       case 'popup-blocked':
         return 'Sign-in popup was blocked. Please allow popups for this site.';
+      case 'recaptcha-not-enabled':
+      case 'missing-recaptcha-token':
+      case 'recaptcha-error':
+        return 'Security verification failed. Please try again or contact support if the issue persists.';
+      case 'network-request-failed':
+        return 'Network error. Please check your internet connection and try again.';
+      case 'invalid-credential':
+        return 'Invalid login credentials. Please check your email and password.';
       default:
         return 'An error occurred. Please try again.';
     }

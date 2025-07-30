@@ -60,6 +60,7 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
       backgroundColor: const Color(0xFFF8F9FA),
       currentPage: '/userAppointments',
       pageTitle: 'My Appointments',
+      showDrawer: false,
       child: Column(
         children: [
           Expanded(
@@ -89,8 +90,8 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildUpcomingAppointments(),
-                      const SizedBox(height: 24),
-                      _buildAppointmentHistory(),
+                      // const SizedBox(height: 24),
+                      // _buildAppointmentHistory(),
                       const SizedBox(
                         height: 80,
                       ), // Add space for floating button
