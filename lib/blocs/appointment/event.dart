@@ -17,6 +17,7 @@ class LoadUserAppointments extends AppointmentEvent {
   @override
   List<Object?> get props => [userId];
 }
+
 class LoadAdminAppointmentsWithDateFilter extends AppointmentEvent {
   final String hospitalName;
   final DateTime? fromDate;
@@ -31,11 +32,13 @@ class LoadAdminAppointmentsWithDateFilter extends AppointmentEvent {
   @override
   List<Object?> get props => [hospitalName, fromDate, toDate];
 }
+
 //load admin appointments
 class LoadAdminAppointments extends AppointmentEvent {
   final String hospitalName;
   const LoadAdminAppointments(this.hospitalName);
 }
+
 // Load hospitals
 class LoadHospitals extends AppointmentEvent {
   const LoadHospitals();
@@ -55,9 +58,7 @@ class SelectAppointmentDate extends AppointmentEvent {
 class SelectHospital extends AppointmentEvent {
   final String hospitalName;
 
-  const SelectHospital({
-    required this.hospitalName,
-  });
+  const SelectHospital({required this.hospitalName});
 
   @override
   List<Object?> get props => [hospitalName];
@@ -105,12 +106,12 @@ class BookAppointment extends AppointmentEvent {
 
   @override
   List<Object?> get props => [
-        userId,
-        // hospitalId,
-        hospitalName,
-        appointmentDate,
-        appointmentTime,
-      ];
+    userId,
+    // hospitalId,
+    hospitalName,
+    appointmentDate,
+    appointmentTime,
+  ];
 
   get hospitalId => null;
 }
@@ -147,4 +148,30 @@ class ResetAppointmentForm extends AppointmentEvent {
 // Clear error
 class ClearAppointmentError extends AppointmentEvent {
   const ClearAppointmentError();
+}
+
+//reschedule appointment event
+class RescheduleAppointment extends AppointmentEvent {
+  final String appointmentId;
+  final DateTime newDate;
+  final String newTime;
+  final String hospitalName;
+  final String userId;
+
+  const RescheduleAppointment({
+    required this.appointmentId,
+    required this.newDate,
+    required this.newTime,
+    required this.hospitalName,
+    required this.userId,
+  });
+
+  @override
+  List<Object?> get props => [
+    appointmentId,
+    newDate,
+    newTime,
+    hospitalName,
+    userId,
+  ];
 }

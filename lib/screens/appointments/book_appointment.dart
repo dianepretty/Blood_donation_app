@@ -1,11 +1,8 @@
-// lib/screens/user/book_appointment.dart
 import 'package:blood_system/blocs/appointment/bloc.dart';
 import 'package:blood_system/blocs/appointment/event.dart';
 import 'package:blood_system/blocs/appointment/state.dart';
 import 'package:blood_system/blocs/auth/bloc.dart';
 import 'package:blood_system/blocs/auth/state.dart';
-import 'package:blood_system/service/appointment_service.dart';
-import 'package:blood_system/service/hospital_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -13,25 +10,19 @@ import 'package:intl/intl.dart';
 class BookAppointmentScreen extends StatefulWidget {
   final String userId;
 
-  const BookAppointmentScreen({
-    super.key,
-    required this.userId,
-  });
+  const BookAppointmentScreen({super.key, required this.userId});
 
   @override
   State<BookAppointmentScreen> createState() => _BookAppointmentScreenState();
 }
 
 class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
-
   @override
   void initState() {
     super.initState();
+    // Load hospitals when screen initializes
     context.read<AppointmentBloc>().add(const LoadHospitals());
   }
-
- 
-
 
   @override
   Widget build(BuildContext context) {
@@ -44,26 +35,20 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: Colors.grey,
-                  ),
+                  const Icon(Icons.error_outline, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
                   const Text(
                     'Please login to book an appointment',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () => Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      '/login',
-                      (route) => false,
-                    ),
+                    onPressed:
+                        () => Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          '/login',
+                          (route) => false,
+                        ),
                     child: const Text('Login'),
                   ),
                 ],
@@ -72,82 +57,54 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
           );
         }
 
-        final String userId = authState.firebaseUser.email ?? '';
-        
-        if (userId.isEmpty) {
-          return Scaffold(
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: Colors.grey,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Unable to get user information',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        return BlocProvider(
-          create: (context) => AppointmentBloc(
-            appointmentService: AppointmentService(),
-            hospitalService: HospitalService(),
-          )..add(const LoadHospitals()),
-          child: BlocConsumer<AppointmentBloc, AppointmentState>(
-            listener: (context, state) {
-              // Handle success messages
-              if (state.successMessage != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.successMessage!),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-                // Navigate back after successful booking
-                if (state.successMessage!.contains('booked successfully')) {
-                  Future.delayed(const Duration(seconds: 1), () {
-                    if (mounted) {
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        '/appointments',
-                        (route) => route.settings.name == '/home',
-                      );
-                    }
-                  });
-                }
+        // Use the existing AppointmentBloc from the widget tree (created in main)
+        return BlocConsumer<AppointmentBloc, AppointmentState>(
+          listener: (context, state) {
+            // Handle success messages
+            if (state.successMessage != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.successMessage!),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              // Navigate back after successful booking
+              if (state.successMessage!.contains('booked successfully')) {
+                Future.delayed(const Duration(seconds: 1), () {
+                  if (mounted) {
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      '/appointments',
+                      (route) => route.settings.name == '/home',
+                    );
+                  }
+                });
               }
+            }
 
-              // Handle error messages
-              if (state.errorMessage != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.errorMessage!),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            builder: (context, state) {
-              return _buildBookingScreen(context, state, userId);
-            },
-          ),
+            // Handle error messages
+            if (state.errorMessage != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.errorMessage!),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+          builder: (context, state) {
+            return _buildBookingScreen(context, state, widget.userId);
+          },
         );
       },
     );
   }
 
-  Widget _buildBookingScreen(BuildContext context, AppointmentState state, String userId) {
+  Widget _buildBookingScreen(
+    BuildContext context,
+    AppointmentState state,
+    String userId,
+  ) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: Column(
@@ -179,6 +136,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       ),
     );
   }
+
   Widget _buildHeader() {
     return Container(
       height: 120,
@@ -228,6 +186,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   Widget _buildHospitalSelector(AppointmentState state) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         const Text(
           'Hospital',
@@ -239,7 +198,10 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
         ),
         const SizedBox(height: 12),
         GestureDetector(
-          onTap: state.isLoadingHospitals ? null : () => _showHospitalSelector(state),
+          onTap:
+              state.isLoadingHospitals
+                  ? null
+                  : () => _showHospitalSelector(state),
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -250,22 +212,24 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: state.isLoadingHospitals
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(
-                          state.selectedHospitalName ?? 'Select hospital',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: state.selectedHospitalName != null
-                                ? Colors.black87
-                                : Colors.grey.shade600,
+                  child:
+                      state.isLoadingHospitals
+                          ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                          : Text(
+                            state.selectedHospitalName ?? 'Select hospital',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color:
+                                  state.selectedHospitalName != null
+                                      ? Colors.black87
+                                      : Colors.grey.shade600,
+                            ),
                           ),
-                        ),
                 ),
                 Icon(
                   Icons.keyboard_arrow_down,
@@ -277,6 +241,130 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  void _showHospitalSelector(AppointmentState state) {
+    // Use hospitals from state if available, otherwise use static list
+    final hospitalList =
+        state.hospitals.isNotEmpty
+            ? state.hospitals.map((h) => h.name).toList()
+            : [];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allow custom height
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        // Get screen height and calculate maximum height for modal
+        final screenHeight = MediaQuery.of(context).size.height;
+        final maxHeight = screenHeight * 0.7; // Use 70% of screen height
+
+        return ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: maxHeight,
+            minHeight: 200, // Minimum height
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Fixed header
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Select Hospital',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              // Scrollable content
+              Flexible(
+                child:
+                    hospitalList.isEmpty
+                        ? const Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Text(
+                            'No hospitals available',
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          ),
+                        )
+                        : ListView.separated(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 10,
+                          ),
+                          shrinkWrap: true,
+                          itemCount: hospitalList.length,
+                          separatorBuilder:
+                              (context, index) => const Divider(height: 1),
+                          itemBuilder: (context, index) {
+                            final hospitalName = hospitalList[index];
+                            final isSelected =
+                                state.selectedHospitalName == hospitalName;
+
+                            return ListTile(
+                              title: Text(
+                                hospitalName,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              trailing:
+                                  isSelected
+                                      ? const Icon(
+                                        Icons.check,
+                                        color: Color(0xFFD7263D),
+                                      )
+                                      : null,
+                              onTap: () {
+                                setState(() {
+                                  context.read<AppointmentBloc>().add(
+                                    SelectHospital(hospitalName: hospitalName),
+                                  );
+                                });
+                                Navigator.pop(context);
+
+                                // Load time slots for the new hospital
+                                if (state.selectedDate != null) {
+                                  context.read<AppointmentBloc>().add(
+                                    LoadAvailableTimeSlots(
+                                      hospitalName: hospitalName,
+                                      date: state.selectedDate!,
+                                    ),
+                                  );
+                                }
+                              },
+                            );
+                          },
+                        ),
+              ),
+              // Safe area padding at bottom
+              SizedBox(height: MediaQuery.of(context).padding.bottom),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -307,14 +395,17 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                 Expanded(
                   child: Text(
                     state.selectedDate != null
-                        ? DateFormat('EEEE, MMMM d, yyyy').format(state.selectedDate!)
+                        ? DateFormat(
+                          'EEEE, MMMM d, yyyy',
+                        ).format(state.selectedDate!)
                         : 'Select date',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: state.selectedDate != null
-                          ? Colors.black87
-                          : Colors.grey.shade600,
+                      color:
+                          state.selectedDate != null
+                              ? Colors.black87
+                              : Colors.grey.shade600,
                     ),
                   ),
                 ),
@@ -366,39 +457,51 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: state.availableTimeSlots.map((timeSlot) {
-                final isSelected = state.selectedTimeSlot == timeSlot;
-                return GestureDetector(
-                  onTap: () {
-                    context.read<AppointmentBloc>().add(SelectTimeSlot(timeSlot));
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFFD7263D) : Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: isSelected ? const Color(0xFFD7263D) : Colors.grey.shade300,
+              children:
+                  state.availableTimeSlots.map((timeSlot) {
+                    final isSelected = state.selectedTimeSlot == timeSlot;
+                    return GestureDetector(
+                      onTap: () {
+                        context.read<AppointmentBloc>().add(
+                          SelectTimeSlot(timeSlot),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color:
+                              isSelected
+                                  ? const Color(0xFFD7263D)
+                                  : Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color:
+                                isSelected
+                                    ? const Color(0xFFD7263D)
+                                    : Colors.grey.shade300,
+                          ),
+                        ),
+                        child: Text(
+                          timeSlot,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: isSelected ? Colors.white : Colors.black87,
+                          ),
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      timeSlot,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: isSelected ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
+                    );
+                  }).toList(),
             ),
           ],
         ),
       );
     }
 
-    return _buildInfoBox('Please select hospital and datezz first');
+    return _buildInfoBox('Please select hospital and date first');
   }
 
   Widget _buildInfoBox(String message) {
@@ -407,10 +510,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       decoration: _boxDecoration(),
       child: Text(
         message,
-        style: TextStyle(
-          fontSize: 14,
-          color: Colors.grey.shade600,
-        ),
+        style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
       ),
     );
   }
@@ -423,13 +523,14 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     );
   }
 
- Widget _buildActionButtons(AppointmentState state, String userId) {
+  Widget _buildActionButtons(AppointmentState state, String userId) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: state.canBookAppointment && !state.isBooking
-            ? () => _bookAppointment(state, userId)
-            : null,
+        onPressed:
+            state.canBookAppointment && !state.isBooking
+                ? () => _bookAppointment(state, userId)
+                : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFFD7263D),
           foregroundColor: Colors.white,
@@ -439,25 +540,24 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child: state.isBooking
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
+        child:
+            state.isBooking
+                ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+                : const Text(
+                  'Book Appointment',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
-              )
-            : const Text(
-                'Book Appointment',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
       ),
     );
   }
+
   Widget _buildBottomNavigation() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -516,73 +616,14 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     }
   }
 
-  void _showHospitalSelector(AppointmentState state) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+  void _bookAppointment(AppointmentState state, String userId) {
+    context.read<AppointmentBloc>().add(
+      BookAppointment(
+        userId: userId,
+        hospitalName: state.selectedHospitalName!,
+        appointmentDate: state.selectedDate!,
+        appointmentTime: state.selectedTimeSlot!,
       ),
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Select Hospital',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 16),
-              ...state.hospitals.map((hospital) => GestureDetector(
-                    onTap: () {
-                      context.read<AppointmentBloc>().add(
-                            SelectHospital(
-                              hospitalName: hospital.name,
-                            ),
-                          );
-                      Navigator.pop(context);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              '${hospital.name} (${hospital.district})',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          if (state.selectedHospitalName == hospital.name)
-                            const Icon(
-                              Icons.check,
-                              color: Color(0xFFD7263D),
-                            ),
-                        ],
-                      ),
-                    ),
-                  )),
-            ],
-          ),
-        );
-      },
     );
   }
-
-  void _bookAppointment(AppointmentState state, String userId) {
-    context.read<AppointmentBloc>().add(BookAppointment(
-          userId: userId,
-          hospitalName: state.selectedHospitalName!,
-          appointmentDate: state.selectedDate!,
-          appointmentTime: state.selectedTimeSlot!,
-         
-        ));
-  }
 }
-

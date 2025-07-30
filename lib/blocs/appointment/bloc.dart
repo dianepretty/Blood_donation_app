@@ -38,9 +38,69 @@ class AppointmentBloc extends Bloc<AppointmentEvent, AppointmentState> {
     // Add handlers for internal events
     on<_AppointmentsUpdated>(_onInternalAppointmentsUpdated);
     on<_AppointmentsError>(_onInternalAppointmentsError);
+
+    //reschedule appointment logic
+    on<RescheduleAppointment>(_onRescheduleAppointment);
+  }
+
+  // Reschedule appointment logic
+  Future<void> _onRescheduleAppointment(
+    RescheduleAppointment event,
+    Emitter<AppointmentState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(isRescheduling: true));
+      // Check if the user has an existing appointment at the new date and time
+      final hasExisting = await _appointmentService.hasExistingAppointment(
+        userId: event.userId,
+        appointmentDate: event.newDate,
+        appointmentTime: event.newTime,
+      );
+      if (hasExisting) {
+        emit(
+          state.copyWith(
+            isRescheduling: false,
+            errorMessage: 'You already have an appointment at this time',
+          ),
+        );
+        return;
+      }
+      // Create the rescheduled appointment
+      final rescheduledAppointment = Appointment(
+        id: event.appointmentId,
+        userId: event.userId,
+        hospitalName: event.hospitalName,
+        appointmentDate: event.newDate,
+        appointmentTime: event.newTime,
+      );
+      // Update the appointment in the service
+      await _appointmentService.rescheduleAppointment(
+        id: event.appointmentId,
+        appointmentDate: event.newDate,
+        appointmentTime: event.newTime,
+        hospitalName: event.hospitalName,
+      );
+      // Emit success state
+      emit(
+        state.copyWith(
+          isRescheduling: false,
+          successMessage: 'Appointment rescheduled successfully!',
+          errorMessage: null,
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          isRescheduling: false,
+          errorMessage: 'Failed to reschedule appointment: ${e.toString()}',
+          successMessage: null,
+        ),
+      );
+    }
   }
 
   // ADD THIS METHOD to handle LoadAdminAppointments
+  // Handle LoadAdminAppointments - Fixed implementation
   Future<void> _onLoadAdminAppointments(
     LoadAdminAppointments event,
     Emitter<AppointmentState> emit,

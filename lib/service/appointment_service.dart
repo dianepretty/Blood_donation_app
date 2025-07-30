@@ -9,12 +9,10 @@ class AppointmentService {
   // Book a new appointment
   Future<String> bookAppointment(Appointment appointment) async {
     try {
-   
-
       final docRef = await _firestore
           .collection(_collectionName)
           .add(appointment.toJson());
-      
+
       return docRef.id;
     } catch (e) {
       throw Exception('Failed to book appointment: $e');
@@ -29,14 +27,21 @@ class AppointmentService {
         .orderBy('appointmentDate', descending: true)
         .snapshots()
         .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => Appointment.fromJson({
-                    ...(doc.data() != null && doc.data() is Map<String, dynamic> ? doc.data() as Map<String, dynamic> : {}),
-                    'id': doc.id,
-                  }))
-              .toList(),
+          (snapshot) =>
+              snapshot.docs
+                  .map(
+                    (doc) => Appointment.fromJson({
+                      ...(doc.data() != null &&
+                              doc.data() is Map<String, dynamic>
+                          ? doc.data() as Map<String, dynamic>
+                          : {}),
+                      'id': doc.id,
+                    }),
+                  )
+                  .toList(),
         );
   }
+
   // Get all appointments by hospital name with optional date filtering
   Stream<List<Appointment>> getAppointmentsByHospitalName(
     String hospitalName, {
@@ -51,30 +56,46 @@ class AppointmentService {
     if (fromDate != null) {
       // Set time to start of day
       final startOfDay = DateTime(fromDate.year, fromDate.month, fromDate.day);
-      query = query.where('appointmentDate', 
-          isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay));
+      query = query.where(
+        'appointmentDate',
+        isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
+      );
     }
 
     if (toDate != null) {
       // Set time to end of day
-      final endOfDay = DateTime(toDate.year, toDate.month, toDate.day, 23, 59, 59);
-      query = query.where('appointmentDate', 
-          isLessThanOrEqualTo: Timestamp.fromDate(endOfDay));
+      final endOfDay = DateTime(
+        toDate.year,
+        toDate.month,
+        toDate.day,
+        23,
+        59,
+        59,
+      );
+      query = query.where(
+        'appointmentDate',
+        isLessThanOrEqualTo: Timestamp.fromDate(endOfDay),
+      );
     }
 
     return query
         .orderBy('appointmentDate', descending: true)
         .snapshots()
         .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => Appointment.fromJson({
-                    ...(doc.data() != null && doc.data() is Map<String, dynamic> ? doc.data() as Map<String, dynamic> : {}),
-                    'id': doc.id,
-                  }))
-              .toList(),
+          (snapshot) =>
+              snapshot.docs
+                  .map(
+                    (doc) => Appointment.fromJson({
+                      ...(doc.data() != null &&
+                              doc.data() is Map<String, dynamic>
+                          ? doc.data() as Map<String, dynamic>
+                          : {}),
+                      'id': doc.id,
+                    }),
+                  )
+                  .toList(),
         );
   }
-
 
   // Get upcoming appointments for a user
   Stream<List<Appointment>> getUpcomingAppointments(String userId) {
@@ -82,35 +103,31 @@ class AppointmentService {
     return _firestore
         .collection(_collectionName)
         .where('userId', isEqualTo: userId)
-        .where('appointmentDate', isGreaterThanOrEqualTo: Timestamp.fromDate(now))
+        .where(
+          'appointmentDate',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(now),
+        )
         .orderBy('appointmentDate')
         .snapshots()
         .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => Appointment.fromJson({
-                    ...doc.data(),
-                    'id': doc.id,
-                  }))
-              .toList(),
+          (snapshot) =>
+              snapshot.docs
+                  .map(
+                    (doc) =>
+                        Appointment.fromJson({...doc.data(), 'id': doc.id}),
+                  )
+                  .toList(),
         );
   }
-
-
-
 
   // Get appointment by ID
   Future<Appointment?> getAppointmentById(String appointmentId) async {
     try {
-      final doc = await _firestore
-          .collection(_collectionName)
-          .doc(appointmentId)
-          .get();
-      
+      final doc =
+          await _firestore.collection(_collectionName).doc(appointmentId).get();
+
       if (doc.exists) {
-        return Appointment.fromJson({
-          ...doc.data()!,
-          'id': doc.id,
-        });
+        return Appointment.fromJson({...doc.data()!, 'id': doc.id});
       }
       return null;
     } catch (e) {
@@ -124,14 +141,11 @@ class AppointmentService {
       await _firestore
           .collection(_collectionName)
           .doc(appointmentId)
-          .update({
-      });
+          .update({});
     } catch (e) {
       throw Exception('Failed to update appointment status: $e');
     }
   }
-
-
 
   // Check if user has existing appointment on the same date and time
   Future<bool> hasExistingAppointment({
@@ -147,14 +161,21 @@ class AppointmentService {
       );
       final endOfDay = startOfDay.add(const Duration(days: 1));
 
-      final snapshot = await _firestore
-          .collection(_collectionName)
-          .where('userId', isEqualTo: userId)
-          .where('appointmentDate', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
-          .where('appointmentDate', isLessThan: Timestamp.fromDate(endOfDay))
-          .where('appointmentTime', isEqualTo: appointmentTime)
-          .limit(1)
-          .get();
+      final snapshot =
+          await _firestore
+              .collection(_collectionName)
+              .where('userId', isEqualTo: userId)
+              .where(
+                'appointmentDate',
+                isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
+              )
+              .where(
+                'appointmentDate',
+                isLessThan: Timestamp.fromDate(endOfDay),
+              )
+              .where('appointmentTime', isEqualTo: appointmentTime)
+              .limit(1)
+              .get();
 
       return snapshot.docs.isNotEmpty;
     } catch (e) {
@@ -164,51 +185,52 @@ class AppointmentService {
 
   // Get available time slots for a specific date and hospital
 
-Future<List<String>> getAvailableTimeSlots({
-  required String hospitalName,
-  required DateTime date,
-}) async {
-  try {
-    // Convert date to timestamp for exact matching
-    final dateOnly = DateTime(date.year, date.month, date.day);
-    
-    // Query without ordering to avoid index requirement
-    final querySnapshot = await _firestore
-        .collection('appointments')
-        .where('hospitalName', isEqualTo: hospitalName)
-        .where('appointmentDate', isEqualTo: Timestamp.fromDate(dateOnly))
-        .get();
+  Future<List<String>> getAvailableTimeSlots({
+    required String hospitalName,
+    required DateTime date,
+  }) async {
+    try {
+      // Convert date to timestamp for exact matching
+      final dateOnly = DateTime(date.year, date.month, date.day);
 
-    // Extract booked time slots
-    final bookedSlots = querySnapshot.docs
-        .map((doc) => doc.data()['appointmentTime'] as String)
-        .toSet();
+      // Query without ordering to avoid index requirement
+      final querySnapshot =
+          await _firestore
+              .collection('appointments')
+              .where('hospitalName', isEqualTo: hospitalName)
+              .where('appointmentDate', isEqualTo: Timestamp.fromDate(dateOnly))
+              .get();
 
-    // Define all possible time slots
-    final allTimeSlots = [
-      '09:00 AM',
-      '09:30 AM',
-      '10:00 AM',
-      '10:30 AM',
-      '11:00 AM',
-      '11:30 AM',
-      '02:00 PM',
-      '02:30 PM',
-      '03:00 PM',
-      '03:30 PM',
-      '04:00 PM',
-      '04:30 PM',
-    ];
+      // Extract booked time slots
+      final bookedSlots =
+          querySnapshot.docs
+              .map((doc) => doc.data()['appointmentTime'] as String)
+              .toSet();
 
-    // Return available slots
-    return allTimeSlots
-        .where((slot) => !bookedSlots.contains(slot))
-        .toList();
-  } catch (e) {
-    print('Error getting available time slots: $e');
-    return [];
+      // Define all possible time slots
+      final allTimeSlots = [
+        '09:00 AM',
+        '09:30 AM',
+        '10:00 AM',
+        '10:30 AM',
+        '11:00 AM',
+        '11:30 AM',
+        '02:00 PM',
+        '02:30 PM',
+        '03:00 PM',
+        '03:30 PM',
+        '04:00 PM',
+        '04:30 PM',
+      ];
+
+      // Return available slots
+      return allTimeSlots.where((slot) => !bookedSlots.contains(slot)).toList();
+    } catch (e) {
+      print('Error getting available time slots: $e');
+      return [];
+    }
   }
-}
+
   // Get all possible time slots
   List<String> _getAllTimeSlots() {
     return [
@@ -233,20 +255,36 @@ Future<List<String>> getAvailableTimeSlots({
   // Get appointment history for analytics
   Future<List<Appointment>> getAppointmentHistory(String userId) async {
     try {
-      final snapshot = await _firestore
-          .collection(_collectionName)
-          .where('userId', isEqualTo: userId)
-          // .orderBy('appointmentDate', descending: true)
-          .get();
+      final snapshot =
+          await _firestore
+              .collection(_collectionName)
+              .where('userId', isEqualTo: userId)
+              // .orderBy('appointmentDate', descending: true)
+              .get();
 
       return snapshot.docs
-          .map((doc) => Appointment.fromJson({
-                ...doc.data(),
-                'id': doc.id,
-              }))
+          .map((doc) => Appointment.fromJson({...doc.data(), 'id': doc.id}))
           .toList();
     } catch (e) {
       throw Exception('Failed to fetch appointment history: $e');
+    }
+  }
+
+  // Reschedule an appointment
+  Future<void> rescheduleAppointment({
+    required String id,
+    required DateTime appointmentDate,
+    required String appointmentTime,
+    required String hospitalName,
+  }) async {
+    try {
+      await _firestore.collection(_collectionName).doc(id).update({
+        'appointmentDate': Timestamp.fromDate(appointmentDate),
+        'appointmentTime': appointmentTime,
+        'hospitalName': hospitalName,
+      });
+    } catch (e) {
+      throw Exception('Failed to reschedule appointment: $e');
     }
   }
 }
