@@ -187,7 +187,11 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.notifications, color: Colors.white, size: 20),
+                  child: const Icon(
+                    Icons.notifications,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
               ),
             ],
@@ -196,7 +200,6 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
       ),
     );
   }
-
 
   Widget _buildUpcomingAppointments() {
     return Column(

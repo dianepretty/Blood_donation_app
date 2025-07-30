@@ -240,12 +240,8 @@ class _HomePageContentState extends State<HomePageContent> {
                           );
                         }
 
-                        if (state is EventLoaded ||
-                            state is EventOperationSuccess) {
-                          final events =
-                              state is EventLoaded
-                                  ? state.events
-                                  : (state as EventOperationSuccess).events;
+                        if (state is EventLoaded) {
+                          final events = state.events;
 
                           if (events.isEmpty) {
                             return _buildEmptyState('No upcoming events');
