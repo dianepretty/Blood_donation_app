@@ -1,10 +1,13 @@
+import 'package:blood_system/blocs/event_bloc.dart';
+import 'package:blood_system/blocs/event_event.dart';
+import 'package:blood_system/blocs/event_state.dart';
 import 'package:blood_system/models/event_model.dart';
 import 'package:blood_system/widgets/main_navigation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
 import 'view_event.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserEventsScreen extends StatefulWidget {
   const UserEventsScreen({super.key});
@@ -15,32 +18,66 @@ class UserEventsScreen extends StatefulWidget {
 
 class _UserEventsScreenState extends State<UserEventsScreen> {
   PickerDateRange? selectedDateRange;
+  String? selectedHospitalId;
 
   @override
   void initState() {
     super.initState();
     // Set initial date range to one year
     final now = DateTime.now();
-    final yearStart = DateTime(now.year, 1, 1); // January 1st of current year
-    final yearEnd = DateTime(now.year, 12, 31); // December 31st of current year
+    final yearStart = DateTime(now.year, 1, 1);
+    final yearEnd = DateTime(now.year, 12, 31);
     selectedDateRange = PickerDateRange(yearStart, yearEnd);
+
+    // Load events based on initial date range
+    _loadEvents();
+  }
+
+  void _loadEvents() {
+    final eventBloc = context.read<EventBloc>();
+
+    if (selectedHospitalId != null && selectedDateRange != null) {
+      // Load by hospital and date range
+      eventBloc.add(
+        LoadEventsByHospitalAndDateRange(
+          selectedHospitalId!,
+          selectedDateRange!.startDate!,
+          selectedDateRange!.endDate ?? selectedDateRange!.startDate!,
+        ),
+      );
+    } else if (selectedHospitalId != null) {
+      // Load by hospital only
+      eventBloc.add(LoadEventsByHospital(selectedHospitalId!));
+    } else if (selectedDateRange != null) {
+      // Load by date range only
+      eventBloc.add(
+        LoadEventsByDateRange(
+          selectedDateRange!.startDate!,
+          selectedDateRange!.endDate ?? selectedDateRange!.startDate!,
+        ),
+      );
+    } else {
+      // Load all events
+      eventBloc.add(LoadEvents());
+    }
   }
 
   void onDateRangeChanged(PickerDateRange? newDateRange) {
     setState(() {
       selectedDateRange = newDateRange;
     });
+    _loadEvents();
   }
 
-  List<Event> _filterEvents(List<Event> events) {
-    if (selectedDateRange == null) {
-      return events;
-    }
-    final start = selectedDateRange!.startDate;
-    final end = selectedDateRange!.endDate ?? selectedDateRange!.startDate;
-    return events.where((event) {
-      return !event.date.isBefore(start!) && !event.date.isAfter(end!);
-    }).toList();
+  void _clearDateFilter() {
+    setState(() {
+      selectedDateRange = null;
+    });
+    _loadEvents();
+  }
+
+  void _refreshEvents() {
+    context.read<EventBloc>().add(RefreshEvents());
   }
 
   @override
@@ -51,47 +88,18 @@ class _UserEventsScreenState extends State<UserEventsScreen> {
     return MainNavigationWrapper(
       currentPage: 'events',
       pageTitle: 'Events',
-      child: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('events')
-            .orderBy('date')
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+      child: BlocConsumer<EventBloc, EventState>(
+        listener: (context, state) {
+          if (state is EventError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
           }
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-          final docs = snapshot.data?.docs ?? [];
-          final events = docs.map((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            // Handle both Timestamp and DateTime formats for backward compatibility
-            DateTime eventDate;
-            if (data['date'] is Timestamp) {
-              eventDate = (data['date'] as Timestamp).toDate();
-            } else if (data['date'] is DateTime) {
-              eventDate = data['date'] as DateTime;
-            } else {
-              // Fallback to current date if date is missing or invalid
-              eventDate = DateTime.now();
-            }
-
-                              return Event(
-                    id: doc.id,
-                    name: data['name'] ?? '',
-                    date: eventDate,
-                    timeFrom: data['timeFrom'] ?? '',
-                    timeTo: data['timeTo'] ?? '',
-                    location: data['location'] ?? '',
-                    description: data['description'] ?? '',
-                    status: data['status'] ?? 'upcoming',
-                    hospitalId: data['hospitalId'] ?? '',
-                    adminId: data['adminId'] ?? '',
-                  );
-          }).toList();
-          final filteredList = _filterEvents(events);
-
+        },
+        builder: (context, state) {
           return Column(
             children: [
               Expanded(
@@ -103,6 +111,7 @@ class _UserEventsScreenState extends State<UserEventsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Filter Controls
                       Row(
                         children: [
                           Expanded(
@@ -110,18 +119,21 @@ class _UserEventsScreenState extends State<UserEventsScreen> {
                           ),
                           if (selectedDateRange != null)
                             IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  selectedDateRange = null;
-                                });
-                              },
+                              onPressed: _clearDateFilter,
                               icon: const Icon(Icons.clear),
-                              tooltip: 'Clear filter',
+                              tooltip: 'Clear date filter',
                             ),
+                          IconButton(
+                            onPressed: _refreshEvents,
+                            icon: const Icon(Icons.refresh),
+                            tooltip: 'Refresh events',
+                          ),
                         ],
                       ),
                       const SizedBox(height: 24),
-                      _buildEventsList(filteredList, isSmallScreen),
+
+                      // Events List
+                      _buildEventsContent(state, isSmallScreen),
                     ],
                   ),
                 ),
@@ -131,6 +143,57 @@ class _UserEventsScreenState extends State<UserEventsScreen> {
         },
       ),
     );
+  }
+
+  Widget _buildEventsContent(EventState state, bool isSmallScreen) {
+    if (state is EventLoading) {
+      return const Expanded(child: Center(child: CircularProgressIndicator()));
+    }
+
+    if (state is EventError) {
+      return Expanded(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+              const SizedBox(height: 16),
+              Text(
+                'Error loading events',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                state.message,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: _loadEvents,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFD7263D),
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (state is EventLoaded) {
+      return _buildEventsList(state.events, isSmallScreen);
+    }
+
+    // Handle other states or show empty state
+    return const Expanded(child: Center(child: Text('No events available')));
   }
 
   Widget _buildDateRangeSelector(bool isSmallScreen) {
@@ -151,6 +214,7 @@ class _UserEventsScreenState extends State<UserEventsScreen> {
         rangeText = '${formatter.format(start)} - ${formatter.format(end)}';
       }
     }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -167,35 +231,36 @@ class _UserEventsScreenState extends State<UserEventsScreen> {
           onTap: () async {
             await showDialog(
               context: context,
-              builder: (context) => Dialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: SfDateRangePicker(
-                    view: DateRangePickerView.month,
-                    selectionMode: DateRangePickerSelectionMode.range,
-                    initialSelectedRange: selectedDateRange,
-                    onSelectionChanged: (
-                      DateRangePickerSelectionChangedArgs args,
-                    ) {
-                      if (args.value is PickerDateRange) {
-                        onDateRangeChanged(args.value);
-                        Navigator.of(context).pop();
-                      }
-                    },
-                    showActionButtons: true,
-                    onCancel: () => Navigator.of(context).pop(),
-                    onSubmit: (val) {
-                      if (val is PickerDateRange) {
-                        onDateRangeChanged(val);
-                        Navigator.of(context).pop();
-                      }
-                    },
+              builder:
+                  (context) => Dialog(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: SfDateRangePicker(
+                        view: DateRangePickerView.month,
+                        selectionMode: DateRangePickerSelectionMode.range,
+                        initialSelectedRange: selectedDateRange,
+                        onSelectionChanged: (
+                          DateRangePickerSelectionChangedArgs args,
+                        ) {
+                          if (args.value is PickerDateRange) {
+                            onDateRangeChanged(args.value);
+                            Navigator.of(context).pop();
+                          }
+                        },
+                        showActionButtons: true,
+                        onCancel: () => Navigator.of(context).pop(),
+                        onSubmit: (val) {
+                          if (val is PickerDateRange) {
+                            onDateRangeChanged(val);
+                            Navigator.of(context).pop();
+                          }
+                        },
+                      ),
+                    ),
                   ),
-                ),
-              ),
             );
           },
           child: Container(
@@ -214,9 +279,9 @@ class _UserEventsScreenState extends State<UserEventsScreen> {
             ),
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.date_range,
-                  color: const Color(0xFFD7263D),
+                  color: Color(0xFFD7263D),
                   size: 20,
                 ),
                 const SizedBox(width: 12),
@@ -241,22 +306,49 @@ class _UserEventsScreenState extends State<UserEventsScreen> {
 
   Widget _buildEventsList(List<Event> events, bool isSmallScreen) {
     return Expanded(
-      child: events.isEmpty
-          ? const Center(child: Text('No events found.'))
-          : ListView.separated(
-              itemCount: events.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 16),
-              itemBuilder: (context, index) {
-                final event = events[index];
-                return _buildEventCard(event, isSmallScreen);
-              },
-            ),
+      child:
+          events.isEmpty
+              ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.event_busy, size: 64, color: Colors.grey[400]),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No events found',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Try adjusting your date range filter',
+                      style: TextStyle(color: Colors.grey[500]),
+                    ),
+                  ],
+                ),
+              )
+              : RefreshIndicator(
+                onRefresh: () async {
+                  _refreshEvents();
+                },
+                child: ListView.separated(
+                  itemCount: events.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 16),
+                  itemBuilder: (context, index) {
+                    final event = events[index];
+                    return _buildEventCard(event, isSmallScreen);
+                  },
+                ),
+              ),
     );
   }
 
   Widget _buildEventCard(Event event, bool isSmallScreen) {
     final eventTypeColor = const Color(0xFFD7263D);
-    final statusColor = Colors.orange;
+    final statusColor = _getStatusColor(event.status);
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -316,7 +408,7 @@ class _UserEventsScreenState extends State<UserEventsScreen> {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  'UPCOMING',
+                  event.status.toUpperCase(),
                   style: TextStyle(
                     color: statusColor,
                     fontSize: 10,
@@ -358,24 +450,11 @@ class _UserEventsScreenState extends State<UserEventsScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ViewEventScreen(
-                      event: {
-                        'id': event.id,
-                        'title': event.name,
-                        'location': event.location,
-                                                    'date': event.date,
-                            'status': event.status,
-                        'description': event.description,
-                        'timeFrom': event.timeFrom,
-                        'timeTo': event.timeTo,
-                        'hospitalId': event.hospitalId,
-                        'adminId': event.adminId,
-                      },
-                    ),
+                    builder: (context) => ViewEventScreen(event: event),
                   ),
                 );
               },
-              icon: Icon(Icons.visibility, size: 16),
+              icon: const Icon(Icons.visibility, size: 16),
               label: const Text('View Details'),
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: Colors.grey.shade300),
@@ -391,4 +470,19 @@ class _UserEventsScreenState extends State<UserEventsScreen> {
       ),
     );
   }
-} 
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'upcoming':
+        return Colors.orange;
+      case 'ongoing':
+        return Colors.green;
+      case 'completed':
+        return Colors.blue;
+      case 'cancelled':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+}

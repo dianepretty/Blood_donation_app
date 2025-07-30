@@ -21,6 +21,7 @@ import 'package:blood_system/screens/landing.dart';
 import 'package:blood_system/screens/volunteerRegister.dart';
 import 'package:blood_system/screens/welcomepage.dart';
 import 'package:blood_system/service/appointment_service.dart';
+import 'package:blood_system/service/event_service.dart';
 import 'package:blood_system/service/hospital_service.dart';
 import 'package:blood_system/service/user_service.dart';
 import 'dart:async';
@@ -34,11 +35,12 @@ import 'package:blood_system/screens/login.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
+  final EventService _eventService = EventService();
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +62,12 @@ class MyApp extends StatelessWidget {
               ),
         ),
         // Remove this duplicate bloc provider
-        BlocProvider(create: (context) => EventBloc()..add(LoadEvents())),
+        BlocProvider(
+          create:
+              (context) =>
+                  EventBloc(_eventService, eventService: _eventService)
+                    ..add(LoadEvents()),
+        ),
       ],
       child: MaterialApp(
         title: 'Blood Donation App',
@@ -103,7 +110,9 @@ class _AuthWrapperState extends State<AuthWrapper> {
     // Set a timeout to prevent infinite loading
     _timeoutTimer = Timer(const Duration(seconds: 30), () {
       if (mounted) {
-        print('AuthWrapper - Timeout reached, forcing navigation to landing page');
+        print(
+          'AuthWrapper - Timeout reached, forcing navigation to landing page',
+        );
         Navigator.of(context).pushReplacementNamed('/landing');
       }
     });
@@ -166,10 +175,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
                     const SizedBox(height: 16),
                     Text(
                       'Loading...',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                     ),
                   ],
                 ),
@@ -187,10 +193,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
                     const SizedBox(height: 16),
                     Text(
                       'Initializing...',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                     ),
                   ],
                 ),

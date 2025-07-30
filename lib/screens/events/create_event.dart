@@ -1,9 +1,12 @@
+import 'package:blood_system/blocs/event_bloc.dart';
+import 'package:blood_system/blocs/event_event.dart';
+import 'package:blood_system/blocs/event_state.dart';
 import 'package:blood_system/widgets/red_header.dart';
 import 'package:blood_system/blocs/auth/bloc.dart';
 import 'package:blood_system/blocs/auth/state.dart';
+import 'package:blood_system/models/event_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CreateEventScreen extends StatefulWidget {
   const CreateEventScreen({super.key});
@@ -21,7 +24,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   DateTime? _selectedDate;
   TimeOfDay? _fromTime;
   TimeOfDay? _toTime;
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -43,35 +45,45 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
           showBack: true,
         ),
       ),
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 12),
-                      _buildEventNameField(),
-                      const SizedBox(height: 16),
-                      _buildLocationField(),
-                      const SizedBox(height: 16),
-                      _buildDateField(),
-                      const SizedBox(height: 16),
-                      _buildTimeFields(),
-                      const SizedBox(height: 16),
-                      _buildDescriptionField(),
-                      const SizedBox(height: 32),
-                      _buildCreateButton(),
-                      const SizedBox(height: 16),
-                    ],
+      body: BlocListener<EventBloc, EventState>(
+        listener: (context, state) {
+          if (state is EventOperationSuccess) {
+            _showSuccessSnackBar(state.message);
+            Navigator.of(context).pop();
+          } else if (state is EventError) {
+            _showErrorSnackBar(state.message);
+          }
+        },
+        child: SafeArea(
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 12),
+                        _buildEventNameField(),
+                        const SizedBox(height: 16),
+                        _buildLocationField(),
+                        const SizedBox(height: 16),
+                        _buildDateField(),
+                        const SizedBox(height: 16),
+                        _buildTimeFields(),
+                        const SizedBox(height: 16),
+                        _buildDescriptionField(),
+                        const SizedBox(height: 32),
+                        _buildCreateButton(),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -128,8 +140,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       ],
     );
   }
-
-
 
   Widget _buildLocationField() {
     return Column(
@@ -394,38 +404,44 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     return SizedBox(
       width: double.infinity,
       height: 52,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFD7263D),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 2,
-        ),
-        onPressed: _isLoading ? null : _handleCreateEvent,
-        child:
-            _isLoading
-                ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    strokeWidth: 2,
-                  ),
-                )
-                : const Text(
-                  'Create Event',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
+      child: BlocBuilder<EventBloc, EventState>(
+        builder: (context, state) {
+          final isLoading = state is EventOperationInProgress;
+
+          return ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFD7263D),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 2,
+            ),
+            onPressed: isLoading ? null : _handleCreateEvent,
+            child:
+                isLoading
+                    ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        strokeWidth: 2,
+                      ),
+                    )
+                    : const Text(
+                      'Create Event',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+          );
+        },
       ),
     );
   }
 
-  void _handleCreateEvent() async {
+  void _handleCreateEvent() {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -448,71 +464,38 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       return;
     }
 
-    // Show loading
-    setState(() {
-      _isLoading = true;
-    });
+    // Get current user info
+    final authState = context.read<AuthBloc>().state;
+    String hospitalId = '';
+    String adminId = '';
 
-    try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Create event
-      await _createEvent();
-
-      // Show success and navigate back
-      if (mounted) {
-        _showSuccessSnackBar('Event created successfully!');
-        Navigator.of(context).pop();
-      }
-    } catch (e) {
-      if (mounted) {
-        _showErrorSnackBar('Failed to create event. Please try again.');
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+    if (authState is AuthAuthenticated) {
+      hospitalId = authState.userData?.districtName ?? '';
+      adminId = authState.firebaseUser.email ?? '';
     }
+
+    // Create the event object
+    final event = Event(
+      id: '', // Will be set by Firestore
+      name: _eventNameController.text.trim(),
+      location: _locationController.text.trim(),
+      date: _selectedDate!,
+      timeFrom: _fromTime!.format(context),
+      timeTo: _toTime!.format(context),
+      description: _descriptionController.text.trim(),
+      status: 'upcoming',
+      hospitalId: hospitalId,
+      adminId: adminId,
+    );
+
+    // Dispatch the AddEvent event to the EventBloc
+    context.read<EventBloc>().add(AddEvent(event));
   }
 
   bool _isTimeInvalid(TimeOfDay fromTime, TimeOfDay toTime) {
     final fromMinutes = fromTime.hour * 60 + fromTime.minute;
     final toMinutes = toTime.hour * 60 + toTime.minute;
     return toMinutes <= fromMinutes;
-  }
-
-  Future<void> _createEvent() async {
-    // Get current user info
-    final authState = context.read<AuthBloc>().state;
-    String hospitalId = '';
-    String adminId = '';
-    
-    if (authState is AuthAuthenticated) {
-      hospitalId = authState.userData?.districtName ?? '';
-      adminId = authState.firebaseUser.email ?? '';
-    }
-    
-    final eventData = {
-      'name': _eventNameController.text.trim(),
-      'location': _locationController.text.trim(),
-      'date': Timestamp.fromDate(
-        _selectedDate!,
-      ), // Convert DateTime to Timestamp
-      'timeFrom': _fromTime != null ? _fromTime!.format(context) : '',
-      'timeTo': _toTime != null ? _toTime!.format(context) : '',
-      'description': _descriptionController.text.trim(),
-      'status': 'upcoming', // Default status
-      'hospitalId': hospitalId,
-      'adminId': adminId,
-    };
-    print('DEBUG: Creating event with data: $eventData');
-    final docRef = await FirebaseFirestore.instance
-        .collection('events')
-        .add(eventData);
-    print('DEBUG: Event created with ID: ${docRef.id}');
   }
 
   void _showErrorSnackBar(String message) {

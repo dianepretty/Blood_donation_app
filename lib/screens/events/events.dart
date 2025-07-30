@@ -1,3 +1,6 @@
+import 'package:blood_system/blocs/event_bloc.dart';
+import 'package:blood_system/blocs/event_event.dart';
+import 'package:blood_system/blocs/event_state.dart';
 import 'package:blood_system/models/event_model.dart';
 import 'package:blood_system/screens/events/create_event.dart';
 import 'package:blood_system/widgets/main_navigation.dart';
@@ -9,7 +12,6 @@ import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
 import 'view_event.dart';
 import 'edit_event.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EventsScreen extends StatefulWidget {
   final VoidCallback? onBackToDashboard;
@@ -30,12 +32,56 @@ class _EventsScreenState extends State<EventsScreen> {
     final yearStart = DateTime(now.year, 1, 1); // January 1st of current year
     final yearEnd = DateTime(now.year, 12, 31); // December 31st of current year
     selectedDateRange = PickerDateRange(yearStart, yearEnd);
+
+    // Load events when screen initializes
+    _loadEvents();
+  }
+
+  void _loadEvents() {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      final userRole = authState.userData?.role ?? 'USER';
+      final hospitalName = authState.userData?.districtName ?? '';
+
+      if (userRole == 'HOSPITAL_ADMIN' && hospitalName.isNotEmpty) {
+        // For hospital admin, only show events for their hospital
+        if (selectedDateRange != null &&
+            selectedDateRange!.startDate != null &&
+            selectedDateRange!.endDate != null) {
+          context.read<EventBloc>().add(
+            LoadEventsByHospitalAndDateRange(
+              hospitalName,
+              selectedDateRange!.startDate!,
+              selectedDateRange!.endDate!,
+            ),
+          );
+        } else {
+          context.read<EventBloc>().add(LoadEventsByHospital(hospitalName));
+        }
+      } else {
+        // For other users, show all events
+        if (selectedDateRange != null &&
+            selectedDateRange!.startDate != null &&
+            selectedDateRange!.endDate != null) {
+          context.read<EventBloc>().add(
+            LoadEventsByDateRange(
+              selectedDateRange!.startDate!,
+              selectedDateRange!.endDate!,
+            ),
+          );
+        } else {
+          context.read<EventBloc>().add(LoadEvents());
+        }
+      }
+    }
   }
 
   void onDateRangeChanged(PickerDateRange? newDateRange) {
     setState(() {
       selectedDateRange = newDateRange;
     });
+    // Reload events with new date range
+    _loadEvents();
   }
 
   List<Event> _filterEvents(List<Event> events) {
@@ -70,7 +116,10 @@ class _EventsScreenState extends State<EventsScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const CreateEventScreen()),
-          );
+          ).then((_) {
+            // Refresh events when returning from create screen
+            _loadEvents();
+          });
         },
         backgroundColor: const Color(0xFFD7263D),
         foregroundColor: Colors.white,
@@ -80,54 +129,90 @@ class _EventsScreenState extends State<EventsScreen> {
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, authState) {
           if (authState is AuthAuthenticated) {
-            final userRole = authState.userData?.role ?? 'USER';
-            final hospitalName = authState.userData?.districtName ?? '';
-            
-            // Filter events based on user role
-            Query query = FirebaseFirestore.instance.collection('events');
-            
-            if (userRole == 'HOSPITAL_ADMIN' && hospitalName.isNotEmpty) {
-              // For hospital admin, only show events for their hospital
-              query = query.where('hospitalId', isEqualTo: hospitalName);
-            }
-            
-            return StreamBuilder<QuerySnapshot>(
-              stream: query.orderBy('date').snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
-                final docs = snapshot.data?.docs ?? [];
-                print('DEBUG: Found ${docs.length} events in Firestore');
-                final events = docs.map((doc) {
-                  final data = doc.data() as Map<String, dynamic>;
-                  // Handle both Timestamp and DateTime formats for backward compatibility
-                  DateTime eventDate;
-                  if (data['date'] is Timestamp) {
-                    eventDate = (data['date'] as Timestamp).toDate();
-                  } else if (data['date'] is DateTime) {
-                    eventDate = data['date'] as DateTime;
-                  } else {
-                    // Fallback to current date if date is missing or invalid
-                    eventDate = DateTime.now();
-                  }
-
-                  return Event(
-                    id: doc.id,
-                    name: data['name'] ?? '',
-                    date: eventDate,
-                    timeFrom: data['timeFrom'] ?? '',
-                    timeTo: data['timeTo'] ?? '',
-                    location: data['location'] ?? '',
-                    description: data['description'] ?? '',
-                    status: data['status'] ?? 'upcoming',
-                    hospitalId: data['hospitalId'] ?? '',
-                    adminId: data['adminId'] ?? '',
+            return BlocConsumer<EventBloc, EventState>(
+              listener: (context, eventState) {
+                if (eventState is EventError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(eventState.message),
+                      backgroundColor: Colors.red,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
                   );
-                }).toList();
+                } else if (eventState is EventOperationSuccess) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(eventState.message),
+                      backgroundColor: Colors.green,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  );
+                  // Refresh events after successful operation
+                  _loadEvents();
+                }
+              },
+              builder: (context, eventState) {
+                if (eventState is EventLoading) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: Color(0xFFD7263D)),
+                  );
+                }
+
+                List<Event> events = [];
+                if (eventState is EventLoaded) {
+                  events = eventState.events;
+                } else if (eventState is EventError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Error loading events',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          eventState.message,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton.icon(
+                          onPressed: _loadEvents,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Retry'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFD7263D),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
                 final filteredList = _filterEvents(events);
 
                 return Column(
@@ -152,13 +237,35 @@ class _EventsScreenState extends State<EventsScreen> {
                                       setState(() {
                                         selectedDateRange = null;
                                       });
+                                      _loadEvents();
                                     },
                                     icon: const Icon(Icons.clear),
                                     tooltip: 'Clear filter',
                                   ),
                               ],
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 16),
+                            // Events count and refresh button
+                            Row(
+                              children: [
+                                Text(
+                                  '${filteredList.length} event${filteredList.length != 1 ? 's' : ''} found',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const Spacer(),
+                                IconButton(
+                                  onPressed: _loadEvents,
+                                  icon: const Icon(Icons.refresh),
+                                  tooltip: 'Refresh events',
+                                  color: const Color(0xFFD7263D),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
                             _buildEventsList(filteredList, isSmallScreen),
                           ],
                         ),
@@ -169,7 +276,19 @@ class _EventsScreenState extends State<EventsScreen> {
               },
             );
           }
-          return const Center(child: Text('Please log in to view events'));
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.login, size: 64, color: Colors.grey),
+                SizedBox(height: 16),
+                Text(
+                  'Please log in to view events',
+                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                ),
+              ],
+            ),
+          );
         },
       ),
     );
@@ -209,35 +328,47 @@ class _EventsScreenState extends State<EventsScreen> {
           onTap: () async {
             await showDialog(
               context: context,
-              builder: (context) => Dialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: SfDateRangePicker(
-                    view: DateRangePickerView.month,
-                    selectionMode: DateRangePickerSelectionMode.range,
-                    initialSelectedRange: selectedDateRange,
-                    onSelectionChanged: (
-                      DateRangePickerSelectionChangedArgs args,
-                    ) {
-                      if (args.value is PickerDateRange) {
-                        onDateRangeChanged(args.value);
-                        Navigator.of(context).pop();
-                      }
-                    },
-                    showActionButtons: true,
-                    onCancel: () => Navigator.of(context).pop(),
-                    onSubmit: (val) {
-                      if (val is PickerDateRange) {
-                        onDateRangeChanged(val);
-                        Navigator.of(context).pop();
-                      }
-                    },
+              builder:
+                  (context) => Dialog(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: SfDateRangePicker(
+                        view: DateRangePickerView.month,
+                        selectionMode: DateRangePickerSelectionMode.range,
+                        initialSelectedRange: selectedDateRange,
+                        selectionColor: const Color(0xFFD7263D),
+                        rangeSelectionColor: const Color(
+                          0xFFD7263D,
+                        ).withOpacity(0.1),
+                        startRangeSelectionColor: const Color(0xFFD7263D),
+                        endRangeSelectionColor: const Color(0xFFD7263D),
+                        todayHighlightColor: const Color(
+                          0xFFD7263D,
+                        ).withOpacity(0.3),
+                        onSelectionChanged: (
+                          DateRangePickerSelectionChangedArgs args,
+                        ) {
+                          if (args.value is PickerDateRange) {
+                            onDateRangeChanged(args.value);
+                            Navigator.of(context).pop();
+                          }
+                        },
+                        showActionButtons: true,
+                        cancelText: 'Cancel',
+                        confirmText: 'Apply',
+                        onCancel: () => Navigator.of(context).pop(),
+                        onSubmit: (val) {
+                          if (val is PickerDateRange) {
+                            onDateRangeChanged(val);
+                            Navigator.of(context).pop();
+                          }
+                        },
+                      ),
+                    ),
                   ),
-                ),
-              ),
             );
           },
           child: Container(
@@ -283,22 +414,52 @@ class _EventsScreenState extends State<EventsScreen> {
 
   Widget _buildEventsList(List<Event> events, bool isSmallScreen) {
     return Expanded(
-      child: events.isEmpty
-          ? const Center(child: Text('No events found.'))
-          : ListView.separated(
-              itemCount: events.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 16),
-              itemBuilder: (context, index) {
-                final event = events[index];
-                return _buildEventCard(event, isSmallScreen);
-              },
-            ),
+      child:
+          events.isEmpty
+              ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.event_busy, size: 64, color: Colors.grey[400]),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No events found',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Try adjusting your date range or create a new event',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                    ),
+                  ],
+                ),
+              )
+              : RefreshIndicator(
+                onRefresh: () async {
+                  _loadEvents();
+                },
+                color: const Color(0xFFD7263D),
+                child: ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: events.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 16),
+                  itemBuilder: (context, index) {
+                    final event = events[index];
+                    return _buildEventCard(event, isSmallScreen);
+                  },
+                ),
+              ),
     );
   }
 
   Widget _buildEventCard(Event event, bool isSmallScreen) {
     final eventTypeColor = const Color(0xFFD7263D);
-    final statusColor = Colors.orange;
+    final statusColor = _getStatusColor(event.status);
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -358,7 +519,7 @@ class _EventsScreenState extends State<EventsScreen> {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  'UPCOMING',
+                  event.status.toUpperCase(),
                   style: TextStyle(
                     color: statusColor,
                     fontSize: 10,
@@ -380,16 +541,18 @@ class _EventsScreenState extends State<EventsScreen> {
                   fontSize: isSmallScreen ? 12 : 14,
                 ),
               ),
-              const SizedBox(width: 16),
-              Icon(Icons.schedule, size: 16, color: Colors.grey.shade600),
-              const SizedBox(width: 6),
-              Text(
-                '${event.timeFrom} - ${event.timeTo}',
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: isSmallScreen ? 12 : 14,
+              if (event.timeFrom.isNotEmpty && event.timeTo.isNotEmpty) ...[
+                const SizedBox(width: 16),
+                Icon(Icons.schedule, size: 16, color: Colors.grey.shade600),
+                const SizedBox(width: 6),
+                Text(
+                  '${event.timeFrom} - ${event.timeTo}',
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: isSmallScreen ? 12 : 14,
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
           const SizedBox(height: 12),
@@ -401,24 +564,11 @@ class _EventsScreenState extends State<EventsScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ViewEventScreen(
-                          event: {
-                            'id': event.id,
-                            'title': event.name,
-                            'location': event.location,
-                            'date': event.date,
-                            'status': event.status,
-                            'description': event.description,
-                            'timeFrom': event.timeFrom,
-                            'timeTo': event.timeTo,
-                            'hospitalId': event.hospitalId,
-                            'adminId': event.adminId,
-                          },
-                        ),
+                        builder: (context) => ViewEventScreen(event: event),
                       ),
                     );
                   },
-                  icon: Icon(Icons.visibility, size: 16),
+                  icon: const Icon(Icons.visibility, size: 16),
                   label: const Text('View Details'),
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: Colors.grey.shade300),
@@ -437,24 +587,14 @@ class _EventsScreenState extends State<EventsScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => EditEventScreen(
-                          event: {
-                            'id': event.id,
-                            'title': event.name,
-                            'location': event.location,
-                            'date': event.date,
-                            'status': event.status,
-                            'description': event.description,
-                            'timeFrom': event.timeFrom,
-                            'timeTo': event.timeTo,
-                            'hospitalId': event.hospitalId,
-                            'adminId': event.adminId,
-                          },
-                        ),
+                        builder: (context) => EditEventScreen(event: event),
                       ),
-                    );
+                    ).then((_) {
+                      // Refresh events when returning from edit screen
+                      _loadEvents();
+                    });
                   },
-                  icon: Icon(Icons.edit, size: 16),
+                  icon: const Icon(Icons.edit, size: 16),
                   label: const Text('Edit Event'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFD7263D),
@@ -471,5 +611,18 @@ class _EventsScreenState extends State<EventsScreen> {
         ],
       ),
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'active':
+        return Colors.green;
+      case 'upcoming':
+        return Colors.blue;
+      case 'completed':
+        return Colors.orange;
+      default:
+        return Colors.grey;
+    }
   }
 }
