@@ -69,3 +69,14 @@ class AuthEmailVerified extends AuthState {
   @override
   List<Object?> get props => [message];
 }
+
+// New state for when user data is loaded for a specific user
+class AuthUserDataLoaded extends AuthState {
+  final String userId;
+  final UserModel? userData;
+
+  const AuthUserDataLoaded({required this.userId, this.userData});
+
+  @override
+  List<Object?> get props => [userId, userData];
+}

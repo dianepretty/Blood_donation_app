@@ -2,6 +2,7 @@ import 'package:blood_system/blocs/appointment/bloc.dart';
 import 'package:blood_system/blocs/appointment/event.dart';
 import 'package:blood_system/blocs/appointment/state.dart';
 import 'package:blood_system/blocs/auth/bloc.dart';
+import 'package:blood_system/blocs/auth/event.dart';
 import 'package:blood_system/blocs/auth/state.dart';
 import 'package:blood_system/screens/appointments/ViewAppointment.dart';
 import 'package:blood_system/widgets/main_navigation.dart';
@@ -19,6 +20,7 @@ class AppointmentsScreen extends StatefulWidget {
 class _AppointmentsScreenState extends State<AppointmentsScreen> {
   DateTime? fromDate;
   DateTime? toDate;
+  Map<String, Map<String, dynamic>> userDataCache = {};
 
   @override
   void initState() {
@@ -38,7 +40,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated && authState.userData != null) {
       // For hospital admin, use the district name as hospital name
-      final hospitalName = authState.userData!.districtName;
+      print("user hospital name: ${authState.userData?.hospital}");
+      final hospitalName = authState.userData!.hospital;
 
       // Use the date filter event instead of the basic load event
       context.read<AppointmentBloc>().add(
@@ -67,10 +70,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     return MainNavigationWrapper(
       currentPage: 'appointments',
       pageTitle: 'Appointments',
-      // backgroundColor: const Color(0xFFF8F9FA),
       child: Column(
         children: [
-          // _buildHeader(),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
@@ -85,49 +86,6 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      height: 120,
-      decoration: const BoxDecoration(
-        color: Color(0xFFD7263D),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.event_note,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                'Appointments',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -153,7 +111,6 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
           ],
         ),
         const SizedBox(height: 12),
-        // Add filter button to apply date range
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
@@ -250,20 +207,17 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       setState(() {
         if (type == 'from') {
           fromDate = date;
-          // Ensure toDate is not before fromDate
           if (toDate != null && toDate!.isBefore(date)) {
             toDate = date;
           }
         } else {
           toDate = date;
-          // Ensure fromDate is not after toDate
           if (fromDate != null && fromDate!.isAfter(date)) {
             fromDate = date;
           }
         }
       });
 
-      // Automatically apply filter when date is selected
       _loadAppointments();
     }
   }
@@ -313,7 +267,6 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
             );
           }
 
-          // No need for local filtering since the bloc handles it
           final appointments =
               state.appointments.map((apt) => _appointmentToMap(apt)).toList();
 
@@ -362,95 +315,143 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   }
 
   Widget _buildAppointmentCard(Map<String, dynamic> appointment) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(8),
+    final userId = appointment['userId'] as String;
+
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthUserDataLoaded && state.userId == userId) {
+          setState(() {
+            userDataCache[userId] = {
+              'fullName': state.userData?.fullName ?? 'Unknown User',
+              'phoneNumber': state.userData?.phoneNumber ?? 'N/A',
+              'bloodType': state.userData?.bloodType ?? 'N/A',
+              'email': state.userData?.email ?? 'N/A',
+            };
+          });
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
-            child: const Icon(Icons.person, color: Color(0xFFD7263D), size: 20),
+          ],
+        ),
+        child: _buildCardContent(appointment, userId),
+      ),
+    );
+  }
+
+  Widget _buildCardContent(Map<String, dynamic> appointment, String userId) {
+    // Check if user data is cached
+    final userData = userDataCache[userId];
+
+    // If not cached, trigger the event to load user data
+    if (userData == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<AuthBloc>().add(AuthGetUserDataRequested(userId));
+      });
+    }
+
+    return Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(8),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'User: ${appointment['userId']}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
+          child: const Icon(Icons.person, color: Color(0xFFD7263D), size: 20),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'User: ${userData?['fullName'] ?? 'Loading...'}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
                 ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '${appointment['appointmentTime']} - Blood Donation',
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                appointment['hospitalName'],
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                DateFormat(
+                  'MMM d, yyyy',
+                ).format(appointment['appointmentDate']),
+                style: TextStyle(
+                  color: const Color(0xFFD7263D),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              if (userData != null) ...[
                 const SizedBox(height: 2),
                 Text(
-                  '${appointment['appointmentTime']} - Blood Donation',
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  appointment['hospitalName'],
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  DateFormat(
-                    'MMM d, yyyy',
-                  ).format(appointment['appointmentDate']),
+                  'Blood Type: ${userData['bloodType']}',
                   style: TextStyle(
-                    color: const Color(0xFFD7263D),
+                    color: Colors.grey.shade600,
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
+            ],
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            // Create enhanced appointment data with user info
+            final enhancedAppointment = Map<String, dynamic>.from(appointment);
+            if (userData != null) {
+              enhancedAppointment.addAll(userData);
+            }
+
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder:
+                    (context) => AppointmentDetailsScreen(
+                      appointment: enhancedAppointment,
+                    ),
+              ),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFFD7263D).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              'View Details',
+              style: TextStyle(
+                color: const Color(0xFFD7263D),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder:
-                      (context) =>
-                          AppointmentDetailsScreen(appointment: appointment),
-                ),
-              );
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(0xFFD7263D).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                'View Details',
-                style: TextStyle(
-                  color: const Color(0xFFD7263D),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

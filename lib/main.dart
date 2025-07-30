@@ -9,6 +9,7 @@ import 'package:blood_system/blocs/hospital/bloc.dart';
 import 'package:blood_system/blocs/language/bloc.dart';
 import 'package:blood_system/screens/FAQScreen.dart';
 import 'package:blood_system/screens/appointments_router.dart';
+import 'package:blood_system/screens/email_verification.dart';
 import 'package:blood_system/screens/events/events.dart';
 import 'package:blood_system/screens/history.dart';
 import 'package:blood_system/screens/notificationScreen.dart';
@@ -83,9 +84,10 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             title: 'Blood Donation App',
             debugShowCheckedModeBanner: false,
-            locale: languageState is LanguageLoadedState
-                ? languageState.locale
-                : const Locale('en'),
+            locale:
+                languageState is LanguageLoadedState
+                    ? languageState.locale
+                    : const Locale('en'),
             supportedLocales: const [
               Locale('en'), // English
               Locale('fr'), // French

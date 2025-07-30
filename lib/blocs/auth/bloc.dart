@@ -29,6 +29,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
     on<AuthStartEmailVerificationTimer>(_onAuthStartEmailVerificationTimer);
     on<AuthStopEmailVerificationTimer>(_onAuthStopEmailVerificationTimer);
+    on<AuthGetUserDataRequested>(_onAuthGetUserDataRequested);
   }
 
   // Start listening to auth state changes
@@ -36,57 +37,71 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     _authStateSubscription?.cancel();
     _authStateSubscription = _authService.authStateChanges.listen(
       (user) => add(AuthUserChanged(user)),
-      onError: (error) {
-        print('AuthBloc - Auth state stream error: $error');
-        add(AuthUserChanged(null));
-      },
     );
   }
 
-  // Handle user state changes OLD VERSION
-  // Future<void> _onAuthUserChanged(
-  //   AuthUserChanged event,
-  //   Emitter<AuthState> emit,
-  // ) async {
-  //   print('AuthBloc - _onAuthUserChanged called');
-  //   print('AuthBloc - User: ${event.user?.uid}');
+  // Handle user state changes
+  Future<void> _onAuthUserChanged(
+    AuthUserChanged event,
+    Emitter<AuthState> emit,
+  ) async {
+    print('AuthBloc - _onAuthUserChanged called');
+    print('AuthBloc - User: ${event.user?.uid}');
 
-  //   if (event.user != null) {
-  //     print('AuthBloc - User is not null, emitting AuthLoading');
-  //     emit(AuthLoading());
-  //     try {
-  //       // Check if email is verified
-  //       if (!event.user!.emailVerified) {
-  //         print(
-  //           'AuthBloc - Email not verified, emitting AuthEmailVerificationSent',
-  //         );
-  //         emit(AuthEmailVerificationSent(event.user!.email ?? ''));
-  //         return;
-  //       }
+    if (event.user != null) {
+      print('AuthBloc - User is not null, emitting AuthLoading');
+      emit(AuthLoading());
+      try {
+        // Get user data from Firestore
+        print('AuthBloc - Getting user data from Firestore');
+        final userData = await _authService.getUserData(event.user!.uid);
+        print('AuthBloc - User data retrieved: ${userData?.toJson()}');
+        emit(AuthAuthenticated(firebaseUser: event.user!, userData: userData));
+        print('AuthBloc - Emitted AuthAuthenticated');
+      } catch (e) {
+        print('AuthBloc - Error getting user data: ${e.toString()}');
+        emit(AuthError('Failed to load user data: ${e.toString()}'));
+      }
+    } else {
+      print('AuthBloc - User is null, emitting AuthUnauthenticated');
+      emit(AuthUnauthenticated());
+    }
+  }
 
-  //       // Get user data from Firestore
-  //       print('AuthBloc - Getting user data from Firestore');
-  //       final userData = await _authService.getUserData(event.user!.uid);
-  //       print('AuthBloc - User data retrieved: ${userData?.toJson()}');
-  //       emit(AuthAuthenticated(firebaseUser: event.user!, userData: userData));
-  //       print('AuthBloc - Emitted AuthAuthenticated');
-  //     } catch (e) {
-  //       print('AuthBloc - Error getting user data: ${e.toString()}');
-  //       emit(AuthError('Failed to load user data: ${e.toString()}'));
-  //     }
-  //   } else {
-  //     print('AuthBloc - User is null, emitting AuthUnauthenticated');
-  //     emit(AuthUnauthenticated());
-  //   }
-  // }
+  // Handle get user data request
+  Future<void> _onAuthGetUserDataRequested(
+    AuthGetUserDataRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    print(
+      'AuthBloc - _onAuthGetUserDataRequested called for userId: ${event.userId}',
+    );
+    try {
+      final userData = await _authService.getUserData(event.userId);
+      print(
+        'AuthBloc - User data retrieved for ${event.userId}: ${userData?.toJson()}',
+      );
+      emit(AuthUserDataLoaded(userId: event.userId, userData: userData));
+    } catch (e) {
+      print(
+        'AuthBloc - Error getting user data for ${event.userId}: ${e.toString()}',
+      );
+      emit(AuthError('Failed to load user data: ${e.toString()}'));
+    }
+  }
 
   // Handle sign up
   Future<void> _onAuthSignUpRequested(
     AuthSignUpRequested event,
     Emitter<AuthState> emit,
   ) async {
+    print('AuthBloc - _onAuthSignUpRequested called');
+    print('AuthBloc - Email: ${event.email}');
+    print('AuthBloc - Role: ${event.role}');
+    print('AuthBloc - Hospital: ${event.hospital}');
     emit(AuthLoading());
     try {
+      print('AuthBloc - Calling signUpWithEmailAndPassword ${event.hospital}');
       await _authService.signUpWithEmailAndPassword(
         fullName: event.fullName,
         email: event.email,
@@ -97,16 +112,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         role: event.role,
         bloodType: event.bloodType,
         imageUrl: event.imageUrl,
+        hospital: event.hospital,
       );
 
-      // Send verification email immediately after signup
-      await _authService.sendEmailVerification();
-
-      // Let AuthUserChanged handle the rest
+      // After successful signup, emit email verification sent state
+      final currentUser = _authService.currentUser;
+      if (currentUser != null) {
+        print(
+          'AuthBloc - Signup successful, emitting AuthEmailVerificationSent',
+        );
+        emit(AuthEmailVerificationSent(currentUser.email ?? ''));
+      }
     } on FirebaseAuthException catch (e) {
-      emit(AuthError(_getErrorMessage(e.code)));
+      print('AuthBloc - FirebaseAuthException during signup: ${e.code}');
+      final errorMessage = _getErrorMessage(e.code);
+      print('AuthBloc - Emitting AuthError during signup: $errorMessage');
+      emit(AuthError(errorMessage));
     } catch (e) {
-      emit(AuthError('An unexpected error occurred: ${e.toString()}'));
+      print('AuthBloc - Unexpected error during signup: ${e.toString()}');
+      final errorMessage = 'An unexpected error occurred: ${e.toString()}';
+      print('AuthBloc - Emitting AuthError during signup: $errorMessage');
+      emit(AuthError(errorMessage));
     }
   }
 
@@ -136,111 +162,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final errorMessage = 'An unexpected error occurred: ${e.toString()}';
       print('AuthBloc - Emitting AuthError: $errorMessage');
       emit(AuthError(errorMessage));
-    }
-  }
-
-  // Handle Google sign in
-  Future<void> _onAuthGoogleSignInRequested(
-    AuthGoogleSignInRequested event,
-    Emitter<AuthState> emit,
-  ) async {
-    print('AuthBloc - _onAuthGoogleSignInRequested called');
-    emit(AuthLoading());
-    try {
-      print('AuthBloc - Calling signInWithGoogle');
-      await _authService.signInWithGoogle();
-      print(
-        'AuthBloc - Google sign in successful, AuthUserChanged will be triggered',
-      );
-      // AuthUserChanged will be triggered automatically by auth state stream
-    } on FirebaseAuthException catch (e) {
-      print(
-        'AuthBloc - FirebaseAuthException during Google sign-in: ${e.code}',
-      );
-      emit(AuthError(_getGoogleSignInErrorMessage(e.code)));
-    } catch (e) {
-      print(
-        'AuthBloc - Unexpected error during Google sign-in: ${e.toString()}',
-      );
-      emit(AuthError('Google sign-in failed: ${e.toString()}'));
-    }
-  }
-
-  // Updated _onAuthUserChanged to handle profile completion
-  Future<void> _onAuthUserChanged(
-    AuthUserChanged event,
-    Emitter<AuthState> emit,
-  ) async {
-    print('AuthBloc - _onAuthUserChanged called');
-    print('AuthBloc - User: ${event.user?.uid}');
-
-    if (event.user != null) {
-      print('AuthBloc - User is not null, emitting AuthLoading');
-      emit(AuthLoading());
-      try {
-        // Check if email is verified (skip for Google sign-in)
-        final isGoogleUser = event.user!.providerData.any(
-          (provider) => provider.providerId == 'google.com',
-        );
-
-        if (!isGoogleUser && !event.user!.emailVerified) {
-          print(
-            'AuthBloc - Email not verified, emitting AuthEmailVerificationSent',
-          );
-          emit(AuthEmailVerificationSent(event.user!.email ?? ''));
-          return;
-        }
-
-        // Get user data from Firestore
-        print('AuthBloc - Getting user data from Firestore');
-        final userData = await _authService.getUserData(event.user!.uid)
-            .timeout(const Duration(seconds: 15));
-        print('AuthBloc - User data retrieved: $userData');
-
-        if (userData != null) {
-          emit(AuthAuthenticated(firebaseUser: event.user!, userData: userData));
-          print('AuthBloc - Emitted AuthAuthenticated');
-        } else {
-          // If user data is null, emit unauthenticated state
-          print('AuthBloc - User data is null, emitting AuthUnauthenticated');
-          emit(AuthUnauthenticated());
-        }
-      } catch (e) {
-        print('AuthBloc - Error getting user data: ${e.toString()}');
-        // Instead of emitting error, emit unauthenticated to prevent infinite loading
-        emit(AuthUnauthenticated());
-      }
-    } else {
-      print('AuthBloc - User is null, emitting AuthUnauthenticated');
-      emit(AuthUnauthenticated());
-    }
-  }
-
-  // Add Google-specific error messages
-  String _getGoogleSignInErrorMessage(String errorCode) {
-    switch (errorCode) {
-      case 'account-exists-with-different-credential':
-        return 'An account already exists with the same email address but different sign-in credentials.';
-      case 'invalid-credential':
-        return 'The credential received is malformed or has expired.';
-      case 'operation-not-allowed':
-        return 'Google sign-in is not enabled for this project.';
-      case 'user-disabled':
-        return 'The user account has been disabled by an administrator.';
-      case 'user-not-found':
-        return 'No user found for this account.';
-      case 'wrong-password':
-        return 'Invalid password for this account.';
-      case 'invalid-verification-code':
-        return 'Invalid verification code.';
-      case 'invalid-verification-id':
-        return 'Invalid verification ID.';
-      case 'sign_in_canceled':
-        return 'Google sign-in was canceled.';
-      case 'google-sign-in-failed':
-        return 'Google sign-in failed. Please try again.';
-      default:
-        return 'An error occurred during Google sign-in. Please try again.';
     }
   }
 
@@ -309,21 +230,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  // // Handle Google sign in
-  // Future<void> _onAuthGoogleSignInRequested(
-  //   AuthGoogleSignInRequested event,
-  //   Emitter<AuthState> emit,
-  // ) async {
-  //   emit(AuthLoading());
-  //   try {
-  //     await _authService.signInWithGoogle();
-  //     // AuthUserChanged will be triggered automatically by auth state stream
-  //   } on FirebaseAuthException catch (e) {
-  //     emit(AuthError(_getErrorMessage(e.code)));
-  //   } catch (e) {
-  //     emit(AuthError('An unexpected error occurred: ${e.toString()}'));
-  //   }
-  // }
+  // Handle Google sign in
+  Future<void> _onAuthGoogleSignInRequested(
+    AuthGoogleSignInRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      await _authService.signInWithGoogle();
+      // AuthUserChanged will be triggered automatically by auth state stream
+    } on FirebaseAuthException catch (e) {
+      emit(AuthError(_getErrorMessage(e.code)));
+    } catch (e) {
+      emit(AuthError('An unexpected error occurred: ${e.toString()}'));
+    }
+  }
 
   // Handle email verification request
   Future<void> _onAuthEmailVerificationRequested(
@@ -380,7 +301,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) {
     _emailVerificationTimer?.cancel();
-    _emailVerificationTimer = Timer.periodic(const Duration(seconds: 15), (
+    _emailVerificationTimer = Timer.periodic(const Duration(seconds: 3), (
       timer,
     ) {
       add(AuthCheckEmailVerificationRequested());
