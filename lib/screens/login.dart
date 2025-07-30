@@ -54,10 +54,9 @@ class _LoginPageState extends State<LoginPage> {
                   Future.delayed(const Duration(milliseconds: 500), () {
                     if (mounted) {
                       // Navigate back to home - AuthWrapper will handle the routing
-                      Navigator.of(context).pushNamedAndRemoveUntil(
-                        '/appointments',
-                        (route) => false,
-                      );
+                      Navigator.of(
+                        context,
+                      ).pushNamedAndRemoveUntil('/', (route) => false);
                     }
                   });
                 } else if (state is AuthError) {
@@ -324,7 +323,7 @@ class _LoginPageState extends State<LoginPage> {
                             height: 56,
                             child: OutlinedButton.icon(
                               onPressed:
-                                  isLoading
+                                  _rememberMe
                                       ? null
                                       : () {
                                         context.read<AuthBloc>().add(
@@ -332,7 +331,7 @@ class _LoginPageState extends State<LoginPage> {
                                         );
                                       },
                               icon:
-                                  isLoading
+                                  _rememberMe
                                       ? const SizedBox(
                                         width: 20,
                                         height: 20,

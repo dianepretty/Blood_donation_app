@@ -173,12 +173,7 @@ class CustomDrawer extends StatelessWidget {
       ];
     } else {
       navigationItems = [
-        {
-          'title': 'Home',
-          'icon': Icons.home,
-          'route': '/events',
-          'page': 'home',
-        },
+        {'title': 'Home', 'icon': Icons.home, 'route': '/home', 'page': 'home'},
         {
           'title': 'Appointments',
           'icon': Icons.calendar_today,
@@ -247,16 +242,19 @@ class CustomDrawer extends StatelessWidget {
   }
 
   Widget _buildHelpNavigationItem(
-      BuildContext context, {
-        required String title,
-        required IconData icon,
-        required String route,
-        required bool isSelected,
-      }) {
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required String route,
+    required bool isSelected,
+  }) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFFB83A3A).withOpacity(0.1) : Colors.transparent,
+        color:
+            isSelected
+                ? const Color(0xFFB83A3A).withOpacity(0.1)
+                : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
@@ -273,19 +271,20 @@ class CustomDrawer extends StatelessWidget {
             fontSize: 16,
           ),
         ),
-        trailing: isSelected
-            ? Container(
-          width: 4,
-          height: 24,
-          decoration: const BoxDecoration(
-            color: Color(0xFFB83A3A),
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(2),
-              bottomLeft: Radius.circular(2),
-            ),
-          ),
-        )
-            : null,
+        trailing:
+            isSelected
+                ? Container(
+                  width: 4,
+                  height: 24,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFB83A3A),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(2),
+                      bottomLeft: Radius.circular(2),
+                    ),
+                  ),
+                )
+                : null,
         onTap: () {
           Navigator.pop(context); // Close drawer first
 
@@ -303,18 +302,19 @@ class CustomDrawer extends StatelessWidget {
   }
 
   Widget _buildNavigationItem(
-      BuildContext context, {
-        required String title,
-        required IconData icon,
-        required String route,
-        required bool isSelected,
-      }) {
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required String route,
+    required bool isSelected,
+  }) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: isSelected
-            ? const Color(0xFFB83A3A).withOpacity(0.1)
-            : Colors.transparent,
+        color:
+            isSelected
+                ? const Color(0xFFB83A3A).withOpacity(0.1)
+                : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
@@ -331,19 +331,20 @@ class CustomDrawer extends StatelessWidget {
             fontSize: 16,
           ),
         ),
-        trailing: isSelected
-            ? Container(
-          width: 4,
-          height: 24,
-          decoration: const BoxDecoration(
-            color: Color(0xFFB83A3A),
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(2),
-              bottomLeft: Radius.circular(2),
-            ),
-          ),
-        )
-            : null,
+        trailing:
+            isSelected
+                ? Container(
+                  width: 4,
+                  height: 24,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFB83A3A),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(2),
+                      bottomLeft: Radius.circular(2),
+                    ),
+                  ),
+                )
+                : null,
         onTap: () {
           Navigator.pop(context); // Close drawer
           Navigator.pushNamed(context, route); // Always navigate
@@ -351,7 +352,6 @@ class CustomDrawer extends StatelessWidget {
       ),
     );
   }
-
 
   Widget _buildLogoutSection(BuildContext context) {
     return Container(

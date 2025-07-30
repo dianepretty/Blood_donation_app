@@ -208,7 +208,10 @@ class AuthService {
   // Sign out
   Future<void> signOut() async {
     try {
-      await Future.wait([_auth.signOut(), _googleSignIn.signOut()]);
+      await Future.wait([
+        _auth.signOut(),
+        // , _googleSignIn.signOut()
+      ]);
     } catch (e) {
       debugPrint('Sign out error: $e');
       rethrow;
