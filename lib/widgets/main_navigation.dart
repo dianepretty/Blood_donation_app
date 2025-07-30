@@ -61,44 +61,39 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
           key: _scaffoldKey,
           backgroundColor: widget.backgroundColor ?? const Color(0xFFF5F5F5),
           drawer:
-              widget.showDrawer
-                  ? CustomDrawer(
-                    currentPage: widget.currentPage,
-                    userName: userName,
-                    userEmail: userEmail,
-                    userRole: userRole,
-                  )
-                  : null,
+          widget.showDrawer
+              ? CustomDrawer(
+            currentPage: widget.currentPage,
+            userName: userName,
+            userEmail: userEmail,
+            userRole: userRole,
+            onNavigateToFAQ: _openFAQ, // pass the FAQ navigation callback if your drawer supports it
+          )
+              : null,
           appBar:
-              widget.showAppBar
-                  ? CustomAppBar(
-                    pageName: widget.pageTitle,
-                    scaffoldKey: _scaffoldKey,
-                    onNotificationPressed: () {
-                      // Handle notification press
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Notifications coming soon!'),
-                          backgroundColor: Color(0xFFB83A3A),
-                        ),
-                      );
-                    },
-                  )
-                  : null,
+          widget.showAppBar
+              ? CustomAppBar(
+            pageName: widget.pageTitle,
+            scaffoldKey: _scaffoldKey,
+            onNotificationPressed: () {
+              Navigator.pushNamed(context, '/notifications');
+            },
+          )
+              : null,
           body: widget.child,
           floatingActionButton: widget.floatingActionButton,
           floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
           bottomNavigationBar:
-              widget.showBottomNav
-                  ? CustomBottomNavigation(
-                    currentPage: widget.currentPage,
-                    userRole: userRole ?? 'VOLUNTEER',
-                    onTap: (index) {
-                      _handleBottomNavigation(index, userRole ?? 'VOLUNTEER');
-                    },
-                    child: SingleChildScrollView(child: SizedBox.shrink()),
-                  )
-                  : null,
+          widget.showBottomNav
+              ? CustomBottomNavigation(
+            currentPage: widget.currentPage,
+            userRole: userRole ?? 'VOLUNTEER',
+            onTap: (index) {
+              _handleBottomNavigation(index, userRole ?? 'VOLUNTEER');
+            },
+            child: SingleChildScrollView(child: SizedBox.shrink()),
+          )
+              : null,
         );
       },
     );
@@ -148,6 +143,10 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
     }
   }
 
+  void _openFAQ() {
+    Navigator.pushNamed(context, '/faq');
+  }
+
   // Helper method to get the default page for a user role
   static String getDefaultPageForRole(String userRole) {
     final role = userRole.toUpperCase();
@@ -190,11 +189,11 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
   }
 
   static void _handleBottomNavigationStatic(
-    BuildContext context,
-    int index,
-    String userRole,
-    String currentPage,
-  ) {
+      BuildContext context,
+      int index,
+      String userRole,
+      String currentPage,
+      ) {
     final role = userRole.toUpperCase();
 
     if (role == 'HOSPITAL_ADMIN' || role == 'HOSPITAL ADMIN') {
