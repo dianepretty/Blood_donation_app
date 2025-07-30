@@ -3,43 +3,44 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../models/appointment_model.dart';
+import '../blocs/appointment/bloc.dart'; // Import AppointmentBloc
+import '../blocs/appointment/event.dart'; // Import AppointmentEvent
+import '../blocs/appointment/state.dart'; // Import AppointmentState
 import '../blocs/event_bloc.dart'; // Import EventBloc
 import '../blocs/event_event.dart'; // Import EventEvent
 import '../blocs/event_state.dart'; // Import EventState
+import '../blocs/auth/bloc.dart'; // Import AuthBloc
+import '../blocs/auth/state.dart'; // Import AuthState
 import '../models/event_model.dart'; // Import EventModel
 import '../widgets/main_navigation.dart';
 
-// class HomePage extends StatelessWidget {
-//   const HomePage({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MultiBlocProvider(
-//       providers: [
-//         BlocProvider(
-//           create:
-//               (context) => AppointmentBloc(
-//                 appointmentService: AppointmentService(),
-//                 hospitalService: HospitalService(),
-//               )..add(LoadAdminAppointments('put hospital name of logegd user')),
-//         ),
-//         BlocProvider(
-//           create:
-//               (context) => EventBloc()..add(LoadEvents()), // Provide EventBloc
-//         ),
-//       ],
-//       child: const HomePageContent(),
-//     );
-//   }
-// }
-
-class HomePageContent extends StatelessWidget {
+class HomePageContent extends StatefulWidget {
   const HomePageContent({super.key});
+
+  @override
+  State<HomePageContent> createState() => _HomePageContentState();
+}
+
+class _HomePageContentState extends State<HomePageContent> {
+  @override
+  void initState() {
+    super.initState();
+    // Load appointments when the page initializes
+    _loadUserAppointments();
+  }
+
+  void _loadUserAppointments() {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      context.read<AppointmentBloc>().add(
+        LoadUserAppointments(authState.firebaseUser.uid),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return MainNavigationWrapper(
-      // backgroundColor: const Color(0xFFF5F5F5),
       pageTitle: 'Home',
       currentPage: '/home',
       child: Column(
@@ -47,10 +48,8 @@ class HomePageContent extends StatelessWidget {
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async {
-                // context.read<AppointmentBloc>().add(RefreshAppointments());
-                context.read<EventBloc>().add(
-                  RefreshEvents(),
-                ); // Refresh events
+                _loadUserAppointments();
+                context.read<EventBloc>().add(RefreshEvents());
               },
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -82,14 +81,13 @@ class HomePageContent extends StatelessWidget {
                               ),
                               child: const Text('view more'),
                               onPressed: () {
-                                // Navigate to the appointments page
                                 Navigator.of(
                                   context,
                                 ).pushNamed('/appointments');
                               },
                             ),
                             const SizedBox(width: 4),
-                            Icon(
+                            const Icon(
                               Icons.arrow_forward,
                               color: Color(0xFFB83A3A),
                               size: 16,
@@ -100,6 +98,65 @@ class HomePageContent extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 16),
+
+                    // Appointments section with BlocBuilder
+                    BlocBuilder<AppointmentBloc, AppointmentState>(
+                      builder: (context, state) {
+                        if (state.status == AppointmentStatus.loading) {
+                          return _buildLoadingState();
+                        }
+
+                        if (state.status == AppointmentStatus.error) {
+                          return _buildErrorState(
+                            state.errorMessage ?? 'Failed to load appointments',
+                          );
+                        }
+
+                        if (state.status == AppointmentStatus.success) {
+                          // Filter upcoming appointments (future dates only)
+                          final upcomingAppointments =
+                              state.appointments
+                                  .where(
+                                    (appointment) =>
+                                        appointment.appointmentDate.isAfter(
+                                          DateTime.now(),
+                                        ) ||
+                                        _isToday(appointment.appointmentDate),
+                                  )
+                                  .toList();
+
+                          // Sort by date (earliest first)
+                          upcomingAppointments.sort(
+                            (a, b) =>
+                                a.appointmentDate.compareTo(b.appointmentDate),
+                          );
+
+                          if (upcomingAppointments.isEmpty) {
+                            return _buildEmptyAppointmentsState();
+                          }
+
+                          return Column(
+                            children:
+                                upcomingAppointments
+                                    .take(3) // Show only first 3 appointments
+                                    .map(
+                                      (appointment) => Padding(
+                                        padding: const EdgeInsets.only(
+                                          bottom: 12,
+                                        ),
+                                        child: _buildAppointmentCard(
+                                          appointment,
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                          );
+                        }
+
+                        return _buildEmptyAppointmentsState();
+                      },
+                    ),
+
                     const SizedBox(height: 32),
 
                     // Events section
@@ -116,7 +173,7 @@ class HomePageContent extends StatelessWidget {
                         ),
                         Row(
                           children: [
-                            Text(
+                            const Text(
                               'view more',
                               style: TextStyle(
                                 color: Color(0xFFB83A3A),
@@ -125,7 +182,7 @@ class HomePageContent extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 4),
-                            Icon(
+                            const Icon(
                               Icons.arrow_forward,
                               color: Color(0xFFB83A3A),
                               size: 16,
@@ -222,9 +279,35 @@ class HomePageContent extends StatelessWidget {
     );
   }
 
+  bool _isToday(DateTime date) {
+    final now = DateTime.now();
+    return date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day;
+  }
+
   Widget _buildAppointmentCard(Appointment appointment) {
-    final dateFormatter = DateFormat('M/d/yyyy');
+    final dateFormatter = DateFormat('MMM d, yyyy');
+    final timeFormatter = DateFormat('h:mm a');
     final formattedDate = dateFormatter.format(appointment.appointmentDate);
+
+    // Parse appointment time if it's a string, otherwise use it directly
+    String displayTime = appointment.appointmentTime;
+
+    // Check if today, tomorrow, or future
+    final now = DateTime.now();
+    final appointmentDate = appointment.appointmentDate;
+    String dateLabel;
+
+    if (_isToday(appointmentDate)) {
+      dateLabel = 'Today';
+    } else if (_isTomorrow(appointmentDate)) {
+      dateLabel = 'Tomorrow';
+    } else if (_isThisWeek(appointmentDate)) {
+      dateLabel = DateFormat('EEEE').format(appointmentDate); // Day name
+    } else {
+      dateLabel = formattedDate;
+    }
 
     return Container(
       decoration: BoxDecoration(
@@ -242,40 +325,9 @@ class HomePageContent extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                // children: [
-                //   Text(
-                //     appointment.type,
-                //     style: const TextStyle(
-                //       fontSize: 16,
-                //       fontWeight: FontWeight.w600,
-                //       color: Color(0xFF333333),
-                //     ),
-                //   ),
-                //   const SizedBox(height: 4),
-                //   Text(
-                //     appointment.hospital,
-                //     style: const TextStyle(
-                //       fontSize: 14,
-                //       fontWeight: FontWeight.w600,
-                //       color: Color(0xFF666666),
-                //     ),
-                //   ),
-                //   const SizedBox(height: 4),
-                //   Text(
-                //     '$formattedDate from ${appointment.timeFrom} to ${appointment.timeTo}', // Updated to use timeFrom and timeTo
-                //     style: const TextStyle(
-                //       fontSize: 14,
-                //       color: Color(0xFF888888),
-                //     ),
-                //   ),
-                // ],
-              ),
-            ),
+            // Hospital icon
             Container(
-              width: 80,
+              width: 60,
               height: 60,
               decoration: BoxDecoration(
                 color: const Color(0xFFE8F4FD),
@@ -284,8 +336,96 @@ class HomePageContent extends StatelessWidget {
               child: const Icon(
                 Icons.local_hospital,
                 color: Color(0xFF4A90E2),
-                size: 32,
+                size: 28,
               ),
+            ),
+            const SizedBox(width: 16),
+
+            // Appointment details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Blood Donation',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF333333),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    appointment.hospitalName,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF666666),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.access_time,
+                        size: 14,
+                        color: Colors.grey[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$dateLabel at $displayTime',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            // Status indicator or action button
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color:
+                        _isToday(appointmentDate)
+                            ? Colors.orange.withOpacity(0.1)
+                            : const Color(0xFFB83A3A).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    _isToday(appointmentDate) ? 'Today' : 'Upcoming',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                      color:
+                          _isToday(appointmentDate)
+                              ? Colors.orange[700]
+                              : const Color(0xFFB83A3A),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pushNamed('/appointments');
+                  },
+                  child: Text(
+                    'View Details',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: const Color(0xFFB83A3A),
+                      fontWeight: FontWeight.w500,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -293,7 +433,86 @@ class HomePageContent extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState(String message) {
+  bool _isTomorrow(DateTime date) {
+    final tomorrow = DateTime.now().add(const Duration(days: 1));
+    return date.year == tomorrow.year &&
+        date.month == tomorrow.month &&
+        date.day == tomorrow.day;
+  }
+
+  bool _isThisWeek(DateTime date) {
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    final endOfWeek = startOfWeek.add(const Duration(days: 6));
+    return date.isAfter(startOfWeek) &&
+        date.isBefore(endOfWeek.add(const Duration(days: 1)));
+  }
+
+  Widget _buildLoadingState() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: const Center(
+        child: CircularProgressIndicator(color: Color(0xFFB83A3A)),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String message) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.error_outline, size: 48, color: Colors.red[400]),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.red[600],
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _loadUserAppointments,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFB83A3A),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            ),
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyAppointmentsState() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(32),
@@ -317,6 +536,56 @@ class HomePageContent extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
+            'No upcoming appointments',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Book your next blood donation appointment',
+            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pushNamed('/book-appointment');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFB83A3A),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            ),
+            child: const Text('Book Appointment'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(String message) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.event_outlined, size: 48, color: Colors.grey[400]),
+          const SizedBox(height: 16),
+          Text(
             message,
             style: TextStyle(
               fontSize: 16,
@@ -330,8 +599,7 @@ class HomePageContent extends StatelessWidget {
   }
 
   Widget _buildEventCard(Event event) {
-    // Updated to accept an Event object
-    final dateFormatter = DateFormat('M/d/yyyy');
+    final dateFormatter = DateFormat('MMM d, yyyy');
     final formattedDate = dateFormatter.format(event.date);
 
     return Container(
@@ -357,7 +625,7 @@ class HomePageContent extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    event.description, // Using description as the main title
+                    event.description,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -379,7 +647,7 @@ class HomePageContent extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
+                const Text(
                   'view details',
                   style: TextStyle(
                     color: Color(0xFF666666),
@@ -396,7 +664,7 @@ class HomePageContent extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${event.timeFrom} - ${event.timeTo}', // Displaying timeFrom and timeTo
+                  '${event.timeFrom} - ${event.timeTo}',
                   style: const TextStyle(
                     fontSize: 12,
                     color: Color(0xFF888888),
