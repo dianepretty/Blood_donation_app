@@ -57,26 +57,6 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
           );
         }
 
-        final String userId = authState.firebaseUser.email ?? '';
-
-        if (userId.isEmpty) {
-          return Scaffold(
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Unable to get user information',
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
         // Use the existing AppointmentBloc from the widget tree (created in main)
         return BlocConsumer<AppointmentBloc, AppointmentState>(
           listener: (context, state) {
@@ -113,8 +93,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
             }
           },
           builder: (context, state) {
-            print('BookAppointmentScreen - Current state: $state');
-            return _buildBookingScreen(context, state, userId);
+            return _buildBookingScreen(context, state, widget.userId);
           },
         );
       },
@@ -207,6 +186,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   Widget _buildHospitalSelector(AppointmentState state) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         const Text(
           'Hospital',
@@ -261,6 +241,130 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  void _showHospitalSelector(AppointmentState state) {
+    // Use hospitals from state if available, otherwise use static list
+    final hospitalList =
+        state.hospitals.isNotEmpty
+            ? state.hospitals.map((h) => h.name).toList()
+            : [];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allow custom height
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        // Get screen height and calculate maximum height for modal
+        final screenHeight = MediaQuery.of(context).size.height;
+        final maxHeight = screenHeight * 0.7; // Use 70% of screen height
+
+        return ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: maxHeight,
+            minHeight: 200, // Minimum height
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Fixed header
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Select Hospital',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              // Scrollable content
+              Flexible(
+                child:
+                    hospitalList.isEmpty
+                        ? const Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Text(
+                            'No hospitals available',
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          ),
+                        )
+                        : ListView.separated(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 10,
+                          ),
+                          shrinkWrap: true,
+                          itemCount: hospitalList.length,
+                          separatorBuilder:
+                              (context, index) => const Divider(height: 1),
+                          itemBuilder: (context, index) {
+                            final hospitalName = hospitalList[index];
+                            final isSelected =
+                                state.selectedHospitalName == hospitalName;
+
+                            return ListTile(
+                              title: Text(
+                                hospitalName,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              trailing:
+                                  isSelected
+                                      ? const Icon(
+                                        Icons.check,
+                                        color: Color(0xFFD7263D),
+                                      )
+                                      : null,
+                              onTap: () {
+                                setState(() {
+                                  context.read<AppointmentBloc>().add(
+                                    SelectHospital(hospitalName: hospitalName),
+                                  );
+                                });
+                                Navigator.pop(context);
+
+                                // Load time slots for the new hospital
+                                if (state.selectedDate != null) {
+                                  context.read<AppointmentBloc>().add(
+                                    LoadAvailableTimeSlots(
+                                      hospitalName: hospitalName,
+                                      date: state.selectedDate!,
+                                    ),
+                                  );
+                                }
+                              },
+                            );
+                          },
+                        ),
+              ),
+              // Safe area padding at bottom
+              SizedBox(height: MediaQuery.of(context).padding.bottom),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -510,59 +614,6 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     if (date != null) {
       context.read<AppointmentBloc>().add(SelectAppointmentDate(date));
     }
-  }
-
-  void _showHospitalSelector(AppointmentState state) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Select Hospital',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 16),
-              ...state.hospitals.map(
-                (hospital) => GestureDetector(
-                  onTap: () {
-                    context.read<AppointmentBloc>().add(
-                      SelectHospital(hospitalName: hospital.name),
-                    );
-                    Navigator.pop(context);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            '${hospital.name} (${hospital.district})',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        if (state.selectedHospitalName == hospital.name)
-                          const Icon(Icons.check, color: Color(0xFFD7263D)),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   void _bookAppointment(AppointmentState state, String userId) {

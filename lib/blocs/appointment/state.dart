@@ -3,29 +3,25 @@ import 'package:blood_system/models/appointment_model.dart';
 import 'package:blood_system/models/hospital_model.dart';
 import 'package:equatable/equatable.dart';
 
-enum AppointmentStatus { 
-  initial, 
-  loading, 
-  success, 
-  error 
-}
+enum AppointmentStatus { initial, loading, success, error }
 
 class AppointmentState extends Equatable {
   final AppointmentStatus status;
   final List<Appointment> appointments;
   final List<Hospital> hospitals;
   final List<String> availableTimeSlots;
-  
+
   // Form fields
   final DateTime? selectedDate;
   final String? selectedHospitalName;
   final String? selectedTimeSlot;
   final String? notes;
-  
+
   // Status indicators
   final bool isBooking;
   final bool isLoadingTimeSlots;
   final bool isLoadingHospitals;
+  final bool isRescheduling;
   final String? errorMessage;
   final String? successMessage;
 
@@ -41,32 +37,32 @@ class AppointmentState extends Equatable {
     this.isBooking = false,
     this.isLoadingTimeSlots = false,
     this.isLoadingHospitals = false,
+    this.isRescheduling = false,
     this.errorMessage,
     this.successMessage,
   });
 
   // FIXED: Use selectedHospitalName instead of selectedHospitalId
-  bool get canBookAppointment => 
-      selectedDate != null && 
-      selectedHospitalName != null && 
+  bool get canBookAppointment =>
+      selectedDate != null &&
+      selectedHospitalName != null &&
       selectedTimeSlot != null &&
       !isBooking;
 
-  bool get hasFormData => 
-      selectedDate != null || 
-      selectedHospitalName != null || 
+  bool get hasFormData =>
+      selectedDate != null ||
+      selectedHospitalName != null ||
       selectedTimeSlot != null;
 
-  List<Appointment> get upcomingAppointments => appointments
-      .where((apt) => 
-          apt.appointmentDate.isAfter(DateTime.now()) )
-      .toList();
+  List<Appointment> get upcomingAppointments =>
+      appointments
+          .where((apt) => apt.appointmentDate.isAfter(DateTime.now()))
+          .toList();
 
-  List<Appointment> get pastAppointments => appointments
-      .where((apt) => 
-          apt.appointmentDate.isBefore(DateTime.now()) 
-         )
-      .toList();
+  List<Appointment> get pastAppointments =>
+      appointments
+          .where((apt) => apt.appointmentDate.isBefore(DateTime.now()))
+          .toList();
 
   AppointmentState copyWith({
     AppointmentStatus? status,
@@ -80,6 +76,7 @@ class AppointmentState extends Equatable {
     bool? isBooking,
     bool? isLoadingTimeSlots,
     bool? isLoadingHospitals,
+    bool? isRescheduling,
     String? errorMessage,
     String? successMessage,
   }) {
@@ -95,6 +92,7 @@ class AppointmentState extends Equatable {
       isBooking: isBooking ?? this.isBooking,
       isLoadingTimeSlots: isLoadingTimeSlots ?? this.isLoadingTimeSlots,
       isLoadingHospitals: isLoadingHospitals ?? this.isLoadingHospitals,
+      isRescheduling: isRescheduling ?? this.isRescheduling,
       errorMessage: errorMessage,
       successMessage: successMessage,
     );
@@ -116,32 +114,32 @@ class AppointmentState extends Equatable {
   // Clear error and success messages
   AppointmentState clearMessages() {
     return copyWith(
-      
-       selectedDate: null,
-    selectedHospitalName: null,
-    selectedTimeSlot: null,
-    availableTimeSlots: [],
-    errorMessage: null,
-    successMessage: null,
+      selectedDate: null,
+      selectedHospitalName: null,
+      selectedTimeSlot: null,
+      availableTimeSlots: [],
+      errorMessage: null,
+      successMessage: null,
     );
   }
 
   @override
   List<Object?> get props => [
-        status,
-        appointments,
-        hospitals,
-        availableTimeSlots,
-        selectedDate,
-        selectedHospitalName,
-        selectedTimeSlot,
-        notes,
-        isBooking,
-        isLoadingTimeSlots,
-        isLoadingHospitals,
-        errorMessage,
-        successMessage,
-      ];
+    status,
+    appointments,
+    hospitals,
+    availableTimeSlots,
+    selectedDate,
+    selectedHospitalName,
+    selectedTimeSlot,
+    notes,
+    isBooking,
+    isLoadingTimeSlots,
+    isLoadingHospitals,
+    isRescheduling,
+    errorMessage,
+    successMessage,
+  ];
 
   @override
   String toString() {

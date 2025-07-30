@@ -9,7 +9,9 @@ import 'package:blood_system/blocs/hospital/bloc.dart';
 import 'package:blood_system/screens/FAQScreen.dart';
 import 'package:blood_system/screens/appointments_router.dart';
 import 'package:blood_system/screens/events/events.dart';
+import 'package:blood_system/screens/history.dart';
 import 'package:blood_system/screens/notificationScreen.dart';
+import 'package:blood_system/screens/profile.dart';
 import 'package:blood_system/screens/securityScreen.dart';
 import 'package:blood_system/screens/events_router.dart';
 import 'package:blood_system/screens/userDetails.dart';
@@ -18,9 +20,7 @@ import 'package:blood_system/screens/hospitalAdminRegister.dart';
 import 'package:blood_system/screens/landing.dart';
 import 'package:blood_system/screens/volunteerRegister.dart';
 import 'package:blood_system/screens/welcomepage.dart';
-// import 'package:blood_system/screens/profile.dart';
 import 'package:blood_system/service/appointment_service.dart';
-// import 'package:blood_system/screens/history.dart';
 import 'package:blood_system/service/hospital_service.dart';
 import 'package:blood_system/service/user_service.dart';
 import 'dart:async';
@@ -79,8 +79,8 @@ class MyApp extends StatelessWidget {
           '/faq': (context) => const FAQScreen(),
           '/settings': (context) => const SecurityScreen(),
           '/events': (context) => const EventsRouter(),
-          // '/profile': (context) => const ProfilePage(),
-          // '/history': (context) => const HistoryPage(),
+          '/profile': (context) => const ProfilePage(),
+          '/history': (context) => const HistoryPage(),
         },
       ),
     );
