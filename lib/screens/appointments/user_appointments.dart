@@ -160,47 +160,6 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      height: 120,
-      decoration: const BoxDecoration(
-        color: Color(0xFFD7263D),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            children: [
-              // Existing back and title logic...
-              const Spacer(),
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pushNamed('/notifications');
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.notifications,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildUpcomingAppointments() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

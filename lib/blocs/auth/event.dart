@@ -10,8 +10,6 @@ abstract class AuthEvent extends Equatable {
 
 class AuthStarted extends AuthEvent {}
 
-class AuthGoogleSignInRequested extends AuthEvent {}
-
 class AuthSignUpRequested extends AuthEvent {
   final String fullName;
   final String email;
@@ -93,7 +91,7 @@ class AuthUpdateUserDataRequested extends AuthEvent {
 
 class AuthErrorCleared extends AuthEvent {}
 
-// class AuthGoogleSignInRequested extends AuthEvent {}
+class AuthGoogleSignInRequested extends AuthEvent {}
 
 class AuthEmailVerificationRequested extends AuthEvent {}
 
@@ -102,3 +100,13 @@ class AuthCheckEmailVerificationRequested extends AuthEvent {}
 class AuthStartEmailVerificationTimer extends AuthEvent {}
 
 class AuthStopEmailVerificationTimer extends AuthEvent {}
+
+// New event for getting user data by userId
+class AuthGetUserDataRequested extends AuthEvent {
+  final String userId;
+
+  const AuthGetUserDataRequested(this.userId);
+
+  @override
+  List<Object?> get props => [userId];
+}

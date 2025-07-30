@@ -8,6 +8,7 @@ import 'package:blood_system/blocs/event_event.dart';
 import 'package:blood_system/blocs/hospital/bloc.dart';
 import 'package:blood_system/screens/FAQScreen.dart';
 import 'package:blood_system/screens/appointments_router.dart';
+import 'package:blood_system/screens/email_verification.dart';
 import 'package:blood_system/screens/events/events.dart';
 import 'package:blood_system/screens/history.dart';
 import 'package:blood_system/screens/notificationScreen.dart';
@@ -88,6 +89,7 @@ class MyApp extends StatelessWidget {
           '/events': (context) => const EventsRouter(),
           '/profile': (context) => const ProfilePage(),
           '/history': (context) => const HistoryPage(),
+          '/email-verification': (context) => const EmailVerificationScreen(),
         },
       ),
     );
