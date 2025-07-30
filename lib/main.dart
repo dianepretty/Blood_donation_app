@@ -120,7 +120,7 @@ class MyApp extends StatelessWidget {
               '/userDetails': (context) => const UserDetailsPage(),
               '/appointments': (context) => const AppointmentsRouter(),
               '/login': (context) => const LoginPage(),
-              '/events': (context) => const EventsScreen(),
+              // '/events': (context) => const EventsScreen(),
               '/notifications': (context) => const NotificationsScreen(),
               '/faq': (context) => const FAQScreen(),
               '/settings': (context) => const SecurityScreen(),

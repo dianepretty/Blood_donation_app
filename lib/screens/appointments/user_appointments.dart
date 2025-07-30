@@ -479,28 +479,28 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
               ),
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: TextButton(
-              onPressed: () {
-                _showCancelDialog(appointment);
-              },
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
-                  color: Colors.black87,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
+          // const SizedBox(width: 12),
+          // Expanded(
+          //   child: TextButton(
+          //     onPressed: () {
+          //       _showCancelDialog(appointment);
+          //     },
+          //     style: TextButton.styleFrom(
+          //       padding: const EdgeInsets.symmetric(vertical: 12),
+          //       shape: RoundedRectangleBorder(
+          //         borderRadius: BorderRadius.circular(8),
+          //       ),
+          //     ),
+          //     child: const Text(
+          //       'Cancel',
+          //       style: TextStyle(
+          //         color: Colors.black87,
+          //         fontSize: 14,
+          //         fontWeight: FontWeight.w500,
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

@@ -30,7 +30,7 @@ class _UserAppointmentDetailsScreenState
       backgroundColor: const Color(0xFFF8F9FA),
       child: Column(
         children: [
-          _buildHeader(),
+          // _buildHeader(),
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
@@ -384,23 +384,23 @@ class _UserAppointmentDetailsScreenState
             ),
           ),
         ),
-        const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: TextButton(
-            onPressed: () {
-              _showCancelDialog();
-            },
-            child: const Text(
-              'Cancel',
-              style: TextStyle(
-                color: Colors.black87,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ),
+        // const SizedBox(height: 12),
+        // SizedBox(
+        //   width: double.infinity,
+        //   child: TextButton(
+        //     onPressed: () {
+        //       _showCancelDialog();
+        //     },
+        //     child: const Text(
+        //       'Cancel',
+        //       style: TextStyle(
+        //         color: Colors.black87,
+        //         fontSize: 16,
+        //         fontWeight: FontWeight.w500,
+        //       ),
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }
