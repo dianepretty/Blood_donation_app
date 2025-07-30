@@ -1,6 +1,6 @@
 name: blood_system
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 version: 1.0.0+1
 
 environment:
@@ -23,8 +23,10 @@ dependencies:
   uuid: ^4.3.3
   syncfusion_flutter_datepicker: ^30.1.40
   intl: ^0.20.2
-  flutter_local_notifications: ^12.0.4
+  # flutter_local_notifications: ^12.0.4
   google_sign_in: ^6.1.6
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.0
 
 dev_dependencies:
   google_fonts: ^6.1.0
@@ -36,3 +38,25 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/app_icon.png"
+
+flutter_native_splash:
+  color: "#D7263D" # Background color
+  image: "assets/images/splash_logo.png" # Your splash image
+
+  # Optional configurations
+  color_dark: "#D7263D" # Dark mode background
+  image_dark: "assets/images/splash_logo.png" # Dark mode image
+
+  android_12:
+    image: "assets/images/splash_logo.png"
+    color: "#D7263D"
+
+  # Platform specific settings
+  android: true
+  ios: true
+  web: false

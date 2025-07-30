@@ -63,6 +63,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '410957543883',
     projectId: 'blood-ms-a0f8b',
     storageBucket: 'blood-ms-a0f8b.firebasestorage.app',
-    iosBundleId: 'com.example.blood',
+    iosBundleId: 'com.example.linklife',
   );
 }
