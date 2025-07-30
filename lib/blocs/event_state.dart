@@ -28,12 +28,13 @@ class EventError extends EventState {
   List<Object> get props => [message];
 }
 
+class EventOperationInProgress extends EventState {}
+
 class EventOperationSuccess extends EventState {
   final String message;
-  final List<Event> events; // Include events for consistency after operation
 
-  const EventOperationSuccess(this.message, {this.events = const []});
+  const EventOperationSuccess(this.message);
 
   @override
-  List<Object> get props => [message, events];
+  List<Object> get props => [message];
 }

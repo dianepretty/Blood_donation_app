@@ -67,6 +67,57 @@ class CustomBottomNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Check if MaterialLocalizations are available
+    final materialLocalizations = MaterialLocalizations.of(context);
+    if (materialLocalizations == null) {
+      // Fallback to a simple container if MaterialLocalizations are not available
+      return Container(
+        height: 60,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 8,
+              offset: Offset(0, -2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: _getNavigationItems().map((item) {
+            final isSelected = _getCurrentIndex() == _getNavigationItems().indexOf(item);
+            return Expanded(
+              child: GestureDetector(
+                onTap: () => onTap(_getNavigationItems().indexOf(item)),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        (item.icon as Icon).icon,
+                        color: isSelected ? const Color(0xFFB83A3A) : Colors.grey,
+                        size: 24,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        item.label ?? '',
+                        style: TextStyle(
+                          color: isSelected ? const Color(0xFFB83A3A) : Colors.grey,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      );
+    }
+
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,

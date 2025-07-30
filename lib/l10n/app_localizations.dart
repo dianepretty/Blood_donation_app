@@ -310,31 +310,31 @@ abstract class AppLocalizations {
   /// No description provided for @eventLocation.
   ///
   /// In en, this message translates to:
-  /// **'Location'**
+  /// **'Event Location'**
   String get eventLocation;
 
   /// No description provided for @eventDate.
   ///
   /// In en, this message translates to:
-  /// **'Date'**
+  /// **'Event Date'**
   String get eventDate;
 
   /// No description provided for @eventTime.
   ///
   /// In en, this message translates to:
-  /// **'Time'**
+  /// **'Event Time'**
   String get eventTime;
 
   /// No description provided for @eventDescription.
   ///
   /// In en, this message translates to:
-  /// **'Description'**
+  /// **'Event Description'**
   String get eventDescription;
 
   /// No description provided for @eventStatus.
   ///
   /// In en, this message translates to:
-  /// **'Status'**
+  /// **'Event Status'**
   String get eventStatus;
 
   /// No description provided for @upcoming.
@@ -4740,6 +4740,600 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Neighbor'**
   String get neighbor;
+
+  /// No description provided for @firstName.
+  ///
+  /// In en, this message translates to:
+  /// **'First Name'**
+  String get firstName;
+
+  /// No description provided for @lastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Name'**
+  String get lastName;
+
+  /// No description provided for @middleName.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle Name'**
+  String get middleName;
+
+  /// No description provided for @dateOfBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of Birth'**
+  String get dateOfBirth;
+
+  /// No description provided for @nationalId.
+  ///
+  /// In en, this message translates to:
+  /// **'National ID'**
+  String get nationalId;
+
+  /// No description provided for @passportNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Passport Number'**
+  String get passportNumber;
+
+  /// No description provided for @driversLicense.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver\'s License'**
+  String get driversLicense;
+
+  /// No description provided for @occupation.
+  ///
+  /// In en, this message translates to:
+  /// **'Occupation'**
+  String get occupation;
+
+  /// No description provided for @employer.
+  ///
+  /// In en, this message translates to:
+  /// **'Employer'**
+  String get employer;
+
+  /// No description provided for @education.
+  ///
+  /// In en, this message translates to:
+  /// **'Education'**
+  String get education;
+
+  /// No description provided for @maritalStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Marital Status'**
+  String get maritalStatus;
+
+  /// No description provided for @single.
+  ///
+  /// In en, this message translates to:
+  /// **'Single'**
+  String get single;
+
+  /// No description provided for @married.
+  ///
+  /// In en, this message translates to:
+  /// **'Married'**
+  String get married;
+
+  /// No description provided for @divorced.
+  ///
+  /// In en, this message translates to:
+  /// **'Divorced'**
+  String get divorced;
+
+  /// No description provided for @widowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Widowed'**
+  String get widowed;
+
+  /// No description provided for @separated.
+  ///
+  /// In en, this message translates to:
+  /// **'Separated'**
+  String get separated;
+
+  /// No description provided for @bloodDonationHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Blood Donation History'**
+  String get bloodDonationHistory;
+
+  /// No description provided for @lastDonation.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Donation'**
+  String get lastDonation;
+
+  /// No description provided for @donationCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Donation Count'**
+  String get donationCount;
+
+  /// No description provided for @eligibilityStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Eligibility Status'**
+  String get eligibilityStatus;
+
+  /// No description provided for @eligible.
+  ///
+  /// In en, this message translates to:
+  /// **'Eligible'**
+  String get eligible;
+
+  /// No description provided for @notEligible.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Eligible'**
+  String get notEligible;
+
+  /// No description provided for @temporarilyIneligible.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporarily Ineligible'**
+  String get temporarilyIneligible;
+
+  /// No description provided for @permanentlyIneligible.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently Ineligible'**
+  String get permanentlyIneligible;
+
+  /// No description provided for @medicalConditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical Conditions'**
+  String get medicalConditions;
+
+  /// No description provided for @allergies.
+  ///
+  /// In en, this message translates to:
+  /// **'Allergies'**
+  String get allergies;
+
+  /// No description provided for @medications.
+  ///
+  /// In en, this message translates to:
+  /// **'Medications'**
+  String get medications;
+
+  /// No description provided for @pregnancyStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Pregnancy Status'**
+  String get pregnancyStatus;
+
+  /// No description provided for @pregnant.
+  ///
+  /// In en, this message translates to:
+  /// **'Pregnant'**
+  String get pregnant;
+
+  /// No description provided for @notPregnant.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Pregnant'**
+  String get notPregnant;
+
+  /// No description provided for @recentSurgery.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Surgery'**
+  String get recentSurgery;
+
+  /// No description provided for @tattooOrPiercing.
+  ///
+  /// In en, this message translates to:
+  /// **'Tattoo or Piercing'**
+  String get tattooOrPiercing;
+
+  /// No description provided for @travelHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel History'**
+  String get travelHistory;
+
+  /// No description provided for @recentTravel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Travel'**
+  String get recentTravel;
+
+  /// No description provided for @noRecentTravel.
+  ///
+  /// In en, this message translates to:
+  /// **'No Recent Travel'**
+  String get noRecentTravel;
+
+  /// No description provided for @appointmentDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointment Details'**
+  String get appointmentDetails;
+
+  /// No description provided for @appointmentStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointment Status'**
+  String get appointmentStatus;
+
+  /// No description provided for @appointmentLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointment Location'**
+  String get appointmentLocation;
+
+  /// No description provided for @appointmentNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointment Notes'**
+  String get appointmentNotes;
+
+  /// No description provided for @eventDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Details'**
+  String get eventDetails;
+
+  /// No description provided for @eventType.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Type'**
+  String get eventType;
+
+  /// No description provided for @eventOrganizer.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Organizer'**
+  String get eventOrganizer;
+
+  /// No description provided for @eventCapacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Capacity'**
+  String get eventCapacity;
+
+  /// No description provided for @eventAttendees.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Attendees'**
+  String get eventAttendees;
+
+  /// No description provided for @eventRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Registration'**
+  String get eventRegistration;
+
+  /// No description provided for @eventRegistrationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Required'**
+  String get eventRegistrationRequired;
+
+  /// No description provided for @eventRegistrationOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Optional'**
+  String get eventRegistrationOptional;
+
+  /// No description provided for @eventRegistrationClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Closed'**
+  String get eventRegistrationClosed;
+
+  /// No description provided for @eventRegistrationOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Open'**
+  String get eventRegistrationOpen;
+
+  /// No description provided for @eventRegistrationFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Full'**
+  String get eventRegistrationFull;
+
+  /// No description provided for @eventRegistrationLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Limited'**
+  String get eventRegistrationLimited;
+
+  /// No description provided for @eventRegistrationUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Unlimited'**
+  String get eventRegistrationUnlimited;
+
+  /// No description provided for @eventRegistrationDeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Deadline'**
+  String get eventRegistrationDeadline;
+
+  /// No description provided for @eventRegistrationStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Start'**
+  String get eventRegistrationStart;
+
+  /// No description provided for @eventRegistrationEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration End'**
+  String get eventRegistrationEnd;
+
+  /// No description provided for @eventRegistrationFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Fee'**
+  String get eventRegistrationFee;
+
+  /// No description provided for @eventRegistrationFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Free'**
+  String get eventRegistrationFree;
+
+  /// No description provided for @eventRegistrationPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Paid'**
+  String get eventRegistrationPaid;
+
+  /// No description provided for @eventRegistrationDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Discount'**
+  String get eventRegistrationDiscount;
+
+  /// No description provided for @eventRegistrationEarlyBird.
+  ///
+  /// In en, this message translates to:
+  /// **'Early Bird Registration'**
+  String get eventRegistrationEarlyBird;
+
+  /// No description provided for @eventRegistrationLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Late Registration'**
+  String get eventRegistrationLate;
+
+  /// No description provided for @eventRegistrationOnSite.
+  ///
+  /// In en, this message translates to:
+  /// **'On-Site Registration'**
+  String get eventRegistrationOnSite;
+
+  /// No description provided for @eventRegistrationOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Online Registration'**
+  String get eventRegistrationOnline;
+
+  /// No description provided for @eventRegistrationPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Registration'**
+  String get eventRegistrationPhone;
+
+  /// No description provided for @eventRegistrationEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Registration'**
+  String get eventRegistrationEmail;
+
+  /// No description provided for @eventRegistrationInPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'In-Person Registration'**
+  String get eventRegistrationInPerson;
+
+  /// No description provided for @eventRegistrationMail.
+  ///
+  /// In en, this message translates to:
+  /// **'Mail Registration'**
+  String get eventRegistrationMail;
+
+  /// No description provided for @eventRegistrationFax.
+  ///
+  /// In en, this message translates to:
+  /// **'Fax Registration'**
+  String get eventRegistrationFax;
+
+  /// No description provided for @eventRegistrationWeb.
+  ///
+  /// In en, this message translates to:
+  /// **'Web Registration'**
+  String get eventRegistrationWeb;
+
+  /// No description provided for @eventRegistrationMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Registration'**
+  String get eventRegistrationMobile;
+
+  /// No description provided for @eventRegistrationApp.
+  ///
+  /// In en, this message translates to:
+  /// **'App Registration'**
+  String get eventRegistrationApp;
+
+  /// No description provided for @eventRegistrationPortal.
+  ///
+  /// In en, this message translates to:
+  /// **'Portal Registration'**
+  String get eventRegistrationPortal;
+
+  /// No description provided for @eventRegistrationSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System Registration'**
+  String get eventRegistrationSystem;
+
+  /// No description provided for @eventRegistrationPlatform.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Registration'**
+  String get eventRegistrationPlatform;
+
+  /// No description provided for @eventRegistrationService.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Registration'**
+  String get eventRegistrationService;
+
+  /// No description provided for @eventRegistrationProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider Registration'**
+  String get eventRegistrationProvider;
+
+  /// No description provided for @eventRegistrationVendor.
+  ///
+  /// In en, this message translates to:
+  /// **'Vendor Registration'**
+  String get eventRegistrationVendor;
+
+  /// No description provided for @eventRegistrationPartner.
+  ///
+  /// In en, this message translates to:
+  /// **'Partner Registration'**
+  String get eventRegistrationPartner;
+
+  /// No description provided for @eventRegistrationSponsor.
+  ///
+  /// In en, this message translates to:
+  /// **'Sponsor Registration'**
+  String get eventRegistrationSponsor;
+
+  /// No description provided for @eventRegistrationHost.
+  ///
+  /// In en, this message translates to:
+  /// **'Host Registration'**
+  String get eventRegistrationHost;
+
+  /// No description provided for @eventRegistrationCoordinator.
+  ///
+  /// In en, this message translates to:
+  /// **'Coordinator Registration'**
+  String get eventRegistrationCoordinator;
+
+  /// No description provided for @eventRegistrationManager.
+  ///
+  /// In en, this message translates to:
+  /// **'Manager Registration'**
+  String get eventRegistrationManager;
+
+  /// No description provided for @eventRegistrationAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Registration'**
+  String get eventRegistrationAdmin;
+
+  /// No description provided for @eventRegistrationStaff.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff Registration'**
+  String get eventRegistrationStaff;
+
+  /// No description provided for @eventRegistrationVolunteer.
+  ///
+  /// In en, this message translates to:
+  /// **'Volunteer Registration'**
+  String get eventRegistrationVolunteer;
+
+  /// No description provided for @eventRegistrationParticipant.
+  ///
+  /// In en, this message translates to:
+  /// **'Participant Registration'**
+  String get eventRegistrationParticipant;
+
+  /// No description provided for @eventRegistrationGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest Registration'**
+  String get eventRegistrationGuest;
+
+  /// No description provided for @eventRegistrationVisitor.
+  ///
+  /// In en, this message translates to:
+  /// **'Visitor Registration'**
+  String get eventRegistrationVisitor;
+
+  /// No description provided for @eventRegistrationMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Member Registration'**
+  String get eventRegistrationMember;
+
+  /// No description provided for @eventRegistrationUser.
+  ///
+  /// In en, this message translates to:
+  /// **'User Registration'**
+  String get eventRegistrationUser;
+
+  /// No description provided for @eventRegistrationClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Client Registration'**
+  String get eventRegistrationClient;
+
+  /// No description provided for @eventRegistrationCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer Registration'**
+  String get eventRegistrationCustomer;
+
+  /// No description provided for @eventRegistrationPatient.
+  ///
+  /// In en, this message translates to:
+  /// **'Patient Registration'**
+  String get eventRegistrationPatient;
+
+  /// No description provided for @eventRegistrationDonor.
+  ///
+  /// In en, this message translates to:
+  /// **'Donor Registration'**
+  String get eventRegistrationDonor;
+
+  /// No description provided for @eventRegistrationRecipient.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient Registration'**
+  String get eventRegistrationRecipient;
+
+  /// No description provided for @eventRegistrationBeneficiary.
+  ///
+  /// In en, this message translates to:
+  /// **'Beneficiary Registration'**
+  String get eventRegistrationBeneficiary;
+
+  /// No description provided for @eventRegistrationStakeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Stakeholder Registration'**
+  String get eventRegistrationStakeholder;
+
+  /// No description provided for @eventRegistrationShareholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Shareholder Registration'**
+  String get eventRegistrationShareholder;
+
+  /// No description provided for @eventRegistrationInvestor.
+  ///
+  /// In en, this message translates to:
+  /// **'Investor Registration'**
+  String get eventRegistrationInvestor;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

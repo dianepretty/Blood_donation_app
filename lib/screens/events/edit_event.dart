@@ -1,12 +1,16 @@
+import 'package:blood_system/blocs/event_bloc.dart';
+import 'package:blood_system/blocs/event_event.dart';
+import 'package:blood_system/blocs/event_state.dart';
+import 'package:blood_system/models/event_model.dart';
 import 'package:blood_system/widgets/red_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
 
 class EditEventScreen extends StatefulWidget {
-  final Map<String, dynamic> event;
+  final Event event;
   const EditEventScreen({super.key, required this.event});
 
   @override
@@ -33,13 +37,13 @@ class _EditEventScreenState extends State<EditEventScreen>
   @override
   void initState() {
     super.initState();
-    titleController = TextEditingController(text: widget.event['title']);
-    locationController = TextEditingController(text: widget.event['location']);
+    titleController = TextEditingController(text: widget.event.name);
+    locationController = TextEditingController(text: widget.event.location);
     descriptionController = TextEditingController(
-      text: widget.event['description'] ?? '',
+      text: widget.event.description ?? '',
     );
-    selectedStatus = widget.event['status'];
-    selectedDate = widget.event['date'];
+    selectedStatus = widget.event.status;
+    selectedDate = widget.event.date;
 
     // Initialize animations
     _animationController = AnimationController(
@@ -56,6 +60,9 @@ class _EditEventScreenState extends State<EditEventScreen>
 
   @override
   void dispose() {
+    titleController.dispose();
+    locationController.dispose();
+    descriptionController.dispose();
     _animationController.dispose();
     _titleFocusNode.dispose();
     _locationFocusNode.dispose();
@@ -179,93 +186,126 @@ class _EditEventScreenState extends State<EditEventScreen>
           showBack: true,
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 20,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header section with better visual hierarchy
-                      _buildHeaderSection(),
-                      const SizedBox(height: 32),
+      body: BlocListener<EventBloc, EventState>(
+        listener: (context, state) {
+          if (state is EventOperationSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.green,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            );
+            Navigator.of(context).pop();
+          } else if (state is EventError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            );
+          }
+        },
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 20,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header section with better visual hierarchy
+                        _buildHeaderSection(),
+                        const SizedBox(height: 32),
 
-                      // Form fields with enhanced design
-                      _buildFormField(
-                        label: 'Title',
-                        icon: Icons.event_rounded,
-                        child: _buildTextField(
-                          controller: titleController,
-                          focusNode: _titleFocusNode,
-                          hintText: 'Enter event title',
-                          nextFocusNode: _locationFocusNode,
+                        // Form fields with enhanced design
+                        _buildFormField(
+                          label: 'Title',
+                          icon: Icons.event_rounded,
+                          child: _buildTextField(
+                            controller: titleController,
+                            focusNode: _titleFocusNode,
+                            hintText: 'Enter event title',
+                            nextFocusNode: _locationFocusNode,
+                          ),
                         ),
-                      ),
 
-                      _buildFormField(
-                        label: 'Date',
-                        icon: Icons.calendar_today_rounded,
-                        child: _buildDateSelector(),
-                      ),
-
-                      _buildFormField(
-                        label: 'Location',
-                        icon: Icons.location_on_rounded,
-                        child: _buildTextField(
-                          controller: locationController,
-                          focusNode: _locationFocusNode,
-                          hintText: 'Enter event location',
-                          nextFocusNode: _descriptionFocusNode,
+                        _buildFormField(
+                          label: 'Date',
+                          icon: Icons.calendar_today_rounded,
+                          child: _buildDateSelector(),
                         ),
-                      ),
 
-                      _buildFormField(
-                        label: 'Description',
-                        icon: Icons.description_rounded,
-                        child: _buildTextField(
-                          controller: descriptionController,
-                          focusNode: _descriptionFocusNode,
-                          hintText: 'Event description',
+                        _buildFormField(
+                          label: 'Location',
+                          icon: Icons.location_on_rounded,
+                          child: _buildTextField(
+                            controller: locationController,
+                            focusNode: _locationFocusNode,
+                            hintText: 'Enter event location',
+                            nextFocusNode: _descriptionFocusNode,
+                          ),
                         ),
-                      ),
 
-                      _buildFormField(
-                        label: 'Status',
-                        icon: Icons.info_rounded,
-                        child: _buildDropdown(
-                          value: selectedStatus,
-                          items: statuses,
-                          hint: 'Select event status',
-                          onChanged: (value) {
-                            setState(() {
-                              selectedStatus = value;
-                            });
-                            HapticFeedback.selectionClick();
+                        _buildFormField(
+                          label: 'Description',
+                          icon: Icons.description_rounded,
+                          child: _buildTextField(
+                            controller: descriptionController,
+                            focusNode: _descriptionFocusNode,
+                            hintText: 'Event description',
+                          ),
+                        ),
+
+                        _buildFormField(
+                          label: 'Status',
+                          icon: Icons.info_rounded,
+                          child: _buildDropdown(
+                            value: selectedStatus,
+                            items: statuses,
+                            hint: 'Select event status',
+                            onChanged: (value) {
+                              setState(() {
+                                selectedStatus = value;
+                              });
+                              HapticFeedback.selectionClick();
+                            },
+                          ),
+                        ),
+
+                        const SizedBox(height: 40),
+
+                        // Enhanced save button with BLoC state handling
+                        BlocBuilder<EventBloc, EventState>(
+                          builder: (context, state) {
+                            final isLoading = state is EventOperationInProgress;
+                            return _buildSaveButton(isLoading: isLoading);
                           },
                         ),
-                      ),
 
-                      const SizedBox(height: 40),
-
-                      // Enhanced save button
-                      _buildSaveButton(),
-
-                      const SizedBox(height: 20),
-                    ],
+                        const SizedBox(height: 20),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -538,7 +578,7 @@ class _EditEventScreenState extends State<EditEventScreen>
     );
   }
 
-  Widget _buildSaveButton() {
+  Widget _buildSaveButton({required bool isLoading}) {
     final isFormValid =
         titleController.text.isNotEmpty &&
         selectedDate != null &&
@@ -550,10 +590,12 @@ class _EditEventScreenState extends State<EditEventScreen>
       children: [
         Expanded(
           child: ElevatedButton(
-            onPressed: isFormValid ? _handleSave : null,
+            onPressed: (isFormValid && !isLoading) ? _handleSave : null,
             style: ElevatedButton.styleFrom(
               backgroundColor:
-                  isFormValid ? const Color(0xFFD7263D) : Colors.grey[300],
+                  (isFormValid && !isLoading)
+                      ? const Color(0xFFD7263D)
+                      : Colors.grey[300],
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(28),
@@ -561,65 +603,143 @@ class _EditEventScreenState extends State<EditEventScreen>
               elevation: 0,
               disabledBackgroundColor: Colors.grey[300],
               disabledForegroundColor: Colors.grey[500],
+              padding: const EdgeInsets.symmetric(vertical: 16),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.save_rounded,
-                  size: 20,
-                  color: isFormValid ? Colors.white : Colors.grey[500],
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'Save Changes',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: isFormValid ? Colors.white : Colors.grey[500],
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
-            ),
+            child:
+                isLoading
+                    ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                    : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.save_rounded,
+                          size: 20,
+                          color:
+                              (isFormValid && !isLoading)
+                                  ? Colors.white
+                                  : Colors.grey[500],
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Save Changes',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color:
+                                (isFormValid && !isLoading)
+                                    ? Colors.white
+                                    : Colors.grey[500],
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
           ),
         ),
         const SizedBox(width: 12),
         IconButton(
-          icon: const Icon(Icons.delete, color: Colors.red, size: 28),
+          icon: Icon(
+            Icons.delete,
+            color: isLoading ? Colors.grey : Colors.red,
+            size: 28,
+          ),
           tooltip: 'Delete Event',
-          onPressed: _handleDelete,
+          onPressed: isLoading ? null : _handleDelete,
         ),
       ],
     );
   }
 
-  Future<void> _handleSave() async {
-    final docId = widget.event['id'];
-    final eventData = {
-      'name': titleController.text.trim(),
-      'location': locationController.text.trim(),
-      'date': Timestamp.fromDate(
-        selectedDate!,
-      ), // Convert DateTime to Timestamp
-      'timeFrom': widget.event['timeFrom'] ?? '',
-      'timeTo': widget.event['timeTo'] ?? '',
-      'description': descriptionController.text.trim(),
-      'status': selectedStatus,
-      'hospitalId': widget.event['hospitalId'] ?? '',
-      'adminId': widget.event['adminId'] ?? '',
-    };
-    await FirebaseFirestore.instance
-        .collection('events')
-        .doc(docId)
-        .update(eventData);
-    if (mounted) Navigator.of(context).pop();
+  void _handleSave() {
+    if (!_isFormValid()) return;
+
+    HapticFeedback.mediumImpact();
+
+    // Create updated event object
+    final updatedEvent = Event(
+      id: widget.event.id,
+      name: titleController.text.trim(),
+      location: locationController.text.trim(),
+      date: selectedDate!,
+      timeFrom: widget.event.timeFrom,
+      timeTo: widget.event.timeTo,
+      description: descriptionController.text.trim(),
+      status: selectedStatus!,
+      hospitalId: widget.event.hospitalId,
+      adminId: widget.event.adminId,
+    );
+
+    // Dispatch update event to BLoC
+    context.read<EventBloc>().add(UpdateEvent(updatedEvent));
   }
 
-  Future<void> _handleDelete() async {
-    final docId = widget.event['id'];
-    await FirebaseFirestore.instance.collection('events').doc(docId).delete();
-    if (mounted) Navigator.of(context).pop();
+  void _handleDelete() {
+    HapticFeedback.heavyImpact();
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text(
+              'Delete Event',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1A1A1A),
+              ),
+            ),
+            content: const Text(
+              'Are you sure you want to delete this event? This action cannot be undone.',
+              style: TextStyle(color: Color(0xFF666666), height: 1.4),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: Color(0xFF666666),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  context.read<EventBloc>().add(DeleteEvent(widget.event.id));
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  'Delete',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+
+  bool _isFormValid() {
+    return titleController.text.trim().isNotEmpty &&
+        selectedDate != null &&
+        locationController.text.trim().isNotEmpty &&
+        descriptionController.text.trim().isNotEmpty &&
+        selectedStatus != null;
   }
 
   Color _getItemColor(String item) {

@@ -116,19 +116,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get eventName => 'Nom de l\'Événement';
 
   @override
-  String get eventLocation => 'Lieu';
+  String get eventLocation => 'Lieu de l\'Événement';
 
   @override
-  String get eventDate => 'Date';
+  String get eventDate => 'Date de l\'Événement';
 
   @override
-  String get eventTime => 'Heure';
+  String get eventTime => 'Heure de l\'Événement';
 
   @override
-  String get eventDescription => 'Description';
+  String get eventDescription => 'Description de l\'Événement';
 
   @override
-  String get eventStatus => 'Statut';
+  String get eventStatus => 'Statut de l\'Événement';
 
   @override
   String get upcoming => 'À venir';
@@ -2331,4 +2331,301 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get neighbor => 'Voisin';
+
+  @override
+  String get firstName => 'Prénom';
+
+  @override
+  String get lastName => 'Nom de Famille';
+
+  @override
+  String get middleName => 'Nom du Milieu';
+
+  @override
+  String get dateOfBirth => 'Date de Naissance';
+
+  @override
+  String get nationalId => 'Carte d\'Identité Nationale';
+
+  @override
+  String get passportNumber => 'Numéro de Passeport';
+
+  @override
+  String get driversLicense => 'Permis de Conduire';
+
+  @override
+  String get occupation => 'Profession';
+
+  @override
+  String get employer => 'Employeur';
+
+  @override
+  String get education => 'Éducation';
+
+  @override
+  String get maritalStatus => 'État Civil';
+
+  @override
+  String get single => 'Célibataire';
+
+  @override
+  String get married => 'Marié(e)';
+
+  @override
+  String get divorced => 'Divorcé(e)';
+
+  @override
+  String get widowed => 'Veuf/Veuve';
+
+  @override
+  String get separated => 'Séparé(e)';
+
+  @override
+  String get bloodDonationHistory => 'Historique des Dons de Sang';
+
+  @override
+  String get lastDonation => 'Dernier Don';
+
+  @override
+  String get donationCount => 'Nombre de Dons';
+
+  @override
+  String get eligibilityStatus => 'Statut d\'Éligibilité';
+
+  @override
+  String get eligible => 'Éligible';
+
+  @override
+  String get notEligible => 'Non Éligible';
+
+  @override
+  String get temporarilyIneligible => 'Temporairement Non Éligible';
+
+  @override
+  String get permanentlyIneligible => 'Permanentement Non Éligible';
+
+  @override
+  String get medicalConditions => 'Conditions Médicales';
+
+  @override
+  String get allergies => 'Allergies';
+
+  @override
+  String get medications => 'Médicaments';
+
+  @override
+  String get pregnancyStatus => 'Statut de Grossesse';
+
+  @override
+  String get pregnant => 'Enceinte';
+
+  @override
+  String get notPregnant => 'Non Enceinte';
+
+  @override
+  String get recentSurgery => 'Chirurgie Récente';
+
+  @override
+  String get tattooOrPiercing => 'Tatouage ou Piercing';
+
+  @override
+  String get travelHistory => 'Historique de Voyage';
+
+  @override
+  String get recentTravel => 'Voyage Récent';
+
+  @override
+  String get noRecentTravel => 'Aucun Voyage Récent';
+
+  @override
+  String get appointmentDetails => 'Détails du Rendez-vous';
+
+  @override
+  String get appointmentStatus => 'Statut du Rendez-vous';
+
+  @override
+  String get appointmentLocation => 'Lieu du Rendez-vous';
+
+  @override
+  String get appointmentNotes => 'Notes du Rendez-vous';
+
+  @override
+  String get eventDetails => 'Détails de l\'Événement';
+
+  @override
+  String get eventType => 'Type d\'Événement';
+
+  @override
+  String get eventOrganizer => 'Organisateur de l\'Événement';
+
+  @override
+  String get eventCapacity => 'Capacité de l\'Événement';
+
+  @override
+  String get eventAttendees => 'Participants à l\'Événement';
+
+  @override
+  String get eventRegistration => 'Inscription à l\'Événement';
+
+  @override
+  String get eventRegistrationRequired => 'Inscription Requise';
+
+  @override
+  String get eventRegistrationOptional => 'Inscription Optionnelle';
+
+  @override
+  String get eventRegistrationClosed => 'Inscription Fermée';
+
+  @override
+  String get eventRegistrationOpen => 'Inscription Ouverte';
+
+  @override
+  String get eventRegistrationFull => 'Inscription Complète';
+
+  @override
+  String get eventRegistrationLimited => 'Inscription Limitée';
+
+  @override
+  String get eventRegistrationUnlimited => 'Inscription Illimitée';
+
+  @override
+  String get eventRegistrationDeadline => 'Date Limite d\'Inscription';
+
+  @override
+  String get eventRegistrationStart => 'Début d\'Inscription';
+
+  @override
+  String get eventRegistrationEnd => 'Fin d\'Inscription';
+
+  @override
+  String get eventRegistrationFee => 'Frais d\'Inscription';
+
+  @override
+  String get eventRegistrationFree => 'Inscription Gratuite';
+
+  @override
+  String get eventRegistrationPaid => 'Inscription Payante';
+
+  @override
+  String get eventRegistrationDiscount => 'Réduction d\'Inscription';
+
+  @override
+  String get eventRegistrationEarlyBird => 'Inscription Anticipée';
+
+  @override
+  String get eventRegistrationLate => 'Inscription Tardive';
+
+  @override
+  String get eventRegistrationOnSite => 'Inscription sur Place';
+
+  @override
+  String get eventRegistrationOnline => 'Inscription en Ligne';
+
+  @override
+  String get eventRegistrationPhone => 'Inscription par Téléphone';
+
+  @override
+  String get eventRegistrationEmail => 'Inscription par Email';
+
+  @override
+  String get eventRegistrationInPerson => 'Inscription en Personne';
+
+  @override
+  String get eventRegistrationMail => 'Inscription par Courrier';
+
+  @override
+  String get eventRegistrationFax => 'Inscription par Fax';
+
+  @override
+  String get eventRegistrationWeb => 'Inscription Web';
+
+  @override
+  String get eventRegistrationMobile => 'Inscription Mobile';
+
+  @override
+  String get eventRegistrationApp => 'Inscription par Application';
+
+  @override
+  String get eventRegistrationPortal => 'Inscription par Portail';
+
+  @override
+  String get eventRegistrationSystem => 'Inscription par Système';
+
+  @override
+  String get eventRegistrationPlatform => 'Inscription par Plateforme';
+
+  @override
+  String get eventRegistrationService => 'Inscription par Service';
+
+  @override
+  String get eventRegistrationProvider => 'Inscription par Fournisseur';
+
+  @override
+  String get eventRegistrationVendor => 'Inscription par Vendeur';
+
+  @override
+  String get eventRegistrationPartner => 'Inscription par Partenaire';
+
+  @override
+  String get eventRegistrationSponsor => 'Inscription par Sponsor';
+
+  @override
+  String get eventRegistrationHost => 'Inscription par Hôte';
+
+  @override
+  String get eventRegistrationCoordinator => 'Inscription par Coordinateur';
+
+  @override
+  String get eventRegistrationManager => 'Inscription par Gestionnaire';
+
+  @override
+  String get eventRegistrationAdmin => 'Inscription par Administrateur';
+
+  @override
+  String get eventRegistrationStaff => 'Inscription par Personnel';
+
+  @override
+  String get eventRegistrationVolunteer => 'Inscription par Bénévole';
+
+  @override
+  String get eventRegistrationParticipant => 'Inscription par Participant';
+
+  @override
+  String get eventRegistrationGuest => 'Inscription par Invité';
+
+  @override
+  String get eventRegistrationVisitor => 'Inscription par Visiteur';
+
+  @override
+  String get eventRegistrationMember => 'Inscription par Membre';
+
+  @override
+  String get eventRegistrationUser => 'Inscription par Utilisateur';
+
+  @override
+  String get eventRegistrationClient => 'Inscription par Client';
+
+  @override
+  String get eventRegistrationCustomer => 'Inscription par Client';
+
+  @override
+  String get eventRegistrationPatient => 'Inscription par Patient';
+
+  @override
+  String get eventRegistrationDonor => 'Inscription par Donneur';
+
+  @override
+  String get eventRegistrationRecipient => 'Inscription par Receveur';
+
+  @override
+  String get eventRegistrationBeneficiary => 'Inscription par Bénéficiaire';
+
+  @override
+  String get eventRegistrationStakeholder => 'Inscription par Partie Prenante';
+
+  @override
+  String get eventRegistrationShareholder => 'Inscription par Actionnaire';
+
+  @override
+  String get eventRegistrationInvestor => 'Inscription par Investisseur';
 }

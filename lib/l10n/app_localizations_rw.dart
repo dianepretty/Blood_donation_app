@@ -116,19 +116,19 @@ class AppLocalizationsRw extends AppLocalizations {
   String get eventName => 'Izina ry\'Ikiborwa';
 
   @override
-  String get eventLocation => 'Aho';
+  String get eventLocation => 'Aho Ikiborwa';
 
   @override
-  String get eventDate => 'Itariki';
+  String get eventDate => 'Itariki y\'Ikiborwa';
 
   @override
-  String get eventTime => 'Igihe';
+  String get eventTime => 'Igihe cy\'Ikiborwa';
 
   @override
-  String get eventDescription => 'Ibisobanura';
+  String get eventDescription => 'Ibisobanura by\'Ikiborwa';
 
   @override
-  String get eventStatus => 'Imiterere';
+  String get eventStatus => 'Imiterere y\'Ikiborwa';
 
   @override
   String get upcoming => 'Biraza';
@@ -2331,4 +2331,301 @@ class AppLocalizationsRw extends AppLocalizations {
 
   @override
   String get neighbor => 'Umuturanyi';
+
+  @override
+  String get firstName => 'Izina rya Mbere';
+
+  @override
+  String get lastName => 'Izina rya Nyuma';
+
+  @override
+  String get middleName => 'Izina rya Hagati';
+
+  @override
+  String get dateOfBirth => 'Itariki y\'Amavuko';
+
+  @override
+  String get nationalId => 'Indangamuntu';
+
+  @override
+  String get passportNumber => 'Inomero y\'Urupapuro';
+
+  @override
+  String get driversLicense => 'Urupapuro rwo Kuyobora';
+
+  @override
+  String get occupation => 'Umwuga';
+
+  @override
+  String get employer => 'Umwishingizi';
+
+  @override
+  String get education => 'Uburezi';
+
+  @override
+  String get maritalStatus => 'Imiterere y\'Ubushyingiranwe';
+
+  @override
+  String get single => 'Umutekereje';
+
+  @override
+  String get married => 'Ushyingiwe';
+
+  @override
+  String get divorced => 'Umutandukanye';
+
+  @override
+  String get widowed => 'Umupfakazi';
+
+  @override
+  String get separated => 'Umutandukanye';
+
+  @override
+  String get bloodDonationHistory => 'Amateka yo Gutanga Amaraso';
+
+  @override
+  String get lastDonation => 'Gutanga bya Nyuma';
+
+  @override
+  String get donationCount => 'Umubare wo Gutanga';
+
+  @override
+  String get eligibilityStatus => 'Imiterere yo Gushobora';
+
+  @override
+  String get eligible => 'Ashobora';
+
+  @override
+  String get notEligible => 'Ntashobora';
+
+  @override
+  String get temporarilyIneligible => 'Ntashobora kwa Gato';
+
+  @override
+  String get permanentlyIneligible => 'Ntashobora Burundu';
+
+  @override
+  String get medicalConditions => 'Imiterere y\'Ubuzima';
+
+  @override
+  String get allergies => 'Kurwanya';
+
+  @override
+  String get medications => 'Imiti';
+
+  @override
+  String get pregnancyStatus => 'Imiterere y\'Ubusore';
+
+  @override
+  String get pregnant => 'Ubusore';
+
+  @override
+  String get notPregnant => 'Ntibusore';
+
+  @override
+  String get recentSurgery => 'Gukingira bya Vuba';
+
+  @override
+  String get tattooOrPiercing => 'Gutera Inkuru cyangwa Gukomora';
+
+  @override
+  String get travelHistory => 'Amateka yo Kugera';
+
+  @override
+  String get recentTravel => 'Kugera bya Vuba';
+
+  @override
+  String get noRecentTravel => 'Nta Kugera bya Vuba';
+
+  @override
+  String get appointmentDetails => 'Ibisobanura by\'Igihe';
+
+  @override
+  String get appointmentStatus => 'Imiterere y\'Igihe';
+
+  @override
+  String get appointmentLocation => 'Aho Igihe';
+
+  @override
+  String get appointmentNotes => 'Inyandiko z\'Igihe';
+
+  @override
+  String get eventDetails => 'Ibisobanura by\'Ikiborwa';
+
+  @override
+  String get eventType => 'Ubwoko bw\'Ikiborwa';
+
+  @override
+  String get eventOrganizer => 'Umukora w\'Ikiborwa';
+
+  @override
+  String get eventCapacity => 'Ubushobozi bw\'Ikiborwa';
+
+  @override
+  String get eventAttendees => 'Abagira uruhare mu Kiborwa';
+
+  @override
+  String get eventRegistration => 'Kwiyandikisha ku Kiborwa';
+
+  @override
+  String get eventRegistrationRequired => 'Kwiyandikisha Bikenewe';
+
+  @override
+  String get eventRegistrationOptional => 'Kwiyandikisha Bishobora Kuba';
+
+  @override
+  String get eventRegistrationClosed => 'Kwiyandikisha Byafungwe';
+
+  @override
+  String get eventRegistrationOpen => 'Kwiyandikisha Byafunguriwe';
+
+  @override
+  String get eventRegistrationFull => 'Kwiyandikisha Byuzuye';
+
+  @override
+  String get eventRegistrationLimited => 'Kwiyandikisha Bihagije';
+
+  @override
+  String get eventRegistrationUnlimited => 'Kwiyandikisha Nta Mpamvu';
+
+  @override
+  String get eventRegistrationDeadline => 'Igihe cyo Kwiyandikisha';
+
+  @override
+  String get eventRegistrationStart => 'Gutangira Kwiyandikisha';
+
+  @override
+  String get eventRegistrationEnd => 'Kurangiza Kwiyandikisha';
+
+  @override
+  String get eventRegistrationFee => 'Amafaranga yo Kwiyandikisha';
+
+  @override
+  String get eventRegistrationFree => 'Kwiyandikisha Bihariye';
+
+  @override
+  String get eventRegistrationPaid => 'Kwiyandikisha Bihariye';
+
+  @override
+  String get eventRegistrationDiscount => 'Kugabanuka kwa Kwiyandikisha';
+
+  @override
+  String get eventRegistrationEarlyBird => 'Kwiyandikisha bya Vuba';
+
+  @override
+  String get eventRegistrationLate => 'Kwiyandikisha bya Nyuma';
+
+  @override
+  String get eventRegistrationOnSite => 'Kwiyandikisha kuri Aho';
+
+  @override
+  String get eventRegistrationOnline => 'Kwiyandikisha kuri Internet';
+
+  @override
+  String get eventRegistrationPhone => 'Kwiyandikisha kuri Telefoni';
+
+  @override
+  String get eventRegistrationEmail => 'Kwiyandikisha kuri Imeili';
+
+  @override
+  String get eventRegistrationInPerson => 'Kwiyandikisha mu Giti Cye';
+
+  @override
+  String get eventRegistrationMail => 'Kwiyandikisha kuri Posita';
+
+  @override
+  String get eventRegistrationFax => 'Kwiyandikisha kuri Fax';
+
+  @override
+  String get eventRegistrationWeb => 'Kwiyandikisha kuri Web';
+
+  @override
+  String get eventRegistrationMobile => 'Kwiyandikisha kuri Mobile';
+
+  @override
+  String get eventRegistrationApp => 'Kwiyandikisha kuri Porogaramu';
+
+  @override
+  String get eventRegistrationPortal => 'Kwiyandikisha kuri Portal';
+
+  @override
+  String get eventRegistrationSystem => 'Kwiyandikisha kuri Sisitemu';
+
+  @override
+  String get eventRegistrationPlatform => 'Kwiyandikisha kuri Platform';
+
+  @override
+  String get eventRegistrationService => 'Kwiyandikisha kuri Serivisi';
+
+  @override
+  String get eventRegistrationProvider => 'Kwiyandikisha kuri Provider';
+
+  @override
+  String get eventRegistrationVendor => 'Kwiyandikisha kuri Vendor';
+
+  @override
+  String get eventRegistrationPartner => 'Kwiyandikisha kuri Partner';
+
+  @override
+  String get eventRegistrationSponsor => 'Kwiyandikisha kuri Sponsor';
+
+  @override
+  String get eventRegistrationHost => 'Kwiyandikisha kuri Host';
+
+  @override
+  String get eventRegistrationCoordinator => 'Kwiyandikisha kuri Coordinator';
+
+  @override
+  String get eventRegistrationManager => 'Kwiyandikisha kuri Manager';
+
+  @override
+  String get eventRegistrationAdmin => 'Kwiyandikisha kuri Admin';
+
+  @override
+  String get eventRegistrationStaff => 'Kwiyandikisha kuri Staff';
+
+  @override
+  String get eventRegistrationVolunteer => 'Kwiyandikisha kuri Volunteer';
+
+  @override
+  String get eventRegistrationParticipant => 'Kwiyandikisha kuri Participant';
+
+  @override
+  String get eventRegistrationGuest => 'Kwiyandikisha kuri Guest';
+
+  @override
+  String get eventRegistrationVisitor => 'Kwiyandikisha kuri Visitor';
+
+  @override
+  String get eventRegistrationMember => 'Kwiyandikisha kuri Member';
+
+  @override
+  String get eventRegistrationUser => 'Kwiyandikisha kuri User';
+
+  @override
+  String get eventRegistrationClient => 'Kwiyandikisha kuri Client';
+
+  @override
+  String get eventRegistrationCustomer => 'Kwiyandikisha kuri Customer';
+
+  @override
+  String get eventRegistrationPatient => 'Kwiyandikisha kuri Patient';
+
+  @override
+  String get eventRegistrationDonor => 'Kwiyandikisha kuri Donor';
+
+  @override
+  String get eventRegistrationRecipient => 'Kwiyandikisha kuri Recipient';
+
+  @override
+  String get eventRegistrationBeneficiary => 'Kwiyandikisha kuri Beneficiary';
+
+  @override
+  String get eventRegistrationStakeholder => 'Kwiyandikisha kuri Stakeholder';
+
+  @override
+  String get eventRegistrationShareholder => 'Kwiyandikisha kuri Shareholder';
+
+  @override
+  String get eventRegistrationInvestor => 'Kwiyandikisha kuri Investor';
 }

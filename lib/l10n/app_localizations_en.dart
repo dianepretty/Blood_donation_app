@@ -116,19 +116,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eventName => 'Event Name';
 
   @override
-  String get eventLocation => 'Location';
+  String get eventLocation => 'Event Location';
 
   @override
-  String get eventDate => 'Date';
+  String get eventDate => 'Event Date';
 
   @override
-  String get eventTime => 'Time';
+  String get eventTime => 'Event Time';
 
   @override
-  String get eventDescription => 'Description';
+  String get eventDescription => 'Event Description';
 
   @override
-  String get eventStatus => 'Status';
+  String get eventStatus => 'Event Status';
 
   @override
   String get upcoming => 'Upcoming';
@@ -2331,4 +2331,301 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get neighbor => 'Neighbor';
+
+  @override
+  String get firstName => 'First Name';
+
+  @override
+  String get lastName => 'Last Name';
+
+  @override
+  String get middleName => 'Middle Name';
+
+  @override
+  String get dateOfBirth => 'Date of Birth';
+
+  @override
+  String get nationalId => 'National ID';
+
+  @override
+  String get passportNumber => 'Passport Number';
+
+  @override
+  String get driversLicense => 'Driver\'s License';
+
+  @override
+  String get occupation => 'Occupation';
+
+  @override
+  String get employer => 'Employer';
+
+  @override
+  String get education => 'Education';
+
+  @override
+  String get maritalStatus => 'Marital Status';
+
+  @override
+  String get single => 'Single';
+
+  @override
+  String get married => 'Married';
+
+  @override
+  String get divorced => 'Divorced';
+
+  @override
+  String get widowed => 'Widowed';
+
+  @override
+  String get separated => 'Separated';
+
+  @override
+  String get bloodDonationHistory => 'Blood Donation History';
+
+  @override
+  String get lastDonation => 'Last Donation';
+
+  @override
+  String get donationCount => 'Donation Count';
+
+  @override
+  String get eligibilityStatus => 'Eligibility Status';
+
+  @override
+  String get eligible => 'Eligible';
+
+  @override
+  String get notEligible => 'Not Eligible';
+
+  @override
+  String get temporarilyIneligible => 'Temporarily Ineligible';
+
+  @override
+  String get permanentlyIneligible => 'Permanently Ineligible';
+
+  @override
+  String get medicalConditions => 'Medical Conditions';
+
+  @override
+  String get allergies => 'Allergies';
+
+  @override
+  String get medications => 'Medications';
+
+  @override
+  String get pregnancyStatus => 'Pregnancy Status';
+
+  @override
+  String get pregnant => 'Pregnant';
+
+  @override
+  String get notPregnant => 'Not Pregnant';
+
+  @override
+  String get recentSurgery => 'Recent Surgery';
+
+  @override
+  String get tattooOrPiercing => 'Tattoo or Piercing';
+
+  @override
+  String get travelHistory => 'Travel History';
+
+  @override
+  String get recentTravel => 'Recent Travel';
+
+  @override
+  String get noRecentTravel => 'No Recent Travel';
+
+  @override
+  String get appointmentDetails => 'Appointment Details';
+
+  @override
+  String get appointmentStatus => 'Appointment Status';
+
+  @override
+  String get appointmentLocation => 'Appointment Location';
+
+  @override
+  String get appointmentNotes => 'Appointment Notes';
+
+  @override
+  String get eventDetails => 'Event Details';
+
+  @override
+  String get eventType => 'Event Type';
+
+  @override
+  String get eventOrganizer => 'Event Organizer';
+
+  @override
+  String get eventCapacity => 'Event Capacity';
+
+  @override
+  String get eventAttendees => 'Event Attendees';
+
+  @override
+  String get eventRegistration => 'Event Registration';
+
+  @override
+  String get eventRegistrationRequired => 'Registration Required';
+
+  @override
+  String get eventRegistrationOptional => 'Registration Optional';
+
+  @override
+  String get eventRegistrationClosed => 'Registration Closed';
+
+  @override
+  String get eventRegistrationOpen => 'Registration Open';
+
+  @override
+  String get eventRegistrationFull => 'Registration Full';
+
+  @override
+  String get eventRegistrationLimited => 'Registration Limited';
+
+  @override
+  String get eventRegistrationUnlimited => 'Registration Unlimited';
+
+  @override
+  String get eventRegistrationDeadline => 'Registration Deadline';
+
+  @override
+  String get eventRegistrationStart => 'Registration Start';
+
+  @override
+  String get eventRegistrationEnd => 'Registration End';
+
+  @override
+  String get eventRegistrationFee => 'Registration Fee';
+
+  @override
+  String get eventRegistrationFree => 'Registration Free';
+
+  @override
+  String get eventRegistrationPaid => 'Registration Paid';
+
+  @override
+  String get eventRegistrationDiscount => 'Registration Discount';
+
+  @override
+  String get eventRegistrationEarlyBird => 'Early Bird Registration';
+
+  @override
+  String get eventRegistrationLate => 'Late Registration';
+
+  @override
+  String get eventRegistrationOnSite => 'On-Site Registration';
+
+  @override
+  String get eventRegistrationOnline => 'Online Registration';
+
+  @override
+  String get eventRegistrationPhone => 'Phone Registration';
+
+  @override
+  String get eventRegistrationEmail => 'Email Registration';
+
+  @override
+  String get eventRegistrationInPerson => 'In-Person Registration';
+
+  @override
+  String get eventRegistrationMail => 'Mail Registration';
+
+  @override
+  String get eventRegistrationFax => 'Fax Registration';
+
+  @override
+  String get eventRegistrationWeb => 'Web Registration';
+
+  @override
+  String get eventRegistrationMobile => 'Mobile Registration';
+
+  @override
+  String get eventRegistrationApp => 'App Registration';
+
+  @override
+  String get eventRegistrationPortal => 'Portal Registration';
+
+  @override
+  String get eventRegistrationSystem => 'System Registration';
+
+  @override
+  String get eventRegistrationPlatform => 'Platform Registration';
+
+  @override
+  String get eventRegistrationService => 'Service Registration';
+
+  @override
+  String get eventRegistrationProvider => 'Provider Registration';
+
+  @override
+  String get eventRegistrationVendor => 'Vendor Registration';
+
+  @override
+  String get eventRegistrationPartner => 'Partner Registration';
+
+  @override
+  String get eventRegistrationSponsor => 'Sponsor Registration';
+
+  @override
+  String get eventRegistrationHost => 'Host Registration';
+
+  @override
+  String get eventRegistrationCoordinator => 'Coordinator Registration';
+
+  @override
+  String get eventRegistrationManager => 'Manager Registration';
+
+  @override
+  String get eventRegistrationAdmin => 'Admin Registration';
+
+  @override
+  String get eventRegistrationStaff => 'Staff Registration';
+
+  @override
+  String get eventRegistrationVolunteer => 'Volunteer Registration';
+
+  @override
+  String get eventRegistrationParticipant => 'Participant Registration';
+
+  @override
+  String get eventRegistrationGuest => 'Guest Registration';
+
+  @override
+  String get eventRegistrationVisitor => 'Visitor Registration';
+
+  @override
+  String get eventRegistrationMember => 'Member Registration';
+
+  @override
+  String get eventRegistrationUser => 'User Registration';
+
+  @override
+  String get eventRegistrationClient => 'Client Registration';
+
+  @override
+  String get eventRegistrationCustomer => 'Customer Registration';
+
+  @override
+  String get eventRegistrationPatient => 'Patient Registration';
+
+  @override
+  String get eventRegistrationDonor => 'Donor Registration';
+
+  @override
+  String get eventRegistrationRecipient => 'Recipient Registration';
+
+  @override
+  String get eventRegistrationBeneficiary => 'Beneficiary Registration';
+
+  @override
+  String get eventRegistrationStakeholder => 'Stakeholder Registration';
+
+  @override
+  String get eventRegistrationShareholder => 'Shareholder Registration';
+
+  @override
+  String get eventRegistrationInvestor => 'Investor Registration';
 }

@@ -81,4 +81,10 @@ class LanguageBloc extends Bloc<LanguageEvent, LanguageState> {
       emit(LanguageError('Failed to save language preference'));
     }
   }
+
+  // Get current language code without affecting MaterialApp locale
+  static String getCurrentLanguageCode() {
+    // This will be used by our custom localization system
+    return 'en'; // Default to English for MaterialApp
+  }
 } 

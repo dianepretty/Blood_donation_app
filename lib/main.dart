@@ -23,6 +23,7 @@ import 'package:blood_system/screens/landing.dart';
 import 'package:blood_system/screens/volunteerRegister.dart';
 import 'package:blood_system/screens/welcomepage.dart';
 import 'package:blood_system/service/appointment_service.dart';
+import 'package:blood_system/service/event_service.dart';
 import 'package:blood_system/service/hospital_service.dart';
 import 'package:blood_system/service/user_service.dart';
 import 'dart:async';
@@ -31,6 +32,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:blood_system/l10n/app_localizations.dart';
+import 'package:blood_system/l10n/kinyarwanda_localizations.dart';
+import 'package:blood_system/l10n/comprehensive_localizations.dart';
+import 'package:blood_system/l10n/custom_material_delegate.dart';
 import 'firebase_options.dart';
 import 'package:blood_system/screens/home.dart';
 import 'package:blood_system/screens/login.dart';
@@ -38,11 +42,12 @@ import 'package:blood_system/screens/login.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
+  final EventService _eventService = EventService();
 
   @override
   Widget build(BuildContext context) {
@@ -63,45 +68,65 @@ class MyApp extends StatelessWidget {
                 hospitalService: HospitalService(),
               ),
         ),
-        // Remove this duplicate bloc provider
-        BlocProvider(create: (context) => EventBloc()..add(LoadEvents())),
-        BlocProvider(create: (context) => LanguageBloc()..add(LanguageLoaded())),
+        BlocProvider(
+          create:
+              (context) =>
+                  EventBloc(_eventService, eventService: _eventService)
+                    ..add(LoadEvents()),
+        ),
+        BlocProvider(
+          create: (context) => LanguageBloc()..add(LanguageLoaded()),
+        ),
       ],
       child: BlocBuilder<LanguageBloc, LanguageState>(
         builder: (context, languageState) {
           return MaterialApp(
             title: 'Blood Donation App',
             debugShowCheckedModeBanner: false,
-            locale: languageState is LanguageLoadedState ? languageState.locale : const Locale('en'),
+            locale: languageState is LanguageLoadedState
+                ? languageState.locale
+                : const Locale('en'),
             supportedLocales: const [
               Locale('en'), // English
               Locale('fr'), // French
               Locale('rw'), // Kinyarwanda
             ],
+            localeResolutionCallback: (locale, supportedLocales) {
+              // Check if the current device locale is supported
+              for (var supportedLocale in supportedLocales) {
+                if (supportedLocale.languageCode == locale?.languageCode) {
+                  return supportedLocale;
+                }
+              }
+              // If the current device locale is not supported, use English as fallback
+              return const Locale('en');
+            },
+
             localizationsDelegates: const [
               AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
+              CustomMaterialLocalizationsDelegate(),
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
             home: const AuthWrapper(),
-        routes: {
-          '/landing': (context) => const LandingPage(),
-          '/home': (context) => const HomePageContent(),
-          '/hospitalAdminRegister': (context) => const HospitalAdminRegister(),
-          '/volunteerRegister': (context) => const VolunteerRegister(),
-          '/userDetails': (context) => const UserDetailsPage(),
-          '/appointments': (context) => const AppointmentsRouter(),
-          '/login': (context) => const LoginPage(),
-          '/events': (context) => const EventsScreen(),
-          '/notifications': (context) => const NotificationsScreen(),
-          '/faq': (context) => const FAQScreen(),
-          '/settings': (context) => const SecurityScreen(),
-          '/language': (context) => const LanguageSelectionScreen(),
-          '/events': (context) => const EventsRouter(),
-          '/profile': (context) => const ProfilePage(),
-          '/history': (context) => const HistoryPage(),
-        },
+            routes: {
+              '/landing': (context) => const LandingPage(),
+              '/home': (context) => const HomePageContent(),
+              '/hospitalAdminRegister':
+                  (context) => const HospitalAdminRegister(),
+              '/volunteerRegister': (context) => const VolunteerRegister(),
+              '/userDetails': (context) => const UserDetailsPage(),
+              '/appointments': (context) => const AppointmentsRouter(),
+              '/login': (context) => const LoginPage(),
+              '/events': (context) => const EventsScreen(),
+              '/notifications': (context) => const NotificationsScreen(),
+              '/faq': (context) => const FAQScreen(),
+              '/settings': (context) => const SecurityScreen(),
+              '/language': (context) => const LanguageSelectionScreen(),
+              '/events': (context) => const EventsRouter(),
+              '/profile': (context) => const ProfilePage(),
+              '/history': (context) => const HistoryPage(),
+            },
           );
         },
       ),
@@ -125,7 +150,9 @@ class _AuthWrapperState extends State<AuthWrapper> {
     // Set a timeout to prevent infinite loading
     _timeoutTimer = Timer(const Duration(seconds: 30), () {
       if (mounted) {
-        print('AuthWrapper - Timeout reached, forcing navigation to landing page');
+        print(
+          'AuthWrapper - Timeout reached, forcing navigation to landing page',
+        );
         Navigator.of(context).pushReplacementNamed('/landing');
       }
     });
@@ -188,10 +215,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
                     const SizedBox(height: 16),
                     Text(
                       'Loading...',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                     ),
                   ],
                 ),
@@ -209,10 +233,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
                     const SizedBox(height: 16),
                     Text(
                       'Initializing...',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                     ),
                   ],
                 ),
