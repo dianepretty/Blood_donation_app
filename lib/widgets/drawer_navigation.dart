@@ -1,6 +1,7 @@
 import 'package:blood_system/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:blood_system/l10n/app_localizations.dart';
 import '../blocs/auth/bloc.dart';
 import '../blocs/auth/event.dart';
 
@@ -23,6 +24,8 @@ class CustomDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Drawer(
       child: Container(
         color: Colors.white,
@@ -38,6 +41,7 @@ class CustomDrawer extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       height: 300,
       decoration: BoxDecoration(
@@ -91,7 +95,7 @@ class CustomDrawer extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  userName ?? 'User Name',
+                  userName ?? l10n.userName,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -100,7 +104,7 @@ class CustomDrawer extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  userEmail ?? 'user@example.com',
+                  userEmail ?? l10n.userEmail,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.8),
                     fontSize: 14,
@@ -134,6 +138,7 @@ class CustomDrawer extends StatelessWidget {
   }
 
   Widget _buildNavigationItems(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final role = userRole?.toUpperCase() ?? 'VOLUNTEER';
 
     List<Map<String, dynamic>> navigationItems = [];
@@ -141,31 +146,31 @@ class CustomDrawer extends StatelessWidget {
     if (role == 'HOSPITAL_ADMIN' || role == 'HOSPITAL ADMIN') {
       navigationItems = [
         {
-          'title': 'Events',
+          'title': l10n.events,
           'icon': Icons.event,
           'route': '/events',
           'page': 'events',
         },
         {
-          'title': 'Appointments',
+          'title': l10n.appointments,
           'icon': Icons.calendar_today,
           'route': '/appointments',
           'page': 'appointments',
         },
         {
-          'title': 'Profile',
+          'title': l10n.profile,
           'icon': Icons.person,
           'route': '/profile',
           'page': 'profile',
         },
         {
-          'title': 'Settings',
+          'title': l10n.settings,
           'icon': Icons.settings,
           'route': '/settings',
           'page': 'settings',
         },
         {
-          'title': 'Help & Support',
+          'title': l10n.helpSupport,
           'icon': Icons.help_outline,
           'route': '/faq',
           'page': 'help',
@@ -173,39 +178,39 @@ class CustomDrawer extends StatelessWidget {
       ];
     } else {
       navigationItems = [
-        {'title': 'Home', 'icon': Icons.home, 'route': '/home', 'page': 'home'},
+        {'title': l10n.home, 'icon': Icons.home, 'route': '/home', 'page': 'home'},
         {
-          'title': 'Appointments',
+          'title': l10n.appointments,
           'icon': Icons.calendar_today,
           'route': '/appointments',
           'page': 'appointments',
         },
         {
-          'title': 'Events',
+          'title': l10n.events,
           'icon': Icons.event,
           'route': '/events',
           'page': 'events',
         },
         {
-          'title': 'Profile',
+          'title': l10n.profile,
           'icon': Icons.person,
           'route': '/profile',
           'page': 'profile',
         },
         {
-          'title': 'Donation History',
+          'title': l10n.donationHistory,
           'icon': Icons.history,
           'route': '/history',
           'page': 'history',
         },
         {
-          'title': 'Settings',
+          'title': l10n.settings,
           'icon': Icons.settings,
           'route': '/settings',
           'page': 'settings',
         },
         {
-          'title': 'Help & Support',
+          'title': l10n.helpSupport,
           'icon': Icons.help_outline,
           'route': '/faq',
           'page': 'help',
@@ -354,6 +359,8 @@ class CustomDrawer extends StatelessWidget {
   }
 
   Widget _buildLogoutSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -371,8 +378,8 @@ class CustomDrawer extends StatelessWidget {
                 _showLogoutDialog(context);
               },
               icon: const Icon(Icons.logout, color: AppColors.red),
-              label: const Text(
-                'Logout',
+              label: Text(
+                l10n.logout,
                 style: TextStyle(
                   color: AppColors.red,
                   fontWeight: FontWeight.w600,
@@ -392,6 +399,8 @@ class CustomDrawer extends StatelessWidget {
   }
 
   void _showLogoutDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -399,12 +408,12 @@ class CustomDrawer extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: const Row(
+          title: Row(
             children: [
               Icon(Icons.logout, color: Color(0xFFB83A3A), size: 24),
               SizedBox(width: 8),
               Text(
-                'Logout',
+                l10n.logout,
                 style: TextStyle(
                   color: Color(0xFF333333),
                   fontWeight: FontWeight.w600,
@@ -412,15 +421,15 @@ class CustomDrawer extends StatelessWidget {
               ),
             ],
           ),
-          content: const Text(
-            'Are you sure you want to logout?',
+          content: Text(
+            l10n.logoutConfirm,
             style: TextStyle(color: Color(0xFF666666), fontSize: 16),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                'Cancel',
+              child: Text(
+                l10n.cancel,
                 style: TextStyle(
                   color: Color(0xFF666666),
                   fontWeight: FontWeight.w500,
@@ -442,8 +451,8 @@ class CustomDrawer extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text(
-                'Logout',
+              child: Text(
+                l10n.logout,
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
             ),

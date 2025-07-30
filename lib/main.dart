@@ -6,6 +6,7 @@ import 'package:blood_system/blocs/auth/state.dart';
 import 'package:blood_system/blocs/event_bloc.dart';
 import 'package:blood_system/blocs/event_event.dart';
 import 'package:blood_system/blocs/hospital/bloc.dart';
+import 'package:blood_system/blocs/language/bloc.dart';
 import 'package:blood_system/screens/FAQScreen.dart';
 import 'package:blood_system/screens/appointments_router.dart';
 import 'package:blood_system/screens/events/events.dart';
@@ -13,6 +14,7 @@ import 'package:blood_system/screens/history.dart';
 import 'package:blood_system/screens/notificationScreen.dart';
 import 'package:blood_system/screens/profile.dart';
 import 'package:blood_system/screens/securityScreen.dart';
+import 'package:blood_system/screens/language_selection.dart';
 import 'package:blood_system/screens/events_router.dart';
 import 'package:blood_system/screens/userDetails.dart';
 import 'package:blood_system/screens/appointments/book_appointment.dart';
@@ -27,6 +29,8 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:blood_system/l10n/app_localizations.dart';
 import 'firebase_options.dart';
 import 'package:blood_system/screens/home.dart';
 import 'package:blood_system/screens/login.dart';
@@ -61,11 +65,26 @@ class MyApp extends StatelessWidget {
         ),
         // Remove this duplicate bloc provider
         BlocProvider(create: (context) => EventBloc()..add(LoadEvents())),
+        BlocProvider(create: (context) => LanguageBloc()..add(LanguageLoaded())),
       ],
-      child: MaterialApp(
-        title: 'Blood Donation App',
-        debugShowCheckedModeBanner: false,
-        home: const AuthWrapper(),
+      child: BlocBuilder<LanguageBloc, LanguageState>(
+        builder: (context, languageState) {
+          return MaterialApp(
+            title: 'Blood Donation App',
+            debugShowCheckedModeBanner: false,
+            locale: languageState is LanguageLoadedState ? languageState.locale : const Locale('en'),
+            supportedLocales: const [
+              Locale('en'), // English
+              Locale('fr'), // French
+              Locale('rw'), // Kinyarwanda
+            ],
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: const AuthWrapper(),
         routes: {
           '/landing': (context) => const LandingPage(),
           '/home': (context) => const HomePageContent(),
@@ -78,9 +97,12 @@ class MyApp extends StatelessWidget {
           '/notifications': (context) => const NotificationsScreen(),
           '/faq': (context) => const FAQScreen(),
           '/settings': (context) => const SecurityScreen(),
+          '/language': (context) => const LanguageSelectionScreen(),
           '/events': (context) => const EventsRouter(),
           '/profile': (context) => const ProfilePage(),
           '/history': (context) => const HistoryPage(),
+        },
+          );
         },
       ),
     );
