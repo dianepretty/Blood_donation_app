@@ -1,6 +1,9 @@
 import 'package:blood_system/widgets/main_navigation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../theme/theme.dart';
+import 'package:blood_system/l10n/app_localizations.dart';
+import '../blocs/language/bloc.dart';
 
 class SecurityScreen extends StatefulWidget {
   const SecurityScreen({super.key});
@@ -14,19 +17,54 @@ class _SecurityScreenState extends State<SecurityScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return MainNavigationWrapper(
       backgroundColor: Colors.white,
       currentPage: '/security',
-      pageTitle: 'Settings',
+      pageTitle: l10n.settings,
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         children: [
-          const SectionTitle(title: 'Security'),
+          SectionTitle(title: l10n.language),
+          BlocBuilder<LanguageBloc, LanguageState>(
+            builder: (context, languageState) {
+              String currentLanguage = 'English';
+              if (languageState is LanguageLoadedState) {
+                switch (languageState.locale.languageCode) {
+                  case 'en':
+                    currentLanguage = l10n.english;
+                    break;
+                  case 'fr':
+                    currentLanguage = l10n.french;
+                    break;
+                  case 'rw':
+                    currentLanguage = l10n.kinyarwanda;
+                    break;
+                }
+              }
+              
+              return ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.language),
+                subtitle: Text(
+                  currentLanguage,
+                  style: TextStyle(color: Colors.blueGrey),
+                ),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  Navigator.pushNamed(context, '/language');
+                },
+              );
+            },
+          ),
+          const SizedBox(height: 24),
+          SectionTitle(title: l10n.security),
           ListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Change password'),
-            subtitle: const Text(
-              'Last changed 3 days ago',
+            title: Text(l10n.changePassword),
+            subtitle: Text(
+              l10n.lastChanged(3),
               style: TextStyle(color: Colors.blueGrey),
             ),
             // trailing: const Icon(Icons.arrow_forward_ios, size: 16),
@@ -52,17 +90,17 @@ class _SecurityScreenState extends State<SecurityScreen> {
           //     },
           //   ),
           // ),
-          _buildSection('App Information', [
-            _buildInfoTile('App Version', '1.0.0'),
-            _buildInfoTile('Last Updated', '2025'),
+          _buildSection(l10n.appInformation, [
+            _buildInfoTile(l10n.appVersion, '1.0.0'),
+            _buildInfoTile(l10n.lastUpdated, '2025'),
           ]),
           const SizedBox(height: 24),
-          const SectionTitle(title: 'Other'),
+          SectionTitle(title: l10n.other),
           ListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Privacy policy'),
-            subtitle: const Text(
-              'Learn how we handle your data.',
+            title: Text(l10n.privacyPolicy),
+            subtitle: Text(
+              l10n.privacyPolicyDesc,
               style: TextStyle(color: Colors.blueGrey),
             ),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
@@ -70,9 +108,9 @@ class _SecurityScreenState extends State<SecurityScreen> {
           ),
           ListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Terms of service'),
-            subtitle: const Text(
-              'Review our service agreement.',
+            title: Text(l10n.termsOfService),
+            subtitle: Text(
+              l10n.termsOfServiceDesc,
               style: TextStyle(color: Colors.blueGrey),
             ),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
