@@ -672,6 +672,15 @@ class _HomePageContentState extends State<HomePageContent> {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
+                  const SizedBox(height: 4),
+                  Text(
+                    event.hospitalId,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF4A90E2),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ],
               ),
             ),

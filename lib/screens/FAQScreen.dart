@@ -2,8 +2,6 @@ import 'package:blood_system/widgets/main_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../theme/theme.dart';
-
 class FAQScreen extends StatelessWidget {
   const FAQScreen({super.key});
 
@@ -36,12 +34,12 @@ class FAQScreen extends StatelessWidget {
   static const List<Map<String, Object>> contactItems = [
     {
       'title': 'Email Support',
-      'subtitle': 'Get in touch with our support team.',
+      'subtitle': 'linklife@gmail.com',
       'icon': Icons.email,
     },
     {
       'title': 'Phone Support',
-      'subtitle': 'Call us for immediate assistance.',
+      'subtitle': 'call us at +250 788 123 456',
       'icon': Icons.phone,
     },
   ];
@@ -97,7 +95,7 @@ class FAQScreen extends StatelessWidget {
               );
             }).toList(),
             const SizedBox(height: 24),
-            const SectionHeader(title: 'Support Articles'),
+            const SectionHeader(title: 'Support Information'),
             const SizedBox(height: 8),
             ...supportItems.map((item) {
               final title = item['title']!;
@@ -126,6 +124,13 @@ class FAQScreen extends StatelessWidget {
                 onTap: () {},
               );
             }).toList(),
+            const SizedBox(height: 24),
+            _buildSection('Eligibility Requirements', [
+              _buildInfoTile('Age', '16-17+'),
+              _buildInfoTile('Weight', 'Minimum 110 lbs (50 kg)'),
+              _buildInfoTile('Health', 'General good health'),
+              _buildInfoTile('Documents', 'Valid photo ID required'),
+            ]),
             const SizedBox(height: 24),
             const SectionHeader(title: 'Contact Us'),
             const SizedBox(height: 8),
@@ -159,6 +164,56 @@ class FAQScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildSection(String title, List<Widget> children) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            // color: Color(0xFF333333),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(children: children),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoTile(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.all(5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(color: Color(0xFF666666))),
+          Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF333333),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class SectionHeader extends StatelessWidget {
@@ -169,9 +224,9 @@ class SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = Theme.of(context).appBarTheme.titleTextStyle;
     return Text(
-        title,
-        style: (style ?? const TextStyle(fontSize: 20, color: Colors.black))
-            .copyWith(fontWeight: FontWeight.bold),
-        );
-    }
+      title,
+      style: (style ?? const TextStyle(fontSize: 20, color: Colors.black))
+          .copyWith(fontWeight: FontWeight.bold),
+    );
+  }
 }
