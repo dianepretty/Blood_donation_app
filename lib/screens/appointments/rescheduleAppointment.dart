@@ -251,10 +251,16 @@ class _RescheduleAppointmentScreenState
                 Expanded(
                   child:
                       state.isLoadingHospitals
-                          ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ? Text(
+                            'loading...',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color:
+                                  selectedLocation != null
+                                      ? Colors.black87
+                                      : Colors.grey.shade600,
+                            ),
                           )
                           : Text(
                             selectedLocation ?? 'Select hospital',

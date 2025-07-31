@@ -40,7 +40,6 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated && authState.userData != null) {
       // For hospital admin, use the district name as hospital name
-      print("user hospital name: ${authState.userData?.hospital}");
       final hospitalName = authState.userData!.hospital;
 
       // Use the date filter event instead of the basic load event
@@ -62,6 +61,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       'hospitalName': appointment.hospitalName,
       'appointmentDate': appointment.appointmentDate,
       'appointmentTime': appointment.appointmentTime,
+      'fullName': appointment.fullName ?? 'N/A',
+      'phoneNumber': appointment.phoneNumber ?? 'N/A',
+      'bloodGroup': appointment.bloodGroup ?? 'N/A',
     };
   }
 
@@ -336,6 +338,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   }
 
   Widget _buildCardContent(Map<String, dynamic> appointment) {
+    print("Appointment details !!!!!!!: ${appointment}");
     return Row(
       children: [
         Container(
@@ -352,13 +355,13 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Text(
-              //   'User: ${userData?['fullName'] ?? 'Loading...'}',
-              //   style: const TextStyle(
-              //     fontWeight: FontWeight.w600,
-              //     fontSize: 14,
-              //   ),
-              // ),
+              Text(
+                'Volunteer: ${appointment['fullName']}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
               const SizedBox(height: 2),
               Text(
                 '${appointment['appointmentTime']} - Blood Donation',

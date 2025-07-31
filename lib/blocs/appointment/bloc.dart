@@ -191,6 +191,7 @@ class AppointmentBloc extends Bloc<AppointmentEvent, AppointmentState> {
           )
           .listen(
             (appointments) {
+              print("Appointments in Bloc logic !!!!!!!: ${appointments}");
               if (!isClosed) {
                 add(_AppointmentsUpdated(appointments));
               }

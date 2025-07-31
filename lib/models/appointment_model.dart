@@ -7,12 +7,20 @@ class Appointment {
   final DateTime appointmentDate;
   final String appointmentTime;
 
+  // Optional user details
+  final String? fullName;
+  final String? phoneNumber;
+  final String? bloodGroup;
+
   const Appointment({
     this.id,
     required this.userId,
     required this.hospitalName,
     required this.appointmentDate,
     required this.appointmentTime,
+    this.fullName,
+    this.phoneNumber,
+    this.bloodGroup,
   });
 
   // Create from JSON
@@ -23,6 +31,9 @@ class Appointment {
       hospitalName: json['hospitalName'] ?? '',
       appointmentDate: _parseDateTime(json['appointmentDate']),
       appointmentTime: json['appointmentTime'] ?? '',
+      fullName: json['fullName'],
+      phoneNumber: json['phoneNumber'],
+      bloodGroup: json['bloodGroup'],
     );
   }
 
@@ -33,6 +44,7 @@ class Appointment {
       'hospitalName': hospitalName,
       'appointmentDate': Timestamp.fromDate(appointmentDate),
       'appointmentTime': appointmentTime,
+      // Don't include user details in storage as they're fetched separately
     };
   }
 
@@ -54,6 +66,9 @@ class Appointment {
     String? hospitalName,
     DateTime? appointmentDate,
     String? appointmentTime,
+    String? fullName,
+    String? phoneNumber,
+    String? bloodGroup,
   }) {
     return Appointment(
       id: id ?? this.id,
@@ -61,12 +76,15 @@ class Appointment {
       hospitalName: hospitalName ?? this.hospitalName,
       appointmentDate: appointmentDate ?? this.appointmentDate,
       appointmentTime: appointmentTime ?? this.appointmentTime,
+      fullName: fullName ?? this.fullName,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      bloodGroup: bloodGroup ?? this.bloodGroup,
     );
   }
 
   @override
   String toString() {
-    return 'Appointment(id: $id, hospitalName: $hospitalName, date: $appointmentDate, time: $appointmentTime)';
+    return 'Appointment(id: $id, hospitalName: $hospitalName, date: $appointmentDate, time: $appointmentTime, fullName: $fullName, phoneNumber: $phoneNumber, bloodGroup: $bloodGroup)';
   }
 
   @override
@@ -76,11 +94,22 @@ class Appointment {
         other.id == id &&
         other.userId == userId &&
         other.appointmentDate == appointmentDate &&
-        other.appointmentTime == appointmentTime;
+        other.appointmentTime == appointmentTime &&
+        other.fullName == fullName &&
+        other.phoneNumber == phoneNumber &&
+        other.bloodGroup == bloodGroup;
   }
 
   @override
   int get hashCode {
-    return Object.hash(id, userId, appointmentDate, appointmentTime);
+    return Object.hash(
+      id,
+      userId,
+      appointmentDate,
+      appointmentTime,
+      fullName,
+      phoneNumber,
+      bloodGroup,
+    );
   }
 }

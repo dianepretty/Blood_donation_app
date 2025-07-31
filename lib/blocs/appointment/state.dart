@@ -16,6 +16,11 @@ class AppointmentState extends Equatable {
   final String? selectedTimeSlot;
   final String? notes;
 
+  // User details
+  final String? fullName;
+  final String? phoneNumber;
+  final String? bloodGroup;
+
   // Status indicators
   final bool isBooking;
   final bool isLoadingTimeSlots;
@@ -39,6 +44,9 @@ class AppointmentState extends Equatable {
     this.isRescheduling = false,
     this.errorMessage,
     this.successMessage,
+    this.fullName,
+    this.phoneNumber,
+    this.bloodGroup,
   });
 
   // FIXED: Use selectedHospitalName instead of selectedHospitalId
@@ -78,6 +86,9 @@ class AppointmentState extends Equatable {
     bool? isRescheduling,
     String? errorMessage,
     String? successMessage,
+    String? fullName,
+    String? phoneNumber,
+    String? bloodGroup,
   }) {
     return AppointmentState(
       status: status ?? this.status,
@@ -94,6 +105,9 @@ class AppointmentState extends Equatable {
       isRescheduling: isRescheduling ?? this.isRescheduling,
       errorMessage: errorMessage,
       successMessage: successMessage,
+      fullName: fullName ?? this.fullName,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      bloodGroup: bloodGroup ?? this.bloodGroup,
     );
   }
 
@@ -138,6 +152,9 @@ class AppointmentState extends Equatable {
     isRescheduling,
     errorMessage,
     successMessage,
+    fullName,
+    phoneNumber,
+    bloodGroup,
   ];
 
   @override

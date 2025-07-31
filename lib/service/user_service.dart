@@ -33,7 +33,6 @@ class AuthService {
         password: password,
       );
 
-      print("HOSPITAL FINALLLLLLLLL : ${hospital}");
       // Create user document in Firestore
       if (result.user != null) {
         final now = DateTime.now();

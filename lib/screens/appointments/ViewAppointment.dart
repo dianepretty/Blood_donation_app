@@ -130,15 +130,16 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Patient Information',
+            'Volunteer Information',
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 12),
-          _buildDetailRow('User ID', widget.appointment['userId'] ?? 'N/A'),
+          _buildDetailRow('Name', widget.appointment['fullName'] ?? 'N/A'),
+          _buildDetailRow('Phone', widget.appointment['phoneNumber'] ?? 'N/A'),
           _buildDetailRow(
-            'Email',
-            widget.appointment['userId'] ?? 'N/A',
-          ), // Using userId as email identifier
+            'Blood Group',
+            widget.appointment['bloodGroup'] ?? 'N/A',
+          ),
         ],
       ),
     );

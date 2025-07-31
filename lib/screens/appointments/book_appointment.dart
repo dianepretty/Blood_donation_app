@@ -215,10 +215,16 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                 Expanded(
                   child:
                       state.isLoadingHospitals
-                          ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ? Text(
+                            state.selectedHospitalName ?? 'Select hospital',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color:
+                                  state.selectedHospitalName != null
+                                      ? Colors.black87
+                                      : Colors.grey.shade600,
+                            ),
                           )
                           : Text(
                             state.selectedHospitalName ?? 'Select hospital',

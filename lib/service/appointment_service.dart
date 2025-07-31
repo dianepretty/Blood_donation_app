@@ -1,4 +1,4 @@
-// services/appointment_service.dart
+import 'package:blood_system/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/appointment_model.dart';
 
@@ -43,6 +43,61 @@ class AppointmentService {
   }
 
   // Get all appointments by hospital name with optional date filtering
+  // Stream<List<Appointment>> getAppointmentsByHospitalName(
+  //   String hospitalName, {
+  //   DateTime? fromDate,
+  //   DateTime? toDate,
+  // }) {
+  //   Query query = _firestore
+  //       .collection(_collectionName)
+  //       .where('hospitalName', isEqualTo: hospitalName);
+
+  //   // Add date filtering if provided
+  //   if (fromDate != null) {
+  //     // Set time to start of day
+  //     final startOfDay = DateTime(fromDate.year, fromDate.month, fromDate.day);
+  //     query = query.where(
+  //       'appointmentDate',
+  //       isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
+  //     );
+  //   }
+
+  //   if (toDate != null) {
+  //     // Set time to end of day
+  //     final endOfDay = DateTime(
+  //       toDate.year,
+  //       toDate.month,
+  //       toDate.day,
+  //       23,
+  //       59,
+  //       59,
+  //     );
+  //     query = query.where(
+  //       'appointmentDate',
+  //       isLessThanOrEqualTo: Timestamp.fromDate(endOfDay),
+  //     );
+  //   }
+
+  //   return query
+  //       .orderBy('appointmentDate', descending: true)
+  //       .snapshots()
+  //       .map(
+  //         (snapshot) =>
+  //             snapshot.docs
+  //                 .map(
+  //                   (doc) => Appointment.fromJson({
+  //                     ...(doc.data() != null &&
+  //                             doc.data() is Map<String, dynamic>
+  //                         ? doc.data() as Map<String, dynamic>
+  //                         : {}),
+  //                     'id': doc.id,
+  //                   }),
+  //                 )
+  //                 .toList(),
+  //       );
+  // }
+
+  // Get all appointments by hospital name with optional date filtering
   Stream<List<Appointment>> getAppointmentsByHospitalName(
     String hospitalName, {
     DateTime? fromDate,
@@ -81,20 +136,131 @@ class AppointmentService {
     return query
         .orderBy('appointmentDate', descending: true)
         .snapshots()
-        .map(
-          (snapshot) =>
-              snapshot.docs
-                  .map(
-                    (doc) => Appointment.fromJson({
-                      ...(doc.data() != null &&
-                              doc.data() is Map<String, dynamic>
-                          ? doc.data() as Map<String, dynamic>
-                          : {}),
-                      'id': doc.id,
-                    }),
-                  )
-                  .toList(),
+        .asyncMap((snapshot) async {
+          List<Appointment> appointments = [];
+
+          for (var doc in snapshot.docs) {
+            // Create appointment from document
+            final appointment = Appointment.fromJson({
+              ...(doc.data() != null && doc.data() is Map<String, dynamic>
+                  ? doc.data() as Map<String, dynamic>
+                  : {}),
+              'id': doc.id,
+            });
+
+            // Fetch user details
+            try {
+              final userDoc =
+                  await _firestore
+                      .collection('users')
+                      .doc(appointment.userId)
+                      .get();
+
+              if (userDoc.exists) {
+                final userData = userDoc.data() as Map<String, dynamic>;
+                final userModel = UserModel.fromJson(userData);
+
+                // Add user details to appointment
+                final appointmentWithUserDetails = appointment.copyWith(
+                  fullName: userModel.fullName,
+                  phoneNumber: userModel.phoneNumber,
+                  bloodGroup: userModel.bloodType,
+                );
+
+                appointments.add(appointmentWithUserDetails);
+              } else {
+                // If user not found, add appointment without user details
+                appointments.add(appointment);
+              }
+            } catch (e) {
+              // If error fetching user, add appointment without user details
+              appointments.add(appointment);
+            }
+          }
+
+          return appointments;
+        });
+  }
+
+  // Alternative method using Future for one-time fetch
+  Future<List<Appointment>> getAppointmentsByHospitalNameOnce(
+    String hospitalName, {
+    DateTime? fromDate,
+    DateTime? toDate,
+  }) async {
+    Query query = _firestore
+        .collection(_collectionName)
+        .where('hospitalName', isEqualTo: hospitalName);
+
+    // Add date filtering if provided
+    if (fromDate != null) {
+      final startOfDay = DateTime(fromDate.year, fromDate.month, fromDate.day);
+      query = query.where(
+        'appointmentDate',
+        isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
+      );
+    }
+
+    if (toDate != null) {
+      final endOfDay = DateTime(
+        toDate.year,
+        toDate.month,
+        toDate.day,
+        23,
+        59,
+        59,
+      );
+      query = query.where(
+        'appointmentDate',
+        isLessThanOrEqualTo: Timestamp.fromDate(endOfDay),
+      );
+    }
+
+    final snapshot =
+        await query.orderBy('appointmentDate', descending: true).get();
+
+    List<Appointment> appointments = [];
+
+    for (var doc in snapshot.docs) {
+      // Create appointment from document
+      final appointment = Appointment.fromJson({
+        ...(doc.data() != null && doc.data() is Map<String, dynamic>
+            ? doc.data() as Map<String, dynamic>
+            : {}),
+        'id': doc.id,
+      });
+
+      // Fetch user details
+      try {
+        final userDoc =
+            await _firestore.collection('users').doc(appointment.userId).get();
+
+        if (userDoc.exists) {
+          final userData = userDoc.data() as Map<String, dynamic>;
+          final userModel = UserModel.fromJson(userData);
+
+          // Add user details to appointment
+          final appointmentWithUserDetails = appointment.copyWith(
+            fullName: userModel.fullName,
+            phoneNumber: userModel.phoneNumber,
+            bloodGroup: userModel.bloodType,
+          );
+
+          appointments.add(appointmentWithUserDetails);
+        } else {
+          // If user not found, add appointment without user details
+          appointments.add(appointment);
+        }
+      } catch (e) {
+        // If error fetching user, add appointment without user details
+        print(
+          'Error fetching user details for appointment ${appointment.id}: $e',
         );
+        appointments.add(appointment);
+      }
+    }
+
+    return appointments;
   }
 
   // Get upcoming appointments for a user
@@ -184,7 +350,6 @@ class AppointmentService {
   }
 
   // Get available time slots for a specific date and hospital
-
   Future<List<String>> getAvailableTimeSlots({
     required String hospitalName,
     required DateTime date,

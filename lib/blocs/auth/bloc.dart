@@ -30,7 +30,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
     on<AuthStartEmailVerificationTimer>(_onAuthStartEmailVerificationTimer);
     on<AuthStopEmailVerificationTimer>(_onAuthStopEmailVerificationTimer);
-    on<AuthGetUserDataRequested>(_onAuthGetUserDataRequested);
   }
 
   // Start listening to auth state changes
@@ -66,28 +65,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } else {
       print('AuthBloc - User is null, emitting AuthUnauthenticated');
       emit(AuthUnauthenticated());
-    }
-  }
-
-  // Handle get user data request
-  Future<void> _onAuthGetUserDataRequested(
-    AuthGetUserDataRequested event,
-    Emitter<AuthState> emit,
-  ) async {
-    print(
-      'AuthBloc - _onAuthGetUserDataRequested called for userId: ${event.userId}',
-    );
-    try {
-      final userData = await _authService.getUserData(event.userId);
-      print(
-        'AuthBloc - User data retrieved for ${event.userId}: ${userData?.toJson()}',
-      );
-      emit(AuthUserDataLoaded(userId: event.userId, userData: userData));
-    } catch (e) {
-      print(
-        'AuthBloc - Error getting user data for ${event.userId}: ${e.toString()}',
-      );
-      emit(AuthError('Failed to load user data: ${e.toString()}'));
     }
   }
 
