@@ -15,8 +15,6 @@ class _HomePageState extends State<HomePage> {
 
   static final List<Widget> _pages = <Widget>[
     DashboardScreen(),
-    // Replace with a builder to pass callback
-    // EventsScreen(),
     Builder(
       builder:
           (context) => EventsScreen(

@@ -174,13 +174,20 @@ class _HomePageContentState extends State<HomePageContent> {
                         ),
                         Row(
                           children: [
-                            const Text(
-                              'view more',
-                              style: TextStyle(
-                                color: Color(0xFFB83A3A),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                foregroundColor: const Color(0xFFB83A3A),
+                                textStyle: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
+                              child: const Text('view more'),
+                              onPressed: () {
+                                Navigator.of(
+                                  context,
+                                ).pushNamed('/events');
+                              },
                             ),
                             const SizedBox(width: 4),
                             const Icon(
