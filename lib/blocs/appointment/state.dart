@@ -1,4 +1,3 @@
-// bloc/appointment_state.dart
 import 'package:blood_system/models/appointment_model.dart';
 import 'package:blood_system/models/hospital_model.dart';
 import 'package:equatable/equatable.dart';
