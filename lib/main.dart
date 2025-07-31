@@ -39,6 +39,7 @@ import 'package:blood_system/l10n/custom_material_delegate.dart';
 import 'firebase_options.dart';
 import 'package:blood_system/screens/home.dart';
 import 'package:blood_system/screens/login.dart';
+import 'package:blood_system/screens/events/user_events.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -130,6 +131,7 @@ class MyApp extends StatelessWidget {
               '/history': (context) => const HistoryPage(),
               '/email-verification':
                   (context) => const EmailVerificationScreen(),
+              '/user-events': (context) => const UserEventsScreen(),
             },
           );
         },

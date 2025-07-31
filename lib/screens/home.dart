@@ -184,9 +184,7 @@ class _HomePageContentState extends State<HomePageContent> {
                               ),
                               child: const Text('view more'),
                               onPressed: () {
-                                Navigator.of(
-                                  context,
-                                ).pushNamed('/events');
+                                Navigator.of(context).pushNamed('/user-events');
                               },
                             ),
                             const SizedBox(width: 4),
