@@ -48,7 +48,7 @@ class AuthService {
           bloodType: bloodType,
           hospital: hospital,
           createdAt: now,
-          updatedAt: now,
+          updatedAt: now, id: '',
         );
 
         await _firestore
@@ -91,7 +91,7 @@ class AuthService {
   Future<UserModel?> getUserData(String uid) async {
     try {
       DocumentSnapshot doc =
-          await _firestore.collection('users').doc(uid).get();
+      await _firestore.collection('users').doc(uid).get();
       if (doc.exists) {
         return UserModel.fromJson(doc.data() as Map<String, dynamic>);
       }
@@ -166,7 +166,7 @@ class AuthService {
       // Check if user exists in Firestore, if not create user document
       if (result.user != null) {
         final userDoc =
-            await _firestore.collection('users').doc(result.user!.uid).get();
+        await _firestore.collection('users').doc(result.user!.uid).get();
 
         if (!userDoc.exists) {
           // Create new user document for Google sign-in
@@ -182,7 +182,7 @@ class AuthService {
             imageUrl: result.user!.photoURL ?? '',
             bloodType: '',
             createdAt: now,
-            updatedAt: now,
+            updatedAt: now, id: '',
           );
 
           await _firestore

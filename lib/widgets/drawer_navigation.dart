@@ -19,7 +19,7 @@ class CustomDrawer extends StatelessWidget {
     this.userName,
     this.userEmail,
     this.userRole,
-    this.onNavigateToFAQ, // <-- Add the new param here
+    this.onNavigateToFAQ,
   });
 
   @override

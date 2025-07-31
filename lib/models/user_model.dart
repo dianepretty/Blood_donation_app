@@ -26,7 +26,7 @@ class UserModel {
     this.isProfileComplete = false, // Default to false
     this.hospital = '', // Made optional with default empty string
     required this.createdAt,
-    required this.updatedAt,
+    required this.updatedAt, required String id,
   });
 
   UserModel copyWith({
@@ -55,7 +55,7 @@ class UserModel {
       bloodType: bloodType ?? this.bloodType,
       hospital: hospital ?? this.hospital,
       createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      updatedAt: updatedAt ?? this.updatedAt, id: '',
     );
   }
 
@@ -105,7 +105,7 @@ class UserModel {
       bloodType: json['bloodType'] ?? '',
       hospital: json['hospital'] ?? '', // Will use default empty string if null
       createdAt: parseDateTime(json['createdAt']),
-      updatedAt: parseDateTime(json['updatedAt']),
+      updatedAt: parseDateTime(json['updatedAt']), id: '',
     );
   }
 
