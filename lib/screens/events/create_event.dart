@@ -470,7 +470,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     String adminId = '';
 
     if (authState is AuthAuthenticated) {
-      hospitalId = authState.userData?.hospital ?? '';
+      hospitalId = authState.userData?.districtName ?? '';
       adminId = authState.firebaseUser.email ?? '';
     }
 

@@ -16,18 +16,20 @@ class EmailVerificationScreen extends StatefulWidget {
 
 class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   bool _isResending = false;
+  late AuthBloc _authBloc;
 
   @override
   void initState() {
     super.initState();
+    _authBloc = context.read<AuthBloc>();
     // Start the verification timer when screen loads
-    context.read<AuthBloc>().add(AuthStartEmailVerificationTimer());
+    _authBloc.add(AuthStartEmailVerificationTimer());
   }
 
   @override
   void dispose() {
-    // Stop the timer when screen is disposed
-    context.read<AuthBloc>().add(AuthStopEmailVerificationTimer());
+    // Stop the timer using the stored reference
+    _authBloc.add(AuthStopEmailVerificationTimer());
     super.dispose();
   }
 
@@ -60,16 +62,12 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                   );
                 } else if (state is AuthEmailVerified) {
                   // Stop the timer
-                  context.read<AuthBloc>().add(
-                    AuthStopEmailVerificationTimer(),
-                  );
+                  _authBloc.add(AuthStopEmailVerificationTimer());
                   // Show success dialog
                   _showVerificationSuccessDialog();
                 } else if (state is AuthAuthenticated) {
                   // User is now authenticated, navigate to home
-                  context.read<AuthBloc>().add(
-                    AuthStopEmailVerificationTimer(),
-                  );
+                  _authBloc.add(AuthStopEmailVerificationTimer());
                   Navigator.of(
                     context,
                   ).pushNamedAndRemoveUntil('/', (route) => false);
@@ -222,7 +220,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       _isResending = true;
     });
 
-    context.read<AuthBloc>().add(AuthEmailVerificationRequested());
+    _authBloc.add(AuthEmailVerificationRequested());
 
     // Reset loading state after a delay
     Future.delayed(const Duration(seconds: 2), () {
@@ -235,7 +233,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   }
 
   void _checkVerification() {
-    context.read<AuthBloc>().add(AuthCheckEmailVerificationRequested());
+    _authBloc.add(AuthCheckEmailVerificationRequested());
   }
 
   void _showVerificationSuccessDialog() {
@@ -271,9 +269,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                 onPressed: () {
                   Navigator.of(context).pop();
                   // Trigger authentication state update
-                  context.read<AuthBloc>().add(
-                    AuthCheckEmailVerificationRequested(),
-                  );
+                  _authBloc.add(AuthCheckEmailVerificationRequested());
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.red,
